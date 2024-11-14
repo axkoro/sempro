@@ -1,0 +1,33 @@
+image: danger89/cmake:latest 
+
+variables: 
+  GIT_SUBMODULE_STRATEGY: recursive 
+
+before_script: 
+  - export DEBIAN_FRONTEND=noninteractive 
+  - apt-get update -qy
+  - apt-get install -y ninja-build gcovr python3 python3-pip
+
+build:   
+  script:     
+    - mkdir build && cd build
+    - cmake -GNinja -DCMAKE_BUILD_TYPE=Debug ..
+    - ninja
+    - ./ExampleTest
+    - gcovr -r ../  -e '.*/extlibs/.*'
+
+python_tests:
+  image: ubuntu:24.04
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get update -qy
+    - apt-get install -y python3-pip
+  script:
+    - set -e
+    - python3 -m venv pyenv && . pyenv/bin/activate
+    - pip3 install --upgrade pip
+    - pip install -e .
+    - coverage run -m unittest discover -v python_wrapper/testing
+    - coverage report -m
