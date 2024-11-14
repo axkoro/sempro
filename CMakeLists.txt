@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(extlibs/gtest)
 
-add_executable(VectorExample src/main.cpp src/DenseVector.cpp)
-target_include_directories(VectorExample PUBLIC ${PROJECT_SOURCE_DIR}/include)
+add_executable(Example src/main.cpp src/Example.cpp)
+target_include_directories(Example PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-add_executable(VectorTest src/main_testing.cpp src/DenseVector.cpp)
-target_link_libraries(VectorTest PUBLIC gtest)
+add_executable(ExampleTest src/main_testing.cpp src/Example.cpp)
+target_link_libraries(ExampleTest PUBLIC gtest)
