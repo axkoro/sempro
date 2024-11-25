@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(extlibs/gtest)
 
+# Add include directories
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
 add_executable(Example src/main.cpp src/Example.cpp)
 target_include_directories(Example PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
