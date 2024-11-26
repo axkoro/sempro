@@ -1,14 +1,21 @@
 cmake_minimum_required(VERSION 3.17)
-project(sempro CXX)
-set(CMAKE_CXX_STANDARD 23)
+project(semproject CXX)
+set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(extlibs/gtest)
+option(BUILD_TESTS "Build tests" OFF)
 
-# Add include directories
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-add_executable(Example src/main.cpp src/Example.cpp)
-target_include_directories(Example PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-add_executable(ExampleTest src/main_testing.cpp src/Example.cpp)
-target_link_libraries(ExampleTest PUBLIC gtest)
+if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
+	add_subdirectory(extlibs/gtest)
+	set(CMAKE_BUILD_TYPE "Debug")
+	add_executable(VectorTest src/main_testing.cpp src/DenseVector.cpp)
+	target_include_directories(VectorTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(VectorTest PRIVATE gtest)
+	target_compile_options(VectorTest PRIVATE -coverage)
+	target_link_options(VectorTest PRIVATE -coverage)
+else() # Build Python bindings as libraries
+	add_subdirectory(extlibs/pybind11)
+	pybind11_add_module(_lin_alg src/py11_lin_alg.cpp src/DenseVector.cpp)
+	target_include_directories(_lin_alg PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_lin_alg PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+ 
