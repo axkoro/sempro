@@ -132,7 +132,7 @@ setup(
     author_email="",
     description="",
     long_description="",
-    ext_modules=[CMakeExtension("semproject._lin_alg")],
+    ext_modules=[CMakeExtension("semproject._example")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
