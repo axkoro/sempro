@@ -1,7 +1,13 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,python,cmake
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,python,cmake
 
+### Custom ###
+
+# MacOS
 .DS_store
+
+# VSCode
+.vscode/
 
 ### C++ ###
 # Prerequisites

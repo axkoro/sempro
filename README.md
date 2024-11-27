@@ -4,9 +4,23 @@ TODO
 
 # Getting Started
 
-## Building
+Install the package:
 
-To build the project, use CMake:
+```sh
+pip install .
+```
+
+
+# Contributing
+
+When making a branch: 
+```
+git submodule update --init
+```
+
+## Testing
+
+First build the project with CMake:
 
 ```sh
 mkdir build
@@ -23,15 +37,7 @@ cmake -G "MinGW Makefiles" ..
 mingw32-make.exe
 ```
 
-When making a branch: 
-```
-git submodule update --init
-```
-
-## Testing
-
-To run unit tests, execute the following  after building:
-
+Then run the test you want:
 ```sh
-./build/main_testing
+TODO
 ```

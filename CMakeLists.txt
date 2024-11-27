@@ -1,14 +1,23 @@
 cmake_minimum_required(VERSION 3.17)
-project(sempro CXX)
-set(CMAKE_CXX_STANDARD 23)
+project(semproject CXX)
 
-add_subdirectory(extlibs/gtest)
+set(CMAKE_CXX_STANDARD 17)
 
-# Add include directories
-include_directories(${PROJECT_SOURCE_DIR}/include)
+option(BUILD_TESTS "Build tests" OFF)
 
-add_executable(Example src/main.cpp src/Example.cpp)
-target_include_directories(Example PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-add_executable(ExampleTest src/main_testing.cpp src/Example.cpp)
-target_link_libraries(ExampleTest PUBLIC gtest)
+if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
+	add_subdirectory(extlibs/gtest)
+	set(CMAKE_BUILD_TYPE "Debug")
+	add_executable(ExampleTest src/tests/ExampleTest.cpp)
+	target_include_directories(ExampleTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(ExampleTest PRIVATE gtest)
+	target_compile_options(ExampleTest PRIVATE -coverage)
+	target_link_options(ExampleTest PRIVATE -coverage)
+else() # Build Python bindings as libraries
+	add_subdirectory(extlibs/pybind11)
+	pybind11_add_module(_example src/Example.cpp)
+	target_include_directories(_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_example PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+ 
+set(CMAKE_CLEAN_TARGET "clean")
