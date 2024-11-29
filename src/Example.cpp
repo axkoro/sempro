@@ -1,11 +1,10 @@
 #include "Example.hpp"
+
 #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-std::string Example::getString() const {
-    return str;
-}
+std::string Example::getString() const { return str; }
 
 PYBIND11_MODULE(_example, m) {
     py::class_<Example>(m, "Example")
