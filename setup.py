@@ -78,10 +78,7 @@ class CMakeBuild(build_ext):
 
         else:
             # Single config generators are handled "normally"
-            single_config = (
-                not cmake_generator
-                or any(x in cmake_generator for x in {"NMake", "Ninja"})
-            )
+            single_config = any(x in cmake_generator for x in {"NMake", "Ninja"})
 
             # CMake allows an arch-in-generator style for backward compatibility
             contains_arch = any(x in cmake_generator for x in {"ARM", "Win64"})
