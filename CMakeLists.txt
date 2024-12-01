@@ -8,7 +8,7 @@ option(BUILD_TESTS "Build tests" OFF)
 if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
 	add_subdirectory(extlibs/gtest)
 	set(CMAKE_BUILD_TYPE "Debug")
-	add_executable(ExampleTest src/tests/ExampleTest.cpp)
+	add_executable(ExampleTest src/tests/ExampleTest.cpp src/Example.cpp)
 	target_include_directories(ExampleTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(ExampleTest PRIVATE gtest)
 	target_compile_options(ExampleTest PRIVATE -coverage)
