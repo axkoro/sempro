@@ -15,7 +15,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_link_options(ExampleTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
-	pybind11_add_module(_example src/Example.cpp)
+	pybind11_add_module(_example src/Example.cpp src/py11_example.cpp)
 	target_include_directories(_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_example PROPERTIES LINKER_LANGUAGE CXX)
 endif()
