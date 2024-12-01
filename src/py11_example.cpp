@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-
+#include "Example.hpp"
 namespace py = pybind11;
 
 PYBIND11_MODULE(_example, m) {
