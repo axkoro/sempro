@@ -25,7 +25,7 @@ First build the project with CMake:
 ```sh
 mkdir build
 cd build
-cmake ..
+cmake -DBUILDTESTS=ON .. 
 make
 ```
 On Windows using mingw64: 
@@ -33,7 +33,7 @@ On Windows using mingw64:
 ```sh
 mkdir build
 cd build
-cmake -G "MinGW Makefiles" ..
+cmake -G -DBUILDTESTS=ON "MinGW Makefiles" ..
 mingw32-make.exe
 ```
 
