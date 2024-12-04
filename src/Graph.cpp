@@ -1,6 +1,7 @@
 #include "Graph.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 Graph::Graph(std::string edges_path, std::string features_path) {
@@ -40,6 +41,8 @@ void Graph::readEdgesFromFile(std::string edges_path) {
     int num_edges = offsets[num_nodes];
     edges = std::vector<int>(num_edges);
 
+    file.clear();  // reset EOF flag, so that iteration works again
+    file.seekg(0);
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         int a, b;
@@ -59,8 +62,19 @@ void Graph::readEdgesFromFile(std::string edges_path) {
     file.close();
 }
 
-// Assumptions about file format: edges ordered descending (a > b), lines ordered ascending, newline
-// after last edge
+// Prints unique edges
+void Graph::printEdges() {
+    for (int i = 0; i < num_nodes; i++) {
+        for (int j = offsets[i]; j < offsets[i + 1]; j++) {
+            int neighbour = edges[j];
+            if (neighbour <= i) {  // to only print unique edges (in descending order)
+                std::cout << i << "\t" << neighbour << "\n";
+            }
+        }
+    }
+}
+
+// Edge file format: lines ordered ascending, edges ordered descending, newline after last edge
 int getNumNodes(std::string edges_path) {
     std::ifstream file(edges_path);
     if (!file.is_open()) {
@@ -83,5 +97,7 @@ int getNumNodes(std::string edges_path) {
 
     file.close();
 
-    return first_node;
+    int num_nodes = first_node + 1;  // assuming naming starts at 0
+
+    return num_nodes;
 }
