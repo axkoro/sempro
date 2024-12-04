@@ -5,12 +5,13 @@
 class Graph {
    private:
     int num_nodes;
+    int num_features;
 
     std::vector<int> offsets;
     std::vector<int> edges;
 
     std::vector<std::vector<double>> features;  // includes label as last feature
-    std::vector<bool> missing;
+    std::vector<std::vector<bool>> missing;
 
    public:
     Graph() {}

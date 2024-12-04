@@ -7,13 +7,14 @@
 
 Graph::Graph(std::string edges_path, std::string features_path) {
     num_nodes = getNumNodes(edges_path);
+    num_features = getNumFeatures(features_path);
     readEdgesFromFile(edges_path);
     readFeaturesFromFile(features_path);
 }
 
 // Graph: undirected, no loops (A->A)
 // Edge file format: sorted, every edge is "descending" (a b -> b < a)
-void Graph::readEdgesFromFile(std::string edges_path) {
+void Graph::readEdgesFromFile(std::string edges_path) {  // TODO: why so slow?
     std::ifstream file(edges_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -63,8 +64,10 @@ void Graph::readEdgesFromFile(std::string edges_path) {
     file.close();
 }
 
-void Graph::readFeaturesFromFile(std::string features_path) {
+void Graph::readFeaturesFromFile(std::string features_path) {  // TODO: why so slow?
     int num_features = getNumFeatures(features_path);
+    features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
+    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
     std::ifstream file(features_path);
     if (!file.is_open()) {
@@ -78,16 +81,34 @@ void Graph::readFeaturesFromFile(std::string features_path) {
         int node;
         line_stream >> node;
 
-        std::vector<double> node_features(num_features);
-        for (int j = 0; j < num_features; j++) {
-            // TODO: missing features
-            line_stream >> node_features[j];
+        for (int i = 0; i < num_features - 2; i++) {
+            std::string feature;
+            std::getline(line_stream, feature, ',');
+
+            try {
+                features[node][i] = std::stod(feature);
+            } catch (const std::invalid_argument& e) {  // for missing features
+                missing[node][i] = true;
+            }
         }
 
-        features[node] = node_features;  // TODO: does it copy or just set a reference? (efficient?)
-    }
+        std::string feature;
+        std::getline(line_stream, feature);
+        int last_feature = num_features - 2;
+        try {
+            features[node][last_feature] = std::stod(feature);
+        } catch (const std::invalid_argument& e) {  // for missing features
+            missing[node][last_feature] = true;
+        }
 
-    for (int i = 0; i < num_nodes; i++) {
+        std::string label;  // FIXME: label is always loaded as missing
+        std::getline(line_stream, label);
+        int label_idx = num_features - 1;
+        try {
+            features[node][label_idx] = std::stod(label);
+        } catch (const std::invalid_argument& e) {  // for missing features
+            missing[node][label_idx] = true;
+        }
     }
 
     file.close();
@@ -105,7 +126,32 @@ void Graph::printEdges() {
     }
 }
 
-// Features file format: "1 0.93, '#', -3.2 2" + lines ordered ascending, newline after last line
+void Graph::printFeatures() {
+    for (int node = 0; node < num_nodes; node++) {
+        std::cout << node << '\t';
+        for (int i = 0; i < num_features - 2; i++) {
+            if (missing[node][i]) {
+                std::cout << "\'#\'" << ", ";
+            } else {
+                std::cout << features[node][i] << ", ";
+            }
+        }
+
+        if (missing[node][num_features - 2]) {  // last feature
+            std::cout << "\'#\'" << '\t';
+        } else {
+            std::cout << features[node][num_features - 2] << '\t';
+        }
+
+        if (missing[node][num_features - 1]) {  // label
+            std::cout << "\'#\'" << '\n';
+        } else {
+            std::cout << features[node][num_features - 1] << '\n';
+        }
+    }
+}
+
+// Features file format: lines ordered ascending, newline after last line
 int getNumNodes(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
@@ -133,7 +179,7 @@ int getNumNodes(std::string features_path) {
     return num_nodes;
 }
 
-//
+// Features file format: "1 0.93, '#', -3.2 2"
 int getNumFeatures(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
