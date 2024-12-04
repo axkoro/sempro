@@ -75,8 +75,8 @@ void Graph::printEdges() {
 }
 
 // Edge file format: lines ordered ascending, edges ordered descending, newline after last edge
-int getNumNodes(std::string edges_path) {
-    std::ifstream file(edges_path);
+int getNumNodes(std::string features_path) {
+    std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
     }
@@ -88,16 +88,16 @@ int getNumNodes(std::string edges_path) {
         file.seekg(--pos);
     }
 
-    // get first node from last line
+    // get node from last line
     std::string last_line;
     getline(file, last_line);
     std::istringstream iss(last_line);
-    int first_node;
-    iss >> first_node;
+    int node;
+    iss >> node;
 
     file.close();
 
-    int num_nodes = first_node + 1;  // assuming naming starts at 0
+    int num_nodes = node + 1;  // assuming naming starts at 0
 
     return num_nodes;
 }
