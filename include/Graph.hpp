@@ -6,8 +6,8 @@ class Graph {
    private:
     int num_nodes;
 
-    std::vector<int> adj_array;
-    std::vector<int> adj_array_indexes;
+    std::vector<int> offsets;
+    std::vector<int> edges;
 
     std::vector<std::vector<double>> feature_list;
 
@@ -26,3 +26,5 @@ class Graph {
     void printEdges();
     void printFeatures();
 };
+
+int getNumNodes(std::string edges_path);
