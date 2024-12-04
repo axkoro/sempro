@@ -1,5 +1,6 @@
 #include "Graph.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -7,7 +8,7 @@
 Graph::Graph(std::string edges_path, std::string features_path) {
     num_nodes = getNumNodes(edges_path);
     readEdgesFromFile(edges_path);
-    // readFeaturesFromFile(features_path);
+    readFeaturesFromFile(features_path);
 }
 
 // Graph: undirected, no loops (A->A)
@@ -22,9 +23,9 @@ void Graph::readEdgesFromFile(std::string edges_path) {
     std::vector<int> edge_counts(num_nodes);
     std::string line;
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
+        std::istringstream line_stream(line);
         int a, b;
-        if (!(iss >> a >> b)) {
+        if (!(line_stream >> a >> b)) {
             break;
         }
 
@@ -44,9 +45,9 @@ void Graph::readEdgesFromFile(std::string edges_path) {
     file.clear();  // reset EOF flag, so that iteration works again
     file.seekg(0);
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
+        std::istringstream line_stream(line);
         int a, b;
-        if (!(iss >> a >> b)) {
+        if (!(line_stream >> a >> b)) {
             break;
         }
 
@@ -57,6 +58,36 @@ void Graph::readEdgesFromFile(std::string edges_path) {
         int next_edge_b = offsets[b + 1] - edge_counts[b];
         edges[next_edge_b] = a;
         --edge_counts[b];
+    }
+
+    file.close();
+}
+
+void Graph::readFeaturesFromFile(std::string features_path) {
+    int num_features = getNumFeatures(features_path);
+
+    std::ifstream file(features_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file");
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream line_stream(line);
+
+        int node;
+        line_stream >> node;
+
+        std::vector<double> node_features(num_features);
+        for (int j = 0; j < num_features; j++) {
+            // TODO: missing features
+            line_stream >> node_features[j];
+        }
+
+        features[node] = node_features;  // TODO: does it copy or just set a reference? (efficient?)
+    }
+
+    for (int i = 0; i < num_nodes; i++) {
     }
 
     file.close();
@@ -74,7 +105,7 @@ void Graph::printEdges() {
     }
 }
 
-// Edge file format: lines ordered ascending, edges ordered descending, newline after last edge
+// Features file format: "1 0.93, '#', -3.2 2" + lines ordered ascending, newline after last line
 int getNumNodes(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
@@ -91,13 +122,29 @@ int getNumNodes(std::string features_path) {
     // get node from last line
     std::string last_line;
     getline(file, last_line);
-    std::istringstream iss(last_line);
+    std::istringstream line_stream(last_line);
     int node;
-    iss >> node;
+    line_stream >> node;
 
     file.close();
 
     int num_nodes = node + 1;  // assuming naming starts at 0
 
     return num_nodes;
+}
+
+//
+int getNumFeatures(std::string features_path) {
+    std::ifstream file(features_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file");
+    }
+
+    std::string line;
+    std::getline(file, line);
+
+    int num_features = std::count(line.begin(), line.end(), ',') +
+                       2;  // + 1 because we include the label as a feature
+
+    return num_features;
 }

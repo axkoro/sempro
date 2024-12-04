@@ -9,7 +9,8 @@ class Graph {
     std::vector<int> offsets;
     std::vector<int> edges;
 
-    std::vector<std::vector<double>> feature_list;
+    std::vector<std::vector<double>> features;  // includes label as last feature
+    std::vector<bool> missing;
 
    public:
     Graph() {}
@@ -27,4 +28,5 @@ class Graph {
     void printFeatures();
 };
 
-int getNumNodes(std::string edges_path);
+int getNumNodes(std::string features_path);
+int getNumFeatures(std::string features_path);

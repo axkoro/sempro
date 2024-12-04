@@ -8,14 +8,23 @@
 class GraphTest : public testing::Test {};
 
 TEST(GraphTest, getNumNodes) {
-    std::string amazon_edges = "../input/amazon/amazon_edges.txt";
-    EXPECT_EQ(getNumNodes(amazon_edges), 13751 + 1);
+    std::string amazon_features = "../input/amazon/amazon_features.txt";
+    EXPECT_EQ(getNumNodes(amazon_features),
+              13751 + 1);  // 13751: largest node, +1: numbering begins at 0
 
-    std::string genius_edges = "../input/genius/genius_edges.txt";
-    EXPECT_EQ(getNumNodes(genius_edges), 421960 + 1);
+    std::string genius_features = "../input/genius/genius_features.txt";
+    EXPECT_EQ(getNumNodes(genius_features), 421960 + 1);
 
-    std::string twitch_edges = "../input/twitch/twitch_edges.txt";
-    EXPECT_EQ(getNumNodes(twitch_edges), 9497 + 1);
+    std::string twitch_features = "../input/twitch/twitch_features.txt";
+    EXPECT_EQ(getNumNodes(twitch_features), 9497 + 1);
+}
+
+TEST(GraphTest, getNumFeatures) {
+    std::string github_features = "../input/github/github_features.txt";
+    EXPECT_EQ(getNumFeatures(github_features), 128 + 1);
+
+    std::string amazon_fraud_features = "../input/amazon_fraud/amazon_fraud_features.txt";
+    EXPECT_EQ(getNumFeatures(amazon_fraud_features), 25 + 1);
 }
 
 TEST(GraphTest, readEdgesFromFile) {
