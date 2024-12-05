@@ -27,6 +27,12 @@ class Graph {
 
     void printEdges();
     void printFeatures();
+    
+    std::vector<std::vector<double>> getFeatures(); //neu
+    std::vector<std::vector<bool>> getMissing(); //neu
+
+    int get_num_nodes(); //neu
+    int get_num_features(); //neu 
 };
 
 int getNumNodes(std::string features_path);
