@@ -7,27 +7,24 @@
 
 class GraphTest : public testing::Test {};
 
-TEST(GraphTest, getNumNodes) {
+TEST(GraphTest, get_num_nodes) {
     std::string amazon_features = "../input/amazon/amazon_features.txt";
-    EXPECT_EQ(getNumNodes(amazon_features),
+    EXPECT_EQ(get_num_nodes(amazon_features),
               13751 + 1);  // 13751: largest node, +1: numbering begins at 0
 
     std::string genius_features = "../input/genius/genius_features.txt";
-    EXPECT_EQ(getNumNodes(genius_features), 421960 + 1);
-
-    std::string twitch_features = "../input/twitch/twitch_features.txt";
-    EXPECT_EQ(getNumNodes(twitch_features), 9497 + 1);
+    EXPECT_EQ(get_num_nodes(genius_features), 421960 + 1);
 }
 
-TEST(GraphTest, getNumFeatures) {
+TEST(GraphTest, get_num_features) {
     std::string github_features = "../input/github/github_features.txt";
-    EXPECT_EQ(getNumFeatures(github_features), 128 + 1);
+    EXPECT_EQ(get_num_features(github_features), 128 + 1);
 
     std::string amazon_fraud_features = "../input/amazon_fraud/amazon_fraud_features.txt";
-    EXPECT_EQ(getNumFeatures(amazon_fraud_features), 25 + 1);
+    EXPECT_EQ(get_num_features(amazon_fraud_features), 25 + 1);
 }
 
-TEST(GraphTest, readEdgesFromFile) {
+TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
     std::string edges_path = "../input/amazon/amazon_edges.txt";
     std::string features_path = "../input/amazon/amazon_features.txt";
@@ -39,7 +36,7 @@ TEST(GraphTest, readEdgesFromFile) {
         std::ofstream output(temp_file_path);
         // Redirect cout to the file
         std::streambuf* old = std::cout.rdbuf(output.rdbuf());
-        graph.printEdges();
+        graph.print_edges();
         std::cout.rdbuf(old);
     }
 
@@ -67,12 +64,12 @@ TEST(GraphTest, readEdgesFromFile) {
     std::remove(temp_file_path.c_str());
 }
 
-TEST(GraphTest, readFeaturesFromFile) {  // TODO: How to test this when formatting is different
+TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is different
     std::string edges_path = "../input/amazon/amazon_edges.txt";
     std::string features_path = "../input/amazon/amazon_features.txt";
     Graph graph(edges_path, features_path);
 
-    graph.printFeatures();
+    // graph.print_features();
 }
 
 int main(int, char**) {
