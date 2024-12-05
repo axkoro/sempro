@@ -7,21 +7,21 @@
 
 class GraphTest : public testing::Test {};
 
-TEST(GraphTest, get_num_nodes) {
+TEST(GraphTest, parse_node_count) {
     std::string amazon_features = "../input/amazon/amazon_features.txt";
-    EXPECT_EQ(get_num_nodes(amazon_features),
+    EXPECT_EQ(parse_node_count(amazon_features),
               13751 + 1);  // 13751: largest node, +1: numbering begins at 0
 
     std::string genius_features = "../input/genius/genius_features.txt";
-    EXPECT_EQ(get_num_nodes(genius_features), 421960 + 1);
+    EXPECT_EQ(parse_node_count(genius_features), 421960 + 1);
 }
 
-TEST(GraphTest, get_num_features) {
+TEST(GraphTest, parse_feature_count) {
     std::string github_features = "../input/github/github_features.txt";
-    EXPECT_EQ(get_num_features(github_features), 128 + 1);
+    EXPECT_EQ(parse_feature_count(github_features), 128 + 1);
 
     std::string amazon_fraud_features = "../input/amazon_fraud/amazon_fraud_features.txt";
-    EXPECT_EQ(get_num_features(amazon_fraud_features), 25 + 1);
+    EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25 + 1);
 }
 
 TEST(GraphTest, read_edges) {

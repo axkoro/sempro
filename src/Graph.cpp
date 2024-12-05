@@ -6,8 +6,8 @@
 #include <sstream>
 
 Graph::Graph(std::string edges_path, std::string features_path) {
-    num_nodes = get_num_nodes(edges_path);
-    num_features = get_num_features(features_path);
+    num_nodes = parse_node_count(features_path);
+    num_features = parse_feature_count(features_path);
     read_edges(edges_path);
     read_features(features_path);
 }
@@ -65,7 +65,6 @@ void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
 }
 
 void Graph::read_features(std::string features_path) {  // TODO: why so slow?
-    int num_features = get_num_features(features_path);
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -115,7 +114,7 @@ void Graph::read_features(std::string features_path) {  // TODO: why so slow?
 }
 
 // Prints unique edges
-void Graph::print_edges() {
+void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
             int neighbour = edges[j];
@@ -126,7 +125,7 @@ void Graph::print_edges() {
     }
 }
 
-void Graph::print_features() {
+void Graph::print_features() const {
     for (int node = 0; node < num_nodes; node++) {
         std::cout << node << '\t';
         for (int i = 0; i < num_features - 2; i++) {
@@ -152,7 +151,7 @@ void Graph::print_features() {
 }
 
 // Features file format: lines ordered ascending, newline after last line
-int get_num_nodes(std::string features_path) {
+int parse_node_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -180,7 +179,7 @@ int get_num_nodes(std::string features_path) {
 }
 
 // Features file format: "1 0.93, '#', -3.2 2"
-int get_num_features(std::string features_path) {
+int parse_feature_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
