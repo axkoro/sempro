@@ -1,11 +1,12 @@
 #include "Graph.hpp"
 
 class KNNImputer {
-   public:
-    KNNImputer(Graph& graph, int k);
-    void run();
-
    private:
     Graph& graph;
     int k;
+
+   public:
+    KNNImputer(Graph& graph);
+    void set_depth(int k);
+    void run();
 };
