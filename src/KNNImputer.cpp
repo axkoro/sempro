@@ -1,4 +1,4 @@
-#include "kNN.hpp"
+#include "KNNImputer.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -7,11 +7,10 @@
 
 #include "Graph.hpp"
 
-kNN::kNN(Graph& graph, int k) : graph(graph), k(k) { run(); }
+KNNImputer::KNNImputer(Graph& graph, int k) : graph(graph), k(k) { run(); }
 
-void kNN::run() {
-    std::vector<std::vector<double>> features = graph.get_features();
-    std::vector<std::vector<bool>> missing = graph.get_missing_features();
+void KNNImputer::run() {
+    
     int num_nodes = graph.get_num_nodes();
     int num_features = graph.get_num_features();
 
@@ -19,20 +18,20 @@ void kNN::run() {
     // features
     for (int i = 0; i < num_nodes; i++) {
         for (int j = 0; j < num_features; j++)
-            if (missing[i][j] == true) {
+            if (graph.missing[i][j] == true) {
                 std::vector<int> neighbours = graph.get_neighbours(i, k);
                 double sum = 0;
                 int count = 0;
                 for (int n : neighbours) {
-                    if (missing[n][j] == false) {
-                        sum += features[n][j];
+                    if (graph.missing[n][j] == false) {
+                        sum += graph.features[n][j];
                         count++;
                     }
                 }
                 if (count > 0) {
-                    features[i][j] = sum / count;
+                    graph.features[i][j] = sum / count;
                 } else {
-                    features[i][j] = 0;  // TODO: take average of all the nodes that have the
+                    graph.features[i][j] = 0;  // TODO: take average of all the nodes that have the
                                          // feature
                 }
             }

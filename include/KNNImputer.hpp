@@ -1,8 +1,8 @@
 #include "Graph.hpp"
 
-class kNN {
+class KNNImputer {
    public:
-    kNN(Graph& graph, int k);
+    KNNImputer(Graph& graph, int k);
     void run();
 
    private:
