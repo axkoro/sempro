@@ -7,33 +7,37 @@
 
 #include "Graph.hpp"
 
-KNNImputer::KNNImputer(Graph& graph, int k) : graph(graph), k(k) { run(); }
+KNNImputer::KNNImputer(Graph& graph) : graph(graph) {}
 
 void KNNImputer::run() {
-    
     int num_nodes = graph.get_num_nodes();
     int num_features = graph.get_num_features();
 
     // for each node in graph if feature is missing take neighbours depth k and take average of
     // features
-    for (int i = 0; i < num_nodes; i++) {
-        for (int j = 0; j < num_features; j++)
-            if (graph.missing[i][j] == true) {
-                std::vector<int> neighbours = graph.get_neighbours(i, k);
+    for (int node = 0; node < num_nodes; node++) {
+        std::vector<int> neighbours = graph.get_neighbours(node, k);
+        for (int feature = 0; feature < num_features; feature++) {
+            if (graph.missing[node][feature] == true) {
                 double sum = 0;
                 int count = 0;
-                for (int n : neighbours) {
-                    if (graph.missing[n][j] == false) {
-                        sum += graph.features[n][j];
+                for (int neighbour : neighbours) {
+                    if (graph.missing[neighbour][feature] == false) {
+                        sum += graph.features[neighbour][feature];
                         count++;
                     }
                 }
+
+                // TODO: set "imputed" flag, so that future imputations might ignore this feature
                 if (count > 0) {
-                    graph.features[i][j] = sum / count;
+                    graph.features[node][feature] = sum / count;
                 } else {
-                    graph.features[i][j] = 0;  // TODO: take average of all the nodes that have the
-                                         // feature
+                    graph.features[node][feature] = 0;  // TODO: take average of all the nodes that
+                                                        // have the feature
                 }
             }
+        }
     }
 }
+
+void KNNImputer::set_depth(int k) { this->k = k; }
