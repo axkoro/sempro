@@ -69,17 +69,16 @@ void Graph::read_features(std::string features_path) {  // TODO: why so slow?
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
     std::ifstream file(features_path);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
-    }
+    if (!file.is_open()) throw std::runtime_error("Could not open file");
 
     std::string line;
     while (std::getline(file, line)) {
         std::istringstream line_stream(line);
 
         int node;
-        line_stream >> node;
+        line_stream >> node;  // first value in each row is the node
 
+        // parse features, except last feature and label (because of different formatting)
         for (int i = 0; i < num_features - 2; i++) {
             std::string feature;
             std::getline(line_stream, feature, ',');
@@ -92,19 +91,19 @@ void Graph::read_features(std::string features_path) {  // TODO: why so slow?
         }
 
         std::string feature;
-        std::getline(line_stream, feature);
-        int last_feature = num_features - 2;
+        std::getline(line_stream, feature, '\t');
+        int last_feature_idx = num_features - 2;
         try {
-            features[node][last_feature] = std::stod(feature);
+            features[node][last_feature_idx] = std::stod(feature);
         } catch (const std::invalid_argument& e) {  // for missing features
-            missing[node][last_feature] = true;
+            missing[node][last_feature_idx] = true;
         }
 
-        std::string label;  // FIXME: label is always loaded as missing
+        std::string label;
         std::getline(line_stream, label);
         int label_idx = num_features - 1;
         try {
-            features[node][label_idx] = std::stod(label);
+            features[node][label_idx] = std::stoi(label);
         } catch (const std::invalid_argument& e) {  // for missing features
             missing[node][label_idx] = true;
         }
