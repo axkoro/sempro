@@ -7,9 +7,9 @@
 
 #include "Graph.hpp"
 
-kNN::kNN(Graph& graph, int k) : graph(graph), k(k) { runkNN(); }
+kNN::kNN(Graph& graph, int k) : graph(graph), k(k) { run(); }
 
-void kNN::runkNN() {
+void kNN::run() {
     std::vector<std::vector<double>> features = graph.get_features();
     std::vector<std::vector<bool>> missing = graph.get_missing_features();
     int num_nodes = graph.get_num_nodes();

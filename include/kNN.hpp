@@ -3,7 +3,7 @@
 class kNN {
    public:
     kNN(Graph& graph, int k);
-    void runkNN();
+    void run();
 
    private:
     Graph& graph;
