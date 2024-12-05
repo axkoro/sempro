@@ -6,15 +6,15 @@
 #include <sstream>
 
 Graph::Graph(std::string edges_path, std::string features_path) {
-    num_nodes = getNumNodes(edges_path);
-    num_features = getNumFeatures(features_path);
-    readEdgesFromFile(edges_path);
-    readFeaturesFromFile(features_path);
+    num_nodes = get_num_nodes(edges_path);
+    num_features = get_num_features(features_path);
+    read_edges(edges_path);
+    read_features(features_path);
 }
 
 // Graph: undirected, no loops (A->A)
 // Edge file format: sorted, every edge is "descending" (a b -> b < a)
-void Graph::readEdgesFromFile(std::string edges_path) {  // TODO: why so slow?
+void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
     std::ifstream file(edges_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -64,8 +64,8 @@ void Graph::readEdgesFromFile(std::string edges_path) {  // TODO: why so slow?
     file.close();
 }
 
-void Graph::readFeaturesFromFile(std::string features_path) {  // TODO: why so slow?
-    int num_features = getNumFeatures(features_path);
+void Graph::read_features(std::string features_path) {  // TODO: why so slow?
+    int num_features = get_num_features(features_path);
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -115,7 +115,7 @@ void Graph::readFeaturesFromFile(std::string features_path) {  // TODO: why so s
 }
 
 // Prints unique edges
-void Graph::printEdges() {
+void Graph::print_edges() {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
             int neighbour = edges[j];
@@ -126,7 +126,7 @@ void Graph::printEdges() {
     }
 }
 
-void Graph::printFeatures() {
+void Graph::print_features() {
     for (int node = 0; node < num_nodes; node++) {
         std::cout << node << '\t';
         for (int i = 0; i < num_features - 2; i++) {
@@ -152,7 +152,7 @@ void Graph::printFeatures() {
 }
 
 // Features file format: lines ordered ascending, newline after last line
-int getNumNodes(std::string features_path) {
+int get_num_nodes(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -180,7 +180,7 @@ int getNumNodes(std::string features_path) {
 }
 
 // Features file format: "1 0.93, '#', -3.2 2"
-int getNumFeatures(std::string features_path) {
+int get_num_features(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
