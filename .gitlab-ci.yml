@@ -12,6 +12,7 @@ cpp_unit_tests:
     - cmake -GNinja -DBUILD_TESTS=ON ..
     - ninja
     - ./ExampleTest
+    - ./GraphTest
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:
