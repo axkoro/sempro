@@ -1,39 +1,49 @@
+#include <stdexcept>
 #include <string>
 #include <vector>
 
-// TODO: Generic Class
+class GraphException : public std::runtime_error {
+   public:
+    explicit GraphException(const std::string& message);
+};
+
+// TODO: Make generic (C++ template)
 class Graph {
    private:
     int num_nodes;
     int num_features;
-
     std::vector<int> offsets;
     std::vector<int> edges;
-
-    std::vector<std::vector<double>> features;  // includes label as last feature
+    std::vector<std::vector<double>> features;
     std::vector<std::vector<bool>> missing;
 
    public:
-    Graph() {}
+    // Constructors
+    Graph();
     Graph(std::string edges_path, std::string features_path);
 
-    void readEdgesFromFile(std::string edges_path);
-    void readFeaturesFromFile(std::string features_path);
+    // Getters
+    int get_num_nodes() const;
+    int get_num_features() const;
+    std::vector<double> get_features(int node) const;
+    std::vector<bool> get_missing_features(int node) const;
+    std::vector<int> get_neighbours(int node) const;
+    std::vector<int> get_neighbours(int node, int depth) const;
+    int get_degree(int node) const;
 
-    std::vector<double> getFeatures(int node);
+    // Queries
+    bool has_edge(int source, int target) const;
+    bool is_valid_node(int node) const;
 
-    std::vector<int> getNeighbours(int node);
-    std::vector<int> getNeighbours(int node, int depth);
+    // File I/O
+    void read_edges(std::string edges_path);
+    void read_features(std::string features_path);
 
-    void printEdges();
-    void printFeatures();
-    
-    std::vector<std::vector<double>> getFeatures(); //neu
-    std::vector<std::vector<bool>> getMissing(); //neu
-
-    int get_num_nodes(); //neu
-    int get_num_features(); //neu 
+    // Debug/Display
+    void print_edges() const;
+    void print_features() const;
 };
 
-int getNumNodes(std::string features_path);
-int getNumFeatures(std::string features_path);
+// Utility functions
+int parse_node_count(std::string features_path);
+int parse_feature_count(std::string features_path);

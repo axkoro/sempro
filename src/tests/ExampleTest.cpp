@@ -1,18 +1,18 @@
-#include <iostream>
 #include <gtest/gtest.h>
+
+#include <iostream>
+
 #include "Example.hpp"
 
 class ExampleTest : public testing::Test {};
 
-TEST(ExampleTest, getString) {
-	Example example("Hello World");
-	EXPECT_EQ(example.getString(), "Hello World");
-	EXPECT_NE(example.getString(), "Hello");
+TEST(ExampleTest, get_string) {
+    Example example("Hello World");
+    EXPECT_EQ(example.get_string(), "Hello World");
+    EXPECT_NE(example.get_string(), "Hello");
 }
-int main(int, char**){
-	
-	::testing::InitGoogleTest();
+int main(int, char**) {
+    ::testing::InitGoogleTest();
 
-	std::cout << "Starting unit tests.\n";
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

@@ -1,4 +1,3 @@
 #include "Example.hpp"
 
-
-std::string Example::getString() const { return str; }
+std::string Example::get_string() const { return str; }
