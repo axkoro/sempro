@@ -28,6 +28,7 @@ class Graph {
    public:
     // Constructors
     Graph();
+    Graph(std::vector<int>& offsets, std::vector<int>& edges);  // for testing
     Graph(std::string edges_path, std::string features_path);
 
     // Getters
@@ -55,3 +56,4 @@ class Graph {
 // Utility functions
 int parse_node_count(std::string features_path);
 int parse_feature_count(std::string features_path);
+std::vector<int> remove_duplicates(const std::vector<int>& arr);
