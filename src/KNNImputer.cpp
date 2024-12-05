@@ -32,8 +32,13 @@ void KNNImputer::run() {
                 if (count > 0) {
                     graph.features[node][feature] = sum / count;
                 } else {
-                    graph.features[node][feature] = 0;  // TODO: take average of all the nodes that
-                                                        // have the feature
+                    for (int nodeglobal = 0; nodeglobal < num_nodes; nodeglobal++) {
+                        if (graph.missing[nodeglobal][feature] == false) {
+                            sum += graph.features[nodeglobal][feature];
+                            count++;
+                        }
+                    }
+                    graph.features[node][feature] = sum / count;
                 }
             }
         }
