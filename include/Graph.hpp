@@ -7,8 +7,16 @@ class GraphException : public std::runtime_error {
     explicit GraphException(const std::string& message);
 };
 
-// TODO: Make generic (C++ template)
+// Forward declarations for friend classes
+class KNNImputer;
+class ClusterImputer;
+class GCNImputer;
+
 class Graph {
+    friend class KNNImputer;
+    friend class ClusterImputer;
+    friend class GCNImputer;
+
    private:
     int num_nodes;
     int num_features;
