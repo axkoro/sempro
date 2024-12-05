@@ -19,7 +19,7 @@ python_build:
   image: ubuntu:24.04
   before_script:
     - apt-get update -qy
-    - apt-get install -y python3-pip
+    - apt-get install -y python3-pip python3-venv
   script:
     - set -e
     - python3 -m venv pyenv && . pyenv/bin/activate
