@@ -69,10 +69,18 @@ TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is d
     std::string features_path = "../input/amazon/amazon_features.txt";
     Graph graph(edges_path, features_path);
 
-    // graph.print_features();
+    std::string temp_file_path = "test_output_features.txt";
+    {
+        std::ofstream output(temp_file_path);
+        // Redirect cout to the file
+        std::streambuf* old = std::cout.rdbuf(output.rdbuf());
+        graph.print_features();
+        std::cout.rdbuf(old);
+    }
 }
 
 int main(int, char**) {
     ::testing::InitGoogleTest();
+
     return RUN_ALL_TESTS();
 }
