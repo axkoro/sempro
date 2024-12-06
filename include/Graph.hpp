@@ -1,3 +1,6 @@
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
+
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -57,3 +60,5 @@ class Graph {
 int parse_node_count(std::string features_path);
 int parse_feature_count(std::string features_path);
 std::vector<int> remove_duplicates(const std::vector<int>& arr);
+
+#endif

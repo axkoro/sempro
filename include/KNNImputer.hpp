@@ -1,3 +1,6 @@
+#ifndef KNNIMPUTER_HPP
+#define KNNIMPUTER_HPP
+
 #include "Graph.hpp"
 
 class KNNImputer {
@@ -10,3 +13,5 @@ class KNNImputer {
     void set_depth(int k);
     void run();
 };
+
+#endif

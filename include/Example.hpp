@@ -1,3 +1,6 @@
+#ifndef EXAMPLE_HPP
+#define EXAMPLE_HPP
+
 #include <string>
 
 class Example {
@@ -8,3 +11,5 @@ class Example {
     Example(std::string s) : str(s) {}
     std::string get_string() const;
 };
+
+#endif
