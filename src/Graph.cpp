@@ -9,8 +9,8 @@
 Graph::Graph() : num_nodes(0), num_features(0), offsets(0), edges(0), features(0), missing(0) {}
 
 Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
-    offsets = offsets;
-    edges = edges;
+    this->offsets = offsets;
+    this->edges = edges;
     num_nodes = offsets.size();
 }
 
