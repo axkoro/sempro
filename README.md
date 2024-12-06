@@ -1,5 +1,3 @@
-test merge
-
 # About This Project
 
 TODO
