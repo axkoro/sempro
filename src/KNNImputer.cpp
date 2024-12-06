@@ -31,6 +31,7 @@ void KNNImputer::run() {
                 // TODO: set "imputed" flag, so that future imputations might ignore this feature
                 if (count > 0) {
                     graph.features[node][feature] = sum / count;
+                    graph.missing[node][feature] = false;
                 } else {
                     for (int nodeglobal = 0; nodeglobal < num_nodes; nodeglobal++) {
                         if (graph.missing[nodeglobal][feature] == false) {
@@ -39,6 +40,7 @@ void KNNImputer::run() {
                         }
                     }
                     graph.features[node][feature] = sum / count;
+                    graph.missing[node][feature] = false;
                 }
             }
         }
