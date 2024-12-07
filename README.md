@@ -33,7 +33,7 @@ On Windows using mingw64:
 ```sh
 mkdir build
 cd build
-cmake -G -DBUILDTESTS=ON "MinGW Makefiles" ..
+cmake -G  "MinGW Makefiles" -DBUILDTESTS=ON ..
 mingw32-make.exe
 ```
 
