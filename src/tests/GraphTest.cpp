@@ -49,6 +49,19 @@ TEST(GraphTest, get_features) {
     EXPECT_EQ(features, expected_features);
 }
 
+TEST(GraphTest, get_missing_features) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    std::vector<bool> missing_features = graph.get_missing_features(0);
+    std::vector<bool> expected_missing_features = {0,0,1,0,0,0,1};
+    
+
+    EXPECT_EQ(missing_features, expected_missing_features);
+ 
+}
+
 TEST(GraphTest, get_neighbours) {
     std::string edges_path = "../input/Gtests/edges_example.txt";
     std::string features_path = "../input/Gtests/features_example.txt";
