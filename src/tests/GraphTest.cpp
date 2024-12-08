@@ -67,6 +67,25 @@ TEST(GraphTest, get_neighbours) {
     
 }
 
+
+TEST(GraphTest, get_degree) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    int degree = graph.get_degree(0);
+    EXPECT_GE(degree, 2);
+}
+
+TEST(GraphTest, has_edge) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    EXPECT_TRUE(graph.has_edge(0, 4));  // Assumes edge exists
+    EXPECT_FALSE(graph.has_edge(0, 2));  // Assumes edge does not exist
+}
+
 TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
     std::string edges_path = "../input/amazon/amazon_edges.txt";
