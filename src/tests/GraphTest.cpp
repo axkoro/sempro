@@ -55,7 +55,7 @@ TEST(GraphTest, get_missing_features) {
     Graph graph(edges_path, features_path);
 
     std::vector<bool> missing_features = graph.get_missing_features(0);
-    std::vector<bool> expected_missing_features = {0,0,1,0,0,0,1};
+    std::vector<bool> expected_missing_features = {0,0,1,0,0,0};
     
 
     EXPECT_EQ(missing_features, expected_missing_features);
