@@ -135,6 +135,31 @@ TEST(GraphTest, print_edges) {
     EXPECT_EQ(output.str(), expected_print);
 }
 
+TEST(GraphTest, print_features) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    // Redirect std::cout to capture the output
+    std::ostringstream output;
+    std::streambuf* oldCoutBuffer = std::cout.rdbuf(output.rdbuf());
+
+    // Call the function to capture its output
+    graph.print_features();
+
+    // Restore std::cout
+    std::cout.rdbuf(oldCoutBuffer);
+
+    std::string expected_print = 
+    "0\t1, 0, '#', 0, 0, 0\t2\n"
+    "1\t0, 1, '#', 0, 0, 0\t0\n"
+    "2\t0, 0, '#', 1, 0, 0\t1\n"
+    "3\t0, 0, '#', 0, 1, 0\t3\n"
+    "4\t0, 0, '#', 0, 0, 1\t4\n";
+
+    EXPECT_EQ(output.str(),expected_print);
+}
+
 TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
     std::string edges_path = "../input/amazon/amazon_edges.txt";
