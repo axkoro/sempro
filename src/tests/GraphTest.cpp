@@ -37,6 +37,36 @@ TEST(GraphTest, parse_feature_count) {
     EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25 + 1);
 }
 
+TEST(GraphTest, get_features) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    std::vector<double> features = graph.get_features(0);
+    std::vector<double> expected_features = {1, 0, 0, 0, 0, 0, 0};
+
+    
+    EXPECT_EQ(features, expected_features);
+}
+
+TEST(GraphTest, get_neighbours) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    std::vector<int> neighbours = graph.get_neighbours(0);
+    std::vector<int> expected_neighbours = {1,4};
+
+    EXPECT_EQ(neighbours, expected_neighbours);
+
+    // Test for a specific depth
+    std::vector<int> depth_neighbours = graph.get_neighbours(0, 2);
+    std::vector<int> expected_depth_neighbours = {1,4,0,2,3};
+
+    EXPECT_EQ(depth_neighbours, expected_depth_neighbours);
+    
+}
+
 TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
     std::string edges_path = "../input/amazon/amazon_edges.txt";
@@ -52,6 +82,7 @@ TEST(GraphTest, read_edges) {
         graph.print_edges();
         std::cout.rdbuf(old);
     }
+
 
     // Compare files line by line
     std::ifstream file1(edges_path);
