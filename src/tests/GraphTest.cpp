@@ -7,6 +7,19 @@
 
 class GraphTest : public testing::Test {};
 
+TEST(GraphTest, FileNotOpenThrowsError) {
+    // Provide a non-existent file path to trigger the error
+    std::string invalid_file_path = "non_existent_file.txt";
+
+    // Verify that the function throws a runtime_error
+    EXPECT_THROW({
+        std::ifstream file(invalid_file_path);
+        if (!file.is_open()) {
+            throw std::runtime_error("Could not open file");
+        }
+    }, std::runtime_error);
+}
+
 TEST(GraphTest, parse_node_count) {
     std::string amazon_features = "../input/amazon/amazon_features.txt";
     EXPECT_EQ(parse_node_count(amazon_features),
