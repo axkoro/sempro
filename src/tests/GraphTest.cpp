@@ -109,6 +109,32 @@ TEST(GraphTest, is_valid_node) {
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
 }
 
+
+TEST(GraphTest, print_edges) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
+    Graph graph(edges_path, features_path);
+
+    // Redirect std::cout to capture the output
+    std::ostringstream output;
+    std::streambuf* oldCoutBuffer = std::cout.rdbuf(output.rdbuf());
+
+    // Call the function to capture its output
+    graph.print_edges();
+    
+    // Restore std::cout
+    std::cout.rdbuf(oldCoutBuffer);
+
+    std::string expected_print = 
+        "1\t0\n"
+        "2\t1\n"
+        "3\t2\n"
+        "4\t3\n"
+        "4\t0\n";
+
+    EXPECT_EQ(output.str(), expected_print);
+}
+
 TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
     std::string edges_path = "../input/amazon/amazon_edges.txt";
