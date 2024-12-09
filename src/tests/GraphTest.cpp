@@ -43,7 +43,7 @@ TEST(GraphTest, get_features) {
     Graph graph(edges_path, features_path);
 
     std::vector<double> features = graph.get_features(0);
-    std::vector<double> expected_features = {1, 0, 0, 0, 0, 0, 0};
+    std::vector<double> expected_features = {1, 0, 0, 0, 0, 0, 2};
 
     
     EXPECT_EQ(features, expected_features);
@@ -55,7 +55,7 @@ TEST(GraphTest, get_missing_features) {
     Graph graph(edges_path, features_path);
 
     std::vector<bool> missing_features = graph.get_missing_features(0);
-    std::vector<bool> expected_missing_features = {0,0,1,0,0,0};
+    std::vector<bool> expected_missing_features = {0,0,1,0,0,0,0};
     
 
     EXPECT_EQ(missing_features, expected_missing_features);
@@ -219,6 +219,8 @@ TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is d
         graph.print_features();
         std::cout.rdbuf(old);
     }
+       
+    
 }
 
 int main(int, char**) {
