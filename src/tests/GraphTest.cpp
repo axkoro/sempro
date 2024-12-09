@@ -211,13 +211,20 @@ TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is d
     std::string features_path = "../input/Gtests/features_example.txt";
     Graph graph(edges_path, features_path);
 
-    std::string temp_file_path = "test_output_features.txt";
-    {
-        std::ofstream output(temp_file_path);
-        // Redirect cout to the file
-        std::streambuf* old = std::cout.rdbuf(output.rdbuf());
-        graph.print_features();
-        std::cout.rdbuf(old);
+   
+    std::vector<std::vector<double>> expected_features = {
+        {1,0,0,0,0,0,2},
+        {0,1,0,0,0,0,0},
+        {0,0,0,1,0,0,1},
+        {0,0,0,0,1,0,3},
+        {0,0,0,0,0,1,4}
+    };
+
+    std::vector<bool> expected_missing = {0,0,1,0,0,0,0};
+
+    for(int i = 0; i < graph.get_num_nodes() - 1; i++) {
+        EXPECT_EQ(graph.get_features(i), expected_features[i]);
+        EXPECT_EQ(graph.get_missing_features(i), expected_missing);
     }
        
     
