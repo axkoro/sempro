@@ -162,8 +162,8 @@ TEST(GraphTest, print_features) {
 
 TEST(GraphTest, read_edges) {
     // TODO: only check first and last lines of the files for quicker tests
-    std::string edges_path = "../input/amazon/amazon_edges.txt";
-    std::string features_path = "../input/amazon/amazon_features.txt";
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
     Graph graph(edges_path, features_path);
 
     // Create temporary file for output
@@ -175,7 +175,6 @@ TEST(GraphTest, read_edges) {
         graph.print_edges();
         std::cout.rdbuf(old);
     }
-
 
     // Compare files line by line
     std::ifstream file1(edges_path);
@@ -192,6 +191,12 @@ TEST(GraphTest, read_edges) {
         }
     }
 
+    std::vector<int> expected_offsets = {0,2,4,6,8,10};
+    std::vector<int> expected_edges = {1,4,0,2,1,3,2,4,3,0};
+
+    EXPECT_EQ(graph.get_offsets(), expected_offsets);
+    EXPECT_EQ(graph.get_edges(),expected_edges);
+
     EXPECT_TRUE(files_match) << "Files differ at line " << line_number;
 
     bool more_lines = std::getline(file1, line1) || std::getline(file2, line2);
@@ -202,8 +207,8 @@ TEST(GraphTest, read_edges) {
 }
 
 TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is different
-    std::string edges_path = "../input/amazon/amazon_edges.txt";
-    std::string features_path = "../input/amazon/amazon_features.txt";
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features_example.txt";
     Graph graph(edges_path, features_path);
 
     std::string temp_file_path = "test_output_features.txt";
