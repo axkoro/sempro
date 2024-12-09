@@ -211,7 +211,7 @@ TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is d
     std::string features_path = "../input/Gtests/features_example.txt";
     Graph graph(edges_path, features_path);
 
-   
+
     std::vector<std::vector<double>> expected_features = {
         {1,0,0,0,0,0,2},
         {0,1,0,0,0,0,0},
@@ -228,6 +228,24 @@ TEST(GraphTest, read_features) {  // TODO: How to test this when formatting is d
     }
        
     
+}
+
+TEST(UtilityTest, RemoveDuplicates) {
+    // Test Case 1: Vector with duplicates
+    std::vector<int> input1 = {1, 2, 3, 2, 4, 3, 5};
+    std::vector<int> expected1 = {1, 2, 3, 4, 5};
+    EXPECT_EQ(remove_duplicates(input1), expected1);
+
+    // Test Case 2: Vector with no duplicates
+    std::vector<int> input2 = {6, 7, 8, 9};
+    std::vector<int> expected2 = {6, 7, 8, 9};
+    EXPECT_EQ(remove_duplicates(input2), expected2);
+
+    // Test Case 3: All identical values
+    std::vector<int> input4 = {10, 10, 10, 10};
+    std::vector<int> expected4 = {10};
+    EXPECT_EQ(remove_duplicates(input4), expected4);
+
 }
 
 int main(int, char**) {
