@@ -42,6 +42,9 @@ class Graph {
     std::vector<int> get_neighbours(int node) const;
     std::vector<int> get_neighbours(int node, int depth) const;
     int get_degree(int node) const;
+    std::vector<int> get_offsets() const;
+    std::vector<int> get_edges() const;
+
 
     // Queries
     bool has_edge(int source, int target) const;
