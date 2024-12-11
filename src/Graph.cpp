@@ -7,17 +7,8 @@
 #include <sstream>
 #include <unordered_set>
 
-/**
- * @brief Default constructor. Creates an empty graph.
- */
 Graph::Graph() = default;
 
-/**
- * @brief Constructs a graph from sparse matrix representation.
- *
- * @param offsets Array containing offsets into edges array for each node
- * @param edges Array containing target node IDs for edges
- */
 Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
     this->offsets = offsets;
     this->edges = edges;
@@ -35,8 +26,10 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
+// TODO: remove - exposes implementation details too much
 std::vector<int> Graph::get_offsets() const { return offsets; }
 
+// TODO: remove - exposes implementation details too much
 std::vector<int> Graph::get_edges() const { return edges; }
 
 std::vector<double> Graph::get_features(int node) const {
@@ -93,8 +86,6 @@ bool Graph::has_edge(int source, int target) const {
 
 bool Graph::is_valid_node(int node) const { return node >= 0 && node < num_nodes; }
 
-// Graph: undirected, no loops (A->A)
-// Edge file format: sorted, every edge is "descending" (a b -> b < a)
 void Graph::read_edges(std::string edges_path) {
     if (num_nodes == -1) {
         throw std::runtime_error("num_nodes needs to be initialised before calling read_edges");
@@ -187,7 +178,6 @@ void Graph::read_features(std::string features_path) {
     file.close();
 }
 
-// Prints unique edges
 void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
@@ -224,7 +214,6 @@ void Graph::print_features() const {
     }
 }
 
-// Features file format: lines ordered ascending, newline after last line
 int parse_node_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
@@ -259,7 +248,6 @@ int parse_node_count(std::string features_path) {
     return node + 1;  // assuming naming starts at 0
 }
 
-// Features file format: "1 0.93, '#', -3.2 2"
 int parse_feature_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
