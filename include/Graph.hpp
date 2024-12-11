@@ -21,8 +21,8 @@ class Graph {
     friend class GCNImputer;
 
    private:
-    int num_nodes;
-    int num_features;
+    int num_nodes = -1;
+    int num_features = -1;
     std::vector<int> offsets;
     std::vector<int> edges;
     std::vector<std::vector<double>> features;
@@ -44,7 +44,6 @@ class Graph {
     int get_degree(int node) const;
     std::vector<int> get_offsets() const;
     std::vector<int> get_edges() const;
-
 
     // Queries
     bool has_edge(int source, int target) const;

@@ -8,13 +8,12 @@
 #include <unordered_set>
 
 /**
- * @brief Default constructor. Creates an empty graph. Used for debugging purposes.
+ * @brief Default constructor. Creates an empty graph.
  */
-Graph::Graph() : num_nodes(0), num_features(0), offsets(0), edges(0), features(0), missing(0) {}
+Graph::Graph() = default;
 
 /**
- * @brief Constructs a graph from adjacency list representation using offsets and edges arrays. Used
- * for debugging purposes.
+ * @brief Constructs a graph from sparse matrix representation.
  *
  * @param offsets Array containing offsets into edges array for each node
  * @param edges Array containing target node IDs for edges
