@@ -1,6 +1,7 @@
 #include "Graph.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -97,57 +98,36 @@ bool Graph::is_valid_node(int node) const { return node < num_nodes; }
 
 // Graph: undirected, no loops (A->A)
 // Edge file format: sorted, every edge is "descending" (a b -> b < a)
-void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
+void Graph::read_edges(std::string edges_path) {
     std::ifstream file(edges_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
     }
 
-    // Populate offsets
-    std::vector<int> edge_counts(num_nodes);
-    std::string line;
-    while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
-        int a, b;
-        if (!(line_stream >> a >> b)) {
-            break;
-        }
+    std::vector<std::vector<int>> temp_edges(num_nodes);  // temporary adjecency list
 
-        ++edge_counts[a];
-        ++edge_counts[b];
+    int a, b;
+    while (file >> a >> b) {
+        temp_edges[a].push_back(b);
+        temp_edges[b].push_back(a);
     }
 
+    // Flatten to CSR
     offsets = std::vector<int>(num_nodes + 1);
     for (int i = 1; i < offsets.size(); i++) {
-        offsets[i] = offsets[i - 1] + edge_counts[i - 1];
+        offsets[i] = offsets[i - 1] + temp_edges[i - 1].size();
     }
 
-    // Populate edges
-    int num_edges = offsets[num_nodes];
+    int num_edges = offsets[offsets.size() - 1];
     edges = std::vector<int>(num_edges);
-
-    file.clear();  // reset EOF flag, so that iteration works again
-    file.seekg(0);
-    while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
-        int a, b;
-        if (!(line_stream >> a >> b)) {
-            break;
-        }
-
-        int next_edge_a = offsets[a + 1] - edge_counts[a];
-        edges[next_edge_a] = b;
-        --edge_counts[a];
-
-        int next_edge_b = offsets[b + 1] - edge_counts[b];
-        edges[next_edge_b] = a;
-        --edge_counts[b];
+    for (int i = 0; i < temp_edges.size(); i++) {
+        std::copy(temp_edges[i].begin(), temp_edges[i].end(), edges.begin() + offsets[i]);
     }
 
     file.close();
 }
 
-void Graph::read_features(std::string features_path) {  // TODO: why so slow?
+void Graph::read_features(std::string features_path) {
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -156,42 +136,35 @@ void Graph::read_features(std::string features_path) {  // TODO: why so slow?
 
     std::string line;
     while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
+        const char* ptr = line.c_str();
+        char* endptr;
 
-        int node;
-        line_stream >> node;  // first value in each row is the node
+        // Parse node index
+        int node = std::strtol(ptr, &endptr, 10);
+        ptr = endptr;
 
-        // parse features, except last feature and label (because of different formatting)
-        for (int i = 0; i < num_features - 2; i++) {
-            std::string feature;
-            std::getline(line_stream, feature, ',');
-
-            try {
-                features[node][i] = std::stod(feature);
-            } catch (const std::invalid_argument& e) {  // for missing features
+        // Parse features
+        for (int i = 0; i < num_features - 1; i++) {
+            double value = std::strtod(ptr, &endptr);
+            if (ptr == endptr) {  // found '#'
                 missing[node][i] = true;
+                endptr += 3;  // advance three characters
+            } else {
+                features[node][i] = value;
             }
+            ptr = endptr + 2;  // skip comma and space
         }
 
-        std::string feature;
-        std::getline(line_stream, feature, '\t');
-        int last_feature_idx = num_features - 2;
-        try {
-            features[node][last_feature_idx] = std::stod(feature);
-        } catch (const std::invalid_argument& e) {  // for missing features
-            missing[node][last_feature_idx] = true;
-        }
-
-        std::string label;
-        std::getline(line_stream, label);
+        // Parse label
+        --ptr;  // because last feature and label are only separated by '\t'
         int label_idx = num_features - 1;
-        try {
-            features[node][label_idx] = std::stoi(label);
-        } catch (const std::invalid_argument& e) {  // for missing features
+        int label_value = std::strtol(ptr, &endptr, 10);
+        if (ptr == endptr) {
             missing[node][label_idx] = true;
+        } else {
+            features[node][label_idx] = label_value;
         }
     }
-
     file.close();
 }
 
@@ -240,7 +213,8 @@ int parse_node_count(std::string features_path) {
     }
 
     // iterate backwards to find last line
-    file.seekg(-2, file.end);  // -2 because -1 would always be newline (see assumptions above)
+    file.seekg(-2,
+               file.end);  // -2 because -1 would always be newline (see assumptions above)
     size_t pos = file.tellg();
     while (file.get() != '\n') {
         file.seekg(--pos);
