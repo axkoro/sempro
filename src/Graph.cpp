@@ -1,7 +1,7 @@
 #include "Graph.hpp"
 
 #include <algorithm>
-#include <chrono>  // DEBUGGING
+#include <charconv>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -106,7 +106,7 @@ bool Graph::is_valid_node(int node) const { return node < num_nodes; }
 
 // Graph: undirected, no loops (A->A)
 // Edge file format: sorted, every edge is "descending" (a b -> b < a)
-void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
+void Graph::read_edges(std::string edges_path) {
     std::ifstream file(edges_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -135,7 +135,7 @@ void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
     file.close();
 }
 
-void Graph::read_features(std::string features_path) {  // TODO: why so slow?
+void Graph::read_features(std::string features_path) {
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -144,42 +144,35 @@ void Graph::read_features(std::string features_path) {  // TODO: why so slow?
 
     std::string line;
     while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
+        const char* ptr = line.c_str();
+        char* endptr;
 
-        int node;
-        line_stream >> node;  // first value in each row is the node
+        // Parse node index
+        int node = std::strtol(ptr, &endptr, 10);
+        ptr = endptr;
 
-        // parse features, except last feature and label (because of different formatting)
-        for (int i = 0; i < num_features - 2; i++) {
-            std::string feature;
-            std::getline(line_stream, feature, ',');
-
-            try {
-                features[node][i] = std::stod(feature);
-            } catch (const std::invalid_argument& e) {  // for missing features
+        // Parse features
+        for (int i = 0; i < num_features - 1; i++) {
+            double value = std::strtod(ptr, &endptr);
+            if (ptr == endptr) {  // found '#'
                 missing[node][i] = true;
+                endptr += 3;  // advance three characters
+            } else {
+                features[node][i] = value;
             }
+            ptr = endptr + 2;  // skip comma and space
         }
 
-        std::string feature;
-        std::getline(line_stream, feature, '\t');
-        int last_feature_idx = num_features - 2;
-        try {
-            features[node][last_feature_idx] = std::stod(feature);
-        } catch (const std::invalid_argument& e) {  // for missing features
-            missing[node][last_feature_idx] = true;
-        }
-
-        std::string label;
-        std::getline(line_stream, label);
+        // Parse label
+        --ptr;  // because last feature and label are only separated by '\t'
         int label_idx = num_features - 1;
-        try {
-            features[node][label_idx] = std::stoi(label);
-        } catch (const std::invalid_argument& e) {  // for missing features
+        int label_value = std::strtol(ptr, &endptr, 10);
+        if (ptr == endptr) {
             missing[node][label_idx] = true;
+        } else {
+            features[node][label_idx] = label_value;
         }
     }
-
     file.close();
 }
 
@@ -276,30 +269,4 @@ std::vector<int> remove_duplicates(const std::vector<int>& arr) {
     }
 
     return result;
-}
-
-int main(int argc, char const* argv[]) {  // DEBUGGING
-    Graph g1;
-    g1.set_num_nodes("../input/amazon_fraud/amazon_fraud_features.txt");
-
-    auto start = std::chrono::high_resolution_clock::now();
-    g1.read_edges("../input/amazon_fraud/amazon_fraud_edges.txt");
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "read_edges on amazon_fraud_edges (37 MB) took " << duration.count()
-              << " seconds.\n";
-
-    Graph g2;
-    g2.set_num_nodes("../input/corafull/corafull_features.txt");
-    g2.set_num_features("../input/corafull/corafull_features.txt");
-    g2.read_edges("../input/corafull/corafull_edges.txt");
-
-    start = std::chrono::high_resolution_clock::now();
-    g2.read_features("../input/corafull/corafull_features.txt");
-    end = std::chrono::high_resolution_clock::now();
-    duration = end - start;
-    std::cout << "read_features on corafull_features (862 MB) took " << duration.count()
-              << " seconds.\n";
-
-    return 0;
 }
