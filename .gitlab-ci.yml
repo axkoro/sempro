@@ -1,12 +1,8 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  DEBIAN_FRONTEND: noninteractive
 
 cpp_unit_tests:
-  image: danger89/cmake:latest
-  before_script:
-    - apt-get update -qy
-    - apt-get install -y ninja-build gcovr python3 python3-pip
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:cpp
   script:
     - mkdir build && cd build
     - cmake -GNinja -DBUILD_TESTS=ON ..
@@ -16,10 +12,7 @@ cpp_unit_tests:
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:
-  image: ubuntu:24.04
-  before_script:
-    - apt-get update -qy
-    - apt-get install -y python3-pip python3-venv
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
     - set -e
     - python3 -m venv pyenv && . pyenv/bin/activate
