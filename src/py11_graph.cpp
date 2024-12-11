@@ -4,7 +4,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(py11_graph, m) {
+PYBIND11_MODULE(_graph, m) {
     py::class_<Graph>(m, "Graph")
         .def(py::init<>()) // Default constructor
         .def(py::init<std::vector<int>&, std::vector<int>&>(), py::arg("offsets"), py::arg("edges")) // Offset-Edge constructor

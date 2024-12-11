@@ -25,9 +25,9 @@ else() # Build Python bindings as libraries
 	pybind11_add_module(_example src/Example.cpp src/py11_example.cpp)
 	target_include_directories(_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_example PROPERTIES LINKER_LANGUAGE CXX)
-	pybind11_add_module(py11_graph src/Graph.cpp src/py11_graph.cpp)
-	target_include_directories(py11_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(py11_graph PROPERTIES LINKER_LANGUAGE CXX)
+	pybind11_add_module(_graph src/Graph.cpp src/py11_graph.cpp)
+	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
 endif()
  
 set(CMAKE_CLEAN_TARGET "clean")
