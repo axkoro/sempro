@@ -32,14 +32,6 @@ Graph::Graph(std::string edges_path, std::string features_path) {
     read_features(features_path);
 }
 
-void Graph::set_num_nodes(std::string features_path) {
-    num_nodes = parse_node_count(features_path);
-}
-
-void Graph::set_num_features(std::string features_path) {
-    num_features = parse_feature_count(features_path);
-}
-
 int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
