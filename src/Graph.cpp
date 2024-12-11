@@ -1,6 +1,7 @@
 #include "Graph.hpp"
 
 #include <algorithm>
+#include <chrono>  // DEBUGGING
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -29,6 +30,14 @@ Graph::Graph(std::string edges_path, std::string features_path) {
     num_features = parse_feature_count(features_path);
     read_edges(edges_path);
     read_features(features_path);
+}
+
+void Graph::set_num_nodes(std::string features_path) {
+    num_nodes = parse_node_count(features_path);
+}
+
+void Graph::set_num_features(std::string features_path) {
+    num_features = parse_feature_count(features_path);
 }
 
 int Graph::get_num_nodes() const { return num_nodes; }
@@ -103,45 +112,24 @@ void Graph::read_edges(std::string edges_path) {  // TODO: why so slow?
         throw std::runtime_error("Could not open file");
     }
 
-    // Populate offsets
-    std::vector<int> edge_counts(num_nodes);
-    std::string line;
-    while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
-        int a, b;
-        if (!(line_stream >> a >> b)) {
-            break;
-        }
+    std::vector<std::vector<int>> temp_edges(num_nodes);  // temporary adjecency list
 
-        ++edge_counts[a];
-        ++edge_counts[b];
+    int a, b;
+    while (file >> a >> b) {
+        temp_edges[a].push_back(b);
+        temp_edges[b].push_back(a);
     }
 
+    // Flatten to CSR
     offsets = std::vector<int>(num_nodes + 1);
     for (int i = 1; i < offsets.size(); i++) {
-        offsets[i] = offsets[i - 1] + edge_counts[i - 1];
+        offsets[i] = offsets[i - 1] + temp_edges[i - 1].size();
     }
 
-    // Populate edges
-    int num_edges = offsets[num_nodes];
+    int num_edges = offsets[offsets.size() - 1];
     edges = std::vector<int>(num_edges);
-
-    file.clear();  // reset EOF flag, so that iteration works again
-    file.seekg(0);
-    while (std::getline(file, line)) {
-        std::istringstream line_stream(line);
-        int a, b;
-        if (!(line_stream >> a >> b)) {
-            break;
-        }
-
-        int next_edge_a = offsets[a + 1] - edge_counts[a];
-        edges[next_edge_a] = b;
-        --edge_counts[a];
-
-        int next_edge_b = offsets[b + 1] - edge_counts[b];
-        edges[next_edge_b] = a;
-        --edge_counts[b];
+    for (int i = 0; i < temp_edges.size(); i++) {
+        std::copy(temp_edges[i].begin(), temp_edges[i].end(), edges.begin() + offsets[i]);
     }
 
     file.close();
@@ -240,7 +228,8 @@ int parse_node_count(std::string features_path) {
     }
 
     // iterate backwards to find last line
-    file.seekg(-2, file.end);  // -2 because -1 would always be newline (see assumptions above)
+    file.seekg(-2,
+               file.end);  // -2 because -1 would always be newline (see assumptions above)
     size_t pos = file.tellg();
     while (file.get() != '\n') {
         file.seekg(--pos);
@@ -287,4 +276,30 @@ std::vector<int> remove_duplicates(const std::vector<int>& arr) {
     }
 
     return result;
+}
+
+int main(int argc, char const* argv[]) {  // DEBUGGING
+    Graph g1;
+    g1.set_num_nodes("../input/amazon_fraud/amazon_fraud_features.txt");
+
+    auto start = std::chrono::high_resolution_clock::now();
+    g1.read_edges("../input/amazon_fraud/amazon_fraud_edges.txt");
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    std::cout << "read_edges on amazon_fraud_edges (37 MB) took " << duration.count()
+              << " seconds.\n";
+
+    Graph g2;
+    g2.set_num_nodes("../input/corafull/corafull_features.txt");
+    g2.set_num_features("../input/corafull/corafull_features.txt");
+    g2.read_edges("../input/corafull/corafull_edges.txt");
+
+    start = std::chrono::high_resolution_clock::now();
+    g2.read_features("../input/corafull/corafull_features.txt");
+    end = std::chrono::high_resolution_clock::now();
+    duration = end - start;
+    std::cout << "read_features on corafull_features (862 MB) took " << duration.count()
+              << " seconds.\n";
+
+    return 0;
 }
