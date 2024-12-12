@@ -28,27 +28,11 @@ int Graph::get_num_features() const { return num_features; }
 
 double Graph::get_feature(int node, int feature) const { return features[node][feature]; }
 
-// TODO: remove - exposes implementation details too much
-std::vector<int> Graph::get_offsets() const { return offsets; }
-
-// TODO: remove - exposes implementation details too much
-std::vector<int> Graph::get_edges() const { return edges; }
-
 void Graph::set_feature(int node, int feature, double value) { features[node][feature] = value; }
 
 void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
 
-std::vector<double> Graph::get_features(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
-    return features[node];
-}
-
-std::vector<bool> Graph::get_missing_features(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
-    return missing[node];
-}
-
-std::vector<int> Graph::get_missing_feature_list(int node) const {
+std::vector<int> Graph::get_missing_features(int node) const {
     std::vector<int> missing_features_list;
     for (int feature = 0; feature < num_features; feature++) {
         if (is_missing(node, feature)) missing_features_list.push_back(feature);

@@ -10,16 +10,7 @@ class GraphException : public std::runtime_error {
     explicit GraphException(const std::string& message);
 };
 
-// Forward declarations for friend classes
-class KNNImputer;
-class ClusterImputer;
-class GCNImputer;
-
 class Graph {
-    friend class KNNImputer;
-    friend class ClusterImputer;
-    friend class GCNImputer;
-
    private:
     int num_nodes = -1;
     int num_features = -1;
@@ -60,23 +51,11 @@ class Graph {
     double get_feature(int node, int feature) const;
 
     /**
-     * @brief Gets the features of a specific node.
-     *
-     * @param node Index of the node.
-     * @return Vector of feature values.
-     * @throws std::logic_error If the node does not exist.
+     * Returns a vector of feature indices that are missing for a given node.
+     * @param node The node index to check for missing features
+     * @return Vector containing indices of all missing features for the node
      */
-    std::vector<double> get_features(int node) const;
-
-    /**
-     * @brief Gets the missing feature indicators for a node.
-     *
-     * @param node Index of the node.
-     * @return Vector of booleans indicating missing features.
-     * @throws std::logic_error If the node does not exist.
-     */
-    std::vector<bool> get_missing_features(int node) const;
-    std::vector<int> get_missing_feature_list(int node) const;
+    std::vector<int> get_missing_features(int node) const;
 
     /**
      * @brief Gets the immediate neighbours of a node.
@@ -105,8 +84,6 @@ class Graph {
      * @throws std::logic_error If the node does not exist.
      */
     int get_degree(int node) const;
-    std::vector<int> get_offsets() const;
-    std::vector<int> get_edges() const;
 
     // Setters
 

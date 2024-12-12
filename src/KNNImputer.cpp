@@ -17,7 +17,7 @@ void KNNImputer::run() {
     // features
     for (int node = 0; node < num_nodes; node++) {
         std::vector<int> neighbours = graph.get_neighbours(node, k);
-        std::vector<int> missing_features = graph.get_missing_feature_list(node);
+        std::vector<int> missing_features = graph.get_missing_features(node);
 
         for (auto&& feature : missing_features) {
             double sum = 0;
