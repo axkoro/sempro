@@ -10,8 +10,13 @@ class KNNImputer {
 
    public:
     KNNImputer(Graph& graph);
-    void set_depth(int k);
+
     void run();
+
+    // Configuration
+    void set_depth(int k);
 };
+
+double compute_global_average(Graph& graph, int feature);
 
 #endif

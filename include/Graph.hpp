@@ -57,6 +57,8 @@ class Graph {
     int get_num_nodes() const;
     int get_num_features() const;
 
+    double get_feature(int node, int feature) const;
+
     /**
      * @brief Gets the features of a specific node.
      *
@@ -74,6 +76,7 @@ class Graph {
      * @throws std::logic_error If the node does not exist.
      */
     std::vector<bool> get_missing_features(int node) const;
+    std::vector<int> get_missing_feature_list(int node) const;
 
     /**
      * @brief Gets the immediate neighbours of a node.
@@ -105,6 +108,11 @@ class Graph {
     std::vector<int> get_offsets() const;
     std::vector<int> get_edges() const;
 
+    // Setters
+
+    void set_feature(int node, int feature, double value);
+    void set_missing(int node, int feature, bool value);
+
     // Queries
 
     /**
@@ -115,6 +123,15 @@ class Graph {
      * @return True if the edge exists, false otherwise.
      */
     bool has_edge(int source, int target) const;
+
+    /**
+     * @brief Checks if a given feature is missing for a node.
+     *
+     * @param node Index of the node.
+     * @param feature Index of the feature.
+     * @return True if the feature is missing, false otherwise.
+     */
+    bool is_missing(int node, int feature) const;
 
     /**
      * @brief Validates if a node index is within the graph.
