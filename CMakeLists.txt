@@ -15,11 +15,11 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
-	add_executable(KNNTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp src/Graph.cpp)
-	target_include_directories(KNNTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(KNNTest PRIVATE gtest)
-	target_compile_options(KNNTest PRIVATE -coverage)
-	target_link_options(KNNTest PRIVATE -coverage)
+	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp src/Graph.cpp)
+	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(KNNImputerTest PRIVATE gtest)
+	target_compile_options(KNNImputerTest PRIVATE -coverage)
+	target_link_options(KNNImputerTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 	pybind11_add_module(_graph src/Graph.cpp src/py11_graph.cpp)
