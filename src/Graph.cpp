@@ -7,18 +7,8 @@
 #include <sstream>
 #include <unordered_set>
 
-/**
- * @brief Default constructor. Creates an empty graph. Used for debugging purposes.
- */
-Graph::Graph() : num_nodes(0), num_features(0), offsets(0), edges(0), features(0), missing(0) {}
+Graph::Graph() = default;
 
-/**
- * @brief Constructs a graph from adjacency list representation using offsets and edges arrays. Used
- * for debugging purposes.
- *
- * @param offsets Array containing offsets into edges array for each node
- * @param edges Array containing target node IDs for edges
- */
 Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
     this->offsets = offsets;
     this->edges = edges;
@@ -36,53 +26,53 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
+// TODO: remove - exposes implementation details too much
 std::vector<int> Graph::get_offsets() const { return offsets; }
 
+// TODO: remove - exposes implementation details too much
 std::vector<int> Graph::get_edges() const { return edges; }
 
 std::vector<double> Graph::get_features(int node) const {
-    if (!(is_valid_node(node))) throw std::runtime_error("Node does not exist");
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
     return features[node];
 }
 
 std::vector<bool> Graph::get_missing_features(int node) const {
-    if (!(is_valid_node(node))) throw std::runtime_error("Node does not exist");
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
     return missing[node];
 }
 
 std::vector<int> Graph::get_neighbours(int node) const {
-    if (!(is_valid_node(node))) throw std::runtime_error("Node does not exist");
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
 
     std::vector<int> neighbours(offsets[node + 1] - offsets[node]);
-    for (int i = 0; i < neighbours.size(); i++) {
-        neighbours[i] = edges[offsets[node] + i];
-    }
+    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
 
     return neighbours;
 }
 
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
-    if (!(is_valid_node(node))) throw std::runtime_error("Node does not exist");
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
 
     std::vector<int> neighbours = get_neighbours(node);  // k=1
 
-    int start_last_k = 0;
-    int start_this_k = neighbours.size();
+    int last_depth_start = 0;
+    int this_depth_start = neighbours.size();
     for (int k = 2; k <= depth; k++) {
-        for (int i = start_last_k; i < start_this_k; i++) {
+        for (int i = last_depth_start; i < this_depth_start; i++) {
             std::vector<int> new_neighbours = get_neighbours(neighbours[i]);
             neighbours.insert(neighbours.end(), new_neighbours.begin(), new_neighbours.end());
         }
         neighbours = remove_duplicates(neighbours);
-        start_last_k = start_this_k;
-        start_this_k = neighbours.size();
+        last_depth_start = this_depth_start;
+        this_depth_start = neighbours.size();
     }
 
     return neighbours;
 }
 
 int Graph::get_degree(int node) const {
-    if (!(is_valid_node(node))) throw std::runtime_error("Node does not exist");
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
     return offsets[node + 1] - offsets[node];
 }
 
@@ -94,22 +84,31 @@ bool Graph::has_edge(int source, int target) const {
     return false;
 }
 
-bool Graph::is_valid_node(int node) const { return node < num_nodes; }
+bool Graph::is_valid_node(int node) const { return node >= 0 && node < num_nodes; }
 
-// Graph: undirected, no loops (A->A)
-// Edge file format: sorted, every edge is "descending" (a b -> b < a)
 void Graph::read_edges(std::string edges_path) {
+    if (num_nodes == -1) {
+        throw std::runtime_error("num_nodes needs to be initialised before calling read_edges");
+    }
+
     std::ifstream file(edges_path);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
+        throw std::runtime_error("Could not open file: " + edges_path);
     }
 
     std::vector<std::vector<int>> temp_edges(num_nodes);  // temporary adjecency list
 
     int a, b;
     while (file >> a >> b) {
+        if (!is_valid_node(a) || !is_valid_node(b)) {
+            throw std::out_of_range("Node index out of range");
+        }
         temp_edges[a].push_back(b);
         temp_edges[b].push_back(a);
+    }
+
+    if (file.bad()) {
+        throw std::runtime_error("Error reading file: " + edges_path);
     }
 
     // Flatten to CSR
@@ -128,11 +127,22 @@ void Graph::read_edges(std::string edges_path) {
 }
 
 void Graph::read_features(std::string features_path) {
+    if (num_nodes == -1) {
+        num_nodes = parse_node_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
+    }
+    if (num_features == -1) {
+        num_features = parse_feature_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
+    }
+
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
     std::ifstream file(features_path);
-    if (!file.is_open()) throw std::runtime_error("Could not open file");
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
 
     std::string line;
     while (std::getline(file, line)) {
@@ -168,7 +178,6 @@ void Graph::read_features(std::string features_path) {
     file.close();
 }
 
-// Prints unique edges
 void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
@@ -205,16 +214,14 @@ void Graph::print_features() const {
     }
 }
 
-// Features file format: lines ordered ascending, newline after last line
 int parse_node_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
+        throw std::runtime_error("Could not open file: " + features_path);
     }
 
-    // iterate backwards to find last line
-    file.seekg(-2,
-               file.end);  // -2 because -1 would always be newline (see assumptions above)
+    // iterate backwards to find beginning of last line
+    file.seekg(-2, file.end);  // -2 because -1 would be '\n' (see assumptions)
     size_t pos = file.tellg();
     while (file.get() != '\n') {
         file.seekg(--pos);
@@ -222,32 +229,41 @@ int parse_node_count(std::string features_path) {
 
     // get node from last line
     std::string last_line;
-    getline(file, last_line);
+    if (!std::getline(file, last_line)) {
+        throw std::runtime_error("Failed to read the last line");
+    }
+
     std::istringstream line_stream(last_line);
     int node;
-    line_stream >> node;
+    if (!(line_stream >> node)) {
+        throw std::runtime_error("Failed to parse integer");
+    }
 
     file.close();
 
-    int num_nodes = node + 1;  // assuming naming starts at 0
+    if (node < 0) {
+        throw std::runtime_error("Invalid node value");
+    }
 
-    return num_nodes;
+    return node + 1;  // assuming naming starts at 0
 }
 
-// Features file format: "1 0.93, '#', -3.2 2"
 int parse_feature_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
+        throw std::runtime_error("Could not open file: " + features_path);
     }
 
     std::string line;
-    std::getline(file, line);
+    if (!std::getline(file, line)) {
+        throw std::runtime_error("Failed to read the first line");
+    }
 
-    int num_features = std::count(line.begin(), line.end(), ',') +
-                       2;  // + 1 because we include the label as a feature
-
-    return num_features;
+    int comma_count = std::count(line.begin(), line.end(), ',');
+    if (comma_count == 0)
+        throw std::runtime_error("Invalid format: no commas found in the line of file '" +
+                                 features_path + "'");
+    return comma_count + 2;  // + 1 because we include the label as a feature
 }
 
 std::vector<int> remove_duplicates(const std::vector<int>& arr) {
