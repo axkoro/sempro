@@ -2,8 +2,9 @@
 #define KNNIMPUTER_HPP
 
 #include "Graph.hpp"
+#include "Imputer.hpp"
 
-class KNNImputer {
+class KNNImputer : public Imputer {
    private:
     Graph& graph;
     int k;
