@@ -2,14 +2,15 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>  
-#include "KNNImputer.hpp"
+#include <sstream>
+
 #include "Graph.hpp"
+#include "KNNImputer.hpp"
 
 class KNNTest : public testing::Test {};
-//test using input/test/test.txt`s data
-TEST( KNNTest, testKNN){
-    
+
+// test using input/test/test.txt's data
+TEST(KNNTest, testKNN) {
     std::string edges_path = "../input/test/test_edges.txt";
     std::string features_path = "../input/test/test_missing_features.txt";
     std::string complete_path = "../input/test/test_complete_features.txt";
@@ -17,9 +18,8 @@ TEST( KNNTest, testKNN){
     KNNImputer knn(graph);
     knn.set_depth(2);
     knn.run();
-    std::cout << "Number of nodes: " << graph.get_num_nodes() << std::endl;
 
-     std::string temp_file_path = "temp_edges.txt";
+    std::string temp_file_path = "temp_edges.txt";
     {
         std::ofstream output(temp_file_path);
         // Redirect cout to the file
@@ -28,7 +28,6 @@ TEST( KNNTest, testKNN){
         std::cout.rdbuf(old);
         output.close();
     }
-    graph.print_features();
 
     // Compare files line by line
     std::ifstream file1(complete_path);
@@ -37,7 +36,7 @@ TEST( KNNTest, testKNN){
     bool files_match = true;
     int line_number = 0;
 
- while (std::getline(file1, line1) && std::getline(file2, line2)) {
+    while (std::getline(file1, line1) && std::getline(file2, line2)) {
         line_number++;
         if (line1 != line2) {
             files_match = false;
@@ -52,7 +51,6 @@ TEST( KNNTest, testKNN){
 
     // Clean up
     std::remove(temp_file_path.c_str());
-    
 }
 int main(int, char**) {
     ::testing::InitGoogleTest();

@@ -17,34 +17,39 @@ void KNNImputer::run() {
     // features
     for (int node = 0; node < num_nodes; node++) {
         std::vector<int> neighbours = graph.get_neighbours(node, k);
-        for (int feature = 0; feature < num_features; feature++) {
-            if (graph.missing[node][feature] == true) {
-                double sum = 0;
-                int count = 0;
-                for (int neighbour : neighbours) {
-                    if (graph.missing[neighbour][feature] == false) {
-                        sum += graph.features[neighbour][feature];
-                        count++;
-                    }
-                }
+        std::vector<int> missing_features = graph.get_missing_features(node);
 
-                // TODO: set "imputed" flag, so that future imputations might ignore this feature
-                if (count > 0) {
-                    graph.features[node][feature] = sum / count;
-                    graph.missing[node][feature] = false;
-                } else {
-                    for (int nodeglobal = 0; nodeglobal < num_nodes; nodeglobal++) {
-                        if (graph.missing[nodeglobal][feature] == false) {
-                            sum += graph.features[nodeglobal][feature];
-                            count++;
-                        }
-                    }
-                    graph.features[node][feature] = sum / count;
-                    graph.missing[node][feature] = false;
+        for (auto&& feature : missing_features) {
+            double sum = 0;
+            int count = 0;
+            for (int neighbour : neighbours) {
+                if (!graph.is_missing(neighbour, feature)) {
+                    sum += graph.get_feature(neighbour, feature);
+                    count++;
                 }
             }
+
+            if (count > 0) {
+                graph.set_feature(node, feature, sum / count);
+            } else {  // neighbourhood also doesn't have this feature
+                double global_avg = compute_global_average(graph, feature);
+                graph.set_feature(node, feature, global_avg);
+            }
+            graph.set_missing(node, feature, false);
         }
     }
 }
 
 void KNNImputer::set_depth(int k) { this->k = k; }
+
+double compute_global_average(Graph& graph, int feature) {
+    double sum = 0;
+    int count = 0;
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        if (!graph.is_missing(node, feature)) {
+            sum += graph.get_feature(node, feature);
+            count++;
+        }
+    }
+    return sum / count;
+}

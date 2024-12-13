@@ -7,8 +7,8 @@ cpp_unit_tests:
     - mkdir build && cd build
     - cmake -GNinja -DBUILD_TESTS=ON ..
     - ninja
-    - ./ExampleTest
     - ./GraphTest
+    - ./KNNImputerTest
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:

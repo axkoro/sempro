@@ -26,20 +26,19 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
-// TODO: remove - exposes implementation details too much
-std::vector<int> Graph::get_offsets() const { return offsets; }
+double Graph::get_feature(int node, int feature) const { return features[node][feature]; }
 
-// TODO: remove - exposes implementation details too much
-std::vector<int> Graph::get_edges() const { return edges; }
+void Graph::set_feature(int node, int feature, double value) { features[node][feature] = value; }
 
-std::vector<double> Graph::get_features(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
-    return features[node];
-}
+void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
 
-std::vector<bool> Graph::get_missing_features(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
-    return missing[node];
+std::vector<int> Graph::get_missing_features(int node) const {
+    std::vector<int> missing_features_list;
+    for (int feature = 0; feature < num_features; feature++) {
+        if (is_missing(node, feature)) missing_features_list.push_back(feature);
+    }
+
+    return missing_features_list;
 }
 
 std::vector<int> Graph::get_neighbours(int node) const {
@@ -85,6 +84,8 @@ bool Graph::has_edge(int source, int target) const {
 }
 
 bool Graph::is_valid_node(int node) const { return node >= 0 && node < num_nodes; }
+
+bool Graph::is_missing(int node, int feature) const { return missing[node][feature]; }
 
 void Graph::read_edges(std::string edges_path) {
     if (num_nodes == -1) {
