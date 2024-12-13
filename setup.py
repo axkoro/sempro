@@ -133,7 +133,7 @@ setup(
     author_email="",
     description="",
     long_description="",
-    ext_modules=[CMakeExtension("semproject._graph")],
+    ext_modules=[CMakeExtension("semproject._graph"), CMakeExtension("semproject._strats")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
