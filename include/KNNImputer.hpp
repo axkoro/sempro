@@ -4,12 +4,14 @@
 #include "Imputer.hpp"
 
 class KNNImputer : public Imputer {
+   public:
+    static constexpr int DEFAULT_K = 3;
+
    private:
-    Graph& graph;
-    int k;
+    int k = DEFAULT_K;
 
    public:
-    KNNImputer(Graph& graph);
+    explicit KNNImputer(Graph& g);
 
     void run();
 

@@ -3,7 +3,7 @@
 #include "Graph.hpp"
 
 class Imputer {
-   private:
+   protected:
     Graph& graph;
 
    public:
