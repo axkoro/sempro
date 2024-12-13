@@ -1,5 +1,4 @@
-#ifndef KNNIMPUTER_HPP
-#define KNNIMPUTER_HPP
+#pragma once
 
 #include "Graph.hpp"
 #include "Imputer.hpp"
@@ -19,5 +18,3 @@ class KNNImputer : public Imputer {
 };
 
 double compute_global_average(Graph& graph, int feature);
-
-#endif
