@@ -1,15 +1,17 @@
-#ifndef KNNIMPUTER_HPP
-#define KNNIMPUTER_HPP
+#pragma once
 
 #include "Graph.hpp"
+#include "Imputer.hpp"
 
-class KNNImputer {
+class KNNImputer : public Imputer {
+   public:
+    static constexpr int DEFAULT_K = 3;
+
    private:
-    Graph& graph;
-    int k;
+    int k = DEFAULT_K;
 
    public:
-    KNNImputer(Graph& graph);
+    explicit KNNImputer(Graph& g);
 
     void run();
 
@@ -18,5 +20,3 @@ class KNNImputer {
 };
 
 double compute_global_average(Graph& graph, int feature);
-
-#endif

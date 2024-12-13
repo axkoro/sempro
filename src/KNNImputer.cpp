@@ -7,7 +7,9 @@
 
 #include "Graph.hpp"
 
-KNNImputer::KNNImputer(Graph& graph) : graph(graph) {}
+KNNImputer::KNNImputer(Graph& g) : Imputer(g) {}
+
+void KNNImputer::set_depth(int k) { this->k = k; }
 
 void KNNImputer::run() {
     int num_nodes = graph.get_num_nodes();
@@ -39,8 +41,6 @@ void KNNImputer::run() {
         }
     }
 }
-
-void KNNImputer::set_depth(int k) { this->k = k; }
 
 double compute_global_average(Graph& graph, int feature) {
     double sum = 0;

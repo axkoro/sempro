@@ -1,5 +1,4 @@
-#ifndef GRAPH_HPP
-#define GRAPH_HPP
+#pragma once
 
 #include <stdexcept>
 #include <string>
@@ -176,5 +175,3 @@ int parse_feature_count(std::string features_path);
  * @return Vector with duplicates removed.
  */
 std::vector<int> remove_duplicates(const std::vector<int>& arr);
-
-#endif
