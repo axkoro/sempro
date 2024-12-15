@@ -41,8 +41,6 @@ TEST(KNNTest, testKNN) {
         line_number++;
         if (line1 != line2) {
             files_match = false;
-            printf("line1: %s\n", line1.c_str());
-            printf("line2: %s\n", line2.c_str());
             break;
         }
     }
@@ -90,7 +88,7 @@ TEST(KNNTest, testGlobalAverage) {
     average1 = compute_global_average(graph, 1);
     average2 = compute_global_average(graph, 2);
     average3 = compute_global_average(graph, 3);
-    
+
     EXPECT_EQ(average0, 0);
     EXPECT_NEAR(average1, 1.08, 1e-5);
     EXPECT_EQ(average2, 2);
