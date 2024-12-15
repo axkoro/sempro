@@ -76,18 +76,25 @@ TEST(KNNTest, testGlobalAverage) {
     double average0 = compute_global_average(graph, 0);
     double average1 = compute_global_average(graph, 1);
     double average2 = compute_global_average(graph, 2);
+    double average3 = compute_global_average(graph, 3);
 
-    EXPECT_EQ(average0, 1);
-    EXPECT_EQ(average1, 2);
-    EXPECT_NEAR(average2, 2.33333, 1e-5);
+    EXPECT_EQ(average0, 0);
+    EXPECT_EQ(average1, 1);
+    EXPECT_EQ(average2, 2);
+    EXPECT_NEAR(average3, 2.33333, 1e-5);
+
     knn.set_depth(3);
     knn.run();
+
     average0 = compute_global_average(graph, 0);
     average1 = compute_global_average(graph, 1);
     average2 = compute_global_average(graph, 2);
-    EXPECT_NEAR(average0, 1.08, 1e-5);
-    EXPECT_EQ(average1, 2);
-    EXPECT_NEAR(average2, 2.33333, 1e-5);
+    average3 = compute_global_average(graph, 3);
+    
+    EXPECT_EQ(average0, 0);
+    EXPECT_NEAR(average1, 1.08, 1e-5);
+    EXPECT_EQ(average2, 2);
+    EXPECT_NEAR(average3, 2.33333, 1e-5);
 }
 int main(int, char**) {
     ::testing::InitGoogleTest();
