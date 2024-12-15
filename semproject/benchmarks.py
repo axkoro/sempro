@@ -2,7 +2,7 @@ import time
 import semproject.graph as graph_module
 import semproject.strats as strats_module
 
-def run_graph_tests():
+def graph_benchmark():
     print("Running Graph tests...")
     start_time = time.time()
     # Create a Graph instance
@@ -14,7 +14,7 @@ def run_graph_tests():
     
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
-def run_knn_imputer_tests():
+def kNN_twitch_benchmark():
     print("Running KNNImputer tests...")
     
     # Create a Graph instance
@@ -34,5 +34,5 @@ def run_knn_imputer_tests():
     print(f"KNNImputer run completed in {end_time - start_time:.4f} seconds")
 
 if __name__ == "__main__":
-    run_graph_tests()
-    run_knn_imputer_tests()
+    graph_benchmark()
+    kNN_twitch_benchmark()
