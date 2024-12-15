@@ -51,7 +51,21 @@ def kNN_fraud_benchmark():
     end_time = time.time()
     
     print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
+def main():
+    print("Select a benchmark to run:")
+    print("1. Graph")
+    print("2. kNN twitch")
+    print("3. kNN amazon_fraud")
 
+    choice = input("Enter your choice: ")
+    if choice == "1":
+        graph_benchmark()
+    elif choice == "2":
+        kNN_twitch_benchmark()
+    elif choice == "3":
+        kNN_fraud_benchmark()
+    else:
+        print("Invalid choice. Exiting...")
+        return
 if __name__ == "__main__":
-    graph_benchmark()
-    kNN_fraud_benchmark()
+    main()
