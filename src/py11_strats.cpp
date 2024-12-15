@@ -8,7 +8,9 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(_strats, m) {
-    py::class_<KNNImputer>(m, "KNNImputer")
+    py::class_<Imputer>(m, "Imputer")
+        .def("run", &Imputer::run);
+    py::class_<KNNImputer, Imputer>(m, "KNNImputer")
         .def(py::init<Graph&>())
         .def("run", &KNNImputer::run)
         .def("set_depth", &KNNImputer::set_depth);
