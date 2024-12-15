@@ -67,3 +67,5 @@ double compute_global_average(Graph& graph, int feature) {
     }
     return sum / count;
 }
+//getter for k
+int KNNImputer::get_depth() { return k; }
