@@ -17,6 +17,9 @@ class KNNImputer : public Imputer {
 
     // Configuration
     void set_depth(int k);
+
+    //getter for k
+    int get_depth();
 };
 
 double compute_global_average(Graph& graph, int feature);

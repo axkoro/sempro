@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -51,6 +52,47 @@ TEST(KNNTest, testKNN) {
 
     // Clean up
     std::remove(temp_file_path.c_str());
+}
+TEST(KNNTest, testDepth) {
+    std::string edges_path = "../input/test/test_edges.txt";
+    std::string features_path = "../input/test/test_missing_features.txt";
+    Graph graph(edges_path, features_path);
+    KNNImputer knn(graph);
+    knn.set_depth(3);
+    EXPECT_EQ(knn.get_depth(), 3);
+    EXPECT_NE(knn.get_depth(), 2);
+    knn.set_depth(5);
+    EXPECT_EQ(knn.get_depth(), 5);
+    EXPECT_NE(knn.get_depth(), 3);
+}
+TEST(KNNTest, testGlobalAverage) {
+    std::setprecision(5);
+    std::string edges_path = "../input/test/test_edges.txt";
+    std::string features_path = "../input/test/test_missing_features.txt";
+    Graph graph(edges_path, features_path);
+    KNNImputer knn = KNNImputer(graph);
+    double average0 = compute_global_average(graph, 0);
+    double average1 = compute_global_average(graph, 1);
+    double average2 = compute_global_average(graph, 2);
+    double average3 = compute_global_average(graph, 3);
+
+    EXPECT_EQ(average0, 0);
+    EXPECT_EQ(average1, 1);
+    EXPECT_EQ(average2, 2);
+    EXPECT_NEAR(average3, 2.33333, 1e-5);
+
+    knn.set_depth(3);
+    knn.run();
+
+    average0 = compute_global_average(graph, 0);
+    average1 = compute_global_average(graph, 1);
+    average2 = compute_global_average(graph, 2);
+    average3 = compute_global_average(graph, 3);
+
+    EXPECT_EQ(average0, 0);
+    EXPECT_NEAR(average1, 1.08, 1e-5);
+    EXPECT_EQ(average2, 2);
+    EXPECT_NEAR(average3, 2.33333, 1e-5);
 }
 int main(int, char**) {
     ::testing::InitGoogleTest();
