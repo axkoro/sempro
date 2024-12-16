@@ -1,5 +1,7 @@
 #include "KNNImputer.hpp"
 
+#include <omp.h>
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -18,8 +20,9 @@ void KNNImputer::run() {
 
     std::unordered_map<int, double> global_averages;  // stores global averages for each feature
 
-    // for each node in graph if feature is missing take neighbours depth k and take average of
-    // features
+// for each node in graph if feature is missing take neighbours depth k and take average of
+// features
+#pragma omp parallel for
     for (int node = 0; node < num_nodes; node++) {
         std::vector<int> neighbours = graph.get_neighbours(node, k);
         std::vector<int> missing_features = graph.get_missing_features(node);
@@ -67,5 +70,5 @@ double compute_global_average(Graph& graph, int feature) {
     }
     return sum / count;
 }
-//getter for k
+// getter for k
 int KNNImputer::get_depth() { return k; }
