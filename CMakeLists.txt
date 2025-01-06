@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.17)
 project(semproject CXX)
 
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-set(CMAKE_CXX_STANDARD 17)
-        
 option(BUILD_TESTS "Build tests" ON)
 
 find_package(OpenMP REQUIRED)
@@ -27,14 +26,14 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
-	add_library(graph_lib src/Graph.cpp)
-	target_include_directories(graph_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
 	pybind11_add_module(_graph src/Graph.cpp src/py11_graph.cpp)
 	target_link_libraries(_graph PRIVATE OpenMP::OpenMP_CXX)
 	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
 
+	add_library(graph_lib src/Graph.cpp)
+	target_include_directories(graph_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	
 	pybind11_add_module(_strats src/KNNImputer.cpp src/py11_strats.cpp)
 	target_link_libraries(_strats PRIVATE graph_lib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
