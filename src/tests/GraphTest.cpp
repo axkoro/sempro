@@ -40,9 +40,9 @@ TEST(GraphTest, parse_feature_count) {
 }
 
 TEST(GraphTest, get_neighbours) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     std::vector<int> neighbours = graph.get_neighbours(0);
     std::vector<int> expected_neighbours = {1, 4};
@@ -57,36 +57,36 @@ TEST(GraphTest, get_neighbours) {
 }
 
 TEST(GraphTest, get_degree) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     int degree = graph.get_degree(0);
     EXPECT_GE(degree, 2);
 }
 
 TEST(GraphTest, has_edge) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.has_edge(0, 4));   // Assumes edge exists
     EXPECT_FALSE(graph.has_edge(0, 2));  // Assumes edge does not exist
 }
 
 TEST(GraphTest, is_valid_node) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.is_valid_node(0));
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
 }
 
 TEST(GraphTest, print_edges) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -108,9 +108,9 @@ TEST(GraphTest, print_edges) {
     EXPECT_EQ(output.str(), expected_print);
 }
 
-TEST(GraphTest, print_features) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
+TEST(GraphTest, print_features) {  // TODO: Test for all feature data types
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
     Graph graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
@@ -134,10 +134,9 @@ TEST(GraphTest, print_features) {
 }
 
 TEST(GraphTest, read_edges) {
-    // TODO: only check first and last lines of the files for quicker tests
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
-    Graph graph(edges_path, features_path);
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    Graph<double> graph(edges_path, features_path);
 
     // Create temporary file for output
     std::string temp_file_path = "temp_edges.txt";
@@ -173,9 +172,9 @@ TEST(GraphTest, read_edges) {
     std::remove(temp_file_path.c_str());
 }
 
-TEST(GraphTest, read_features) {
-    std::string edges_path = "../input/Gtests/edges_example.txt";
-    std::string features_path = "../input/Gtests/features_example.txt";
+TEST(GraphTest, read_features) {  // TODO: Test for all feature data types
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
     Graph graph(edges_path, features_path);
 
     // clang-format off
