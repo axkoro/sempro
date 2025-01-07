@@ -22,6 +22,7 @@ class Graph {
     int num_features = -1;
     std::vector<int> offsets;
     std::vector<int> edges;
+    std::vector<int> labels;
     std::vector<std::vector<T>> features;
     std::vector<std::vector<bool>> missing;
 
@@ -199,7 +200,7 @@ int parse_node_count(std::string features_path) {
 }
 
 /**
- * @brief Parses the number of features from the features file.
+ * @brief Parses the number of features from the features file (excluding the label).
  *
  * @param features_path Path to the features file.
  * @return Total number of features per node.
@@ -220,7 +221,7 @@ int parse_feature_count(std::string features_path) {
     if (comma_count == 0)
         throw std::runtime_error("Invalid format: no commas found in the line of file '" +
                                  features_path + "'");
-    return comma_count + 2;  // + 1 because we include the label as a feature
+    return comma_count + 1;  // assuming one comma after every feature except the last
 }
 
 /**
@@ -412,7 +413,7 @@ void Graph<T>::print_features() const {
 
     for (int node = 0; node < num_nodes; node++) {
         std::cout << node << '\t';
-        for (int i = 0; i < num_features - 2; i++) {
+        for (int i = 0; i < num_features - 1; i++) {
             if (missing[node][i]) {
                 std::cout << "\'#\'" << ", ";
             } else {
@@ -420,17 +421,13 @@ void Graph<T>::print_features() const {
             }
         }
 
-        if (missing[node][num_features - 2]) {  // last feature
+        if (missing[node][num_features - 1]) {  // last feature
             std::cout << "\'#\'" << '\t';
         } else {
-            std::cout << features[node][num_features - 2] << '\t';
+            std::cout << features[node][num_features - 1] << '\t';
         }
 
-        if (missing[node][num_features - 1]) {  // label
-            std::cout << "\'#\'" << '\n';
-        } else {
-            std::cout << features[node][num_features - 1] << '\n';
-        }
+        std::cout << labels[node] << '\n';  // label
     }
 }
 
@@ -449,6 +446,7 @@ void Graph<bool>::read_features(std::string features_path) {
             throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
     }
 
+    labels = std::vector<int>(num_nodes);
     features = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -465,15 +463,21 @@ void Graph<bool>::read_features(std::string features_path) {
         ptr = endptr;
 
         // Parse features
-        for (int i = 0; i < num_features - 1; i++) {
+        for (int i = 0; i < num_features; i++) {
             u_long value = std::strtoul(ptr, &endptr, 10);
             if (ptr == endptr) {  // found '#'
                 missing[node][i] = true;
                 endptr += 3;              // advance three characters
             } else if (*endptr == '.') {  // found value with comma
                 features[node][i] = value;
-                strcspn(endptr, " ");  // skip decimal places
-            } else {                   // found value without comma
+
+                // skip decimal places
+                if (i != num_features - 1) {
+                    endptr += strcspn(endptr, ",");
+                } else {
+                    endptr += strcspn(endptr, "\t");
+                }
+            } else {  // found value without comma
                 features[node][i] = value;
             }
             ptr = endptr + 2;  // skip comma and space
@@ -481,13 +485,7 @@ void Graph<bool>::read_features(std::string features_path) {
 
         // Parse label
         --ptr;  // because last feature and label are only separated by '\t'
-        int label_idx = num_features - 1;
-        int label_value = std::strtol(ptr, &endptr, 10);
-        if (ptr == endptr) {
-            missing[node][label_idx] = true;
-        } else {
-            features[node][label_idx] = label_value;
-        }
+        labels[node] = std::strtol(ptr, NULL, 10);
     }
     file.close();
 }
@@ -505,6 +503,7 @@ void Graph<int>::read_features(std::string features_path) {
             throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
     }
 
+    labels = std::vector<int>(num_nodes);
     features = std::vector<std::vector<int>>(num_nodes, std::vector<int>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -521,15 +520,21 @@ void Graph<int>::read_features(std::string features_path) {
         ptr = endptr;
 
         // Parse features
-        for (int i = 0; i < num_features - 1; i++) {
+        for (int i = 0; i < num_features; i++) {
             long value = std::strtol(ptr, &endptr, 10);
             if (ptr == endptr) {  // found '#'
                 missing[node][i] = true;
                 endptr += 3;              // advance three characters
             } else if (*endptr == '.') {  // found value with comma
                 features[node][i] = value;
-                strcspn(endptr, " ");  // skip decimal places
-            } else {                   // found value without comma
+
+                // skip decimal places
+                if (i != num_features - 1) {
+                    endptr += strcspn(endptr, ",");
+                } else {
+                    endptr += strcspn(endptr, "\t");
+                }
+            } else {  // found value without comma
                 features[node][i] = value;
             }
             ptr = endptr + 2;  // skip comma and space
@@ -537,13 +542,7 @@ void Graph<int>::read_features(std::string features_path) {
 
         // Parse label
         --ptr;  // because last feature and label are only separated by '\t'
-        int label_idx = num_features - 1;
-        int label_value = std::strtol(ptr, &endptr, 10);
-        if (ptr == endptr) {
-            missing[node][label_idx] = true;
-        } else {
-            features[node][label_idx] = label_value;
-        }
+        labels[node] = std::strtol(ptr, NULL, 10);
     }
     file.close();
 }
@@ -561,6 +560,7 @@ void Graph<double>::read_features(std::string features_path) {
             throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
     }
 
+    labels = std::vector<int>(num_nodes);
     features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
 
@@ -577,7 +577,7 @@ void Graph<double>::read_features(std::string features_path) {
         ptr = endptr;
 
         // Parse features
-        for (int i = 0; i < num_features - 1; i++) {
+        for (int i = 0; i < num_features; i++) {
             double value = std::strtod(ptr, &endptr);
             if (ptr == endptr) {  // found '#'
                 missing[node][i] = true;
@@ -590,13 +590,8 @@ void Graph<double>::read_features(std::string features_path) {
 
         // Parse label
         --ptr;  // because last feature and label are only separated by '\t'
-        int label_idx = num_features - 1;
-        int label_value = std::strtol(ptr, &endptr, 10);
-        if (ptr == endptr) {
-            missing[node][label_idx] = true;
-        } else {
-            features[node][label_idx] = label_value;
-        }
+        int label = std::strtol(ptr, &endptr, 10);
+        labels[node] = label;
     }
     file.close();
 }
