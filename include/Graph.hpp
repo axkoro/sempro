@@ -1,7 +1,13 @@
 #pragma once
 
+#include <algorithm>
+#include <charconv>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 class GraphException : public std::runtime_error {
@@ -9,13 +15,14 @@ class GraphException : public std::runtime_error {
     explicit GraphException(const std::string& message);
 };
 
+template <typename T>
 class Graph {
    private:
     int num_nodes = -1;
     int num_features = -1;
     std::vector<int> offsets;
     std::vector<int> edges;
-    std::vector<std::vector<double>> features;
+    std::vector<std::vector<T>> features;
     std::vector<std::vector<bool>> missing;
 
    public:
@@ -47,7 +54,7 @@ class Graph {
     int get_num_nodes() const;
     int get_num_features() const;
 
-    double get_feature(int node, int feature) const;
+    T get_feature(int node, int feature) const;
 
     /**
      * Returns a vector of feature indices that are missing for a given node.
@@ -86,7 +93,7 @@ class Graph {
 
     // Setters
 
-    void set_feature(int node, int feature, double value);
+    void set_feature(int node, int feature, T value);
     void set_missing(int node, int feature, bool value);
 
     // Queries
@@ -157,7 +164,39 @@ class Graph {
  * @return Total number of nodes.
  * @throws std::runtime_error If file errors occur or parsing fails.
  */
-int parse_node_count(std::string features_path);
+int parse_node_count(std::string features_path) {
+    std::ifstream file(features_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + features_path);
+    }
+
+    // iterate backwards to find beginning of last line
+    file.seekg(-2, file.end);  // -2 because -1 would be '\n' (see assumptions)
+    size_t pos = file.tellg();
+    while (file.get() != '\n') {
+        file.seekg(--pos);
+    }
+
+    // get node from last line
+    std::string last_line;
+    if (!std::getline(file, last_line)) {
+        throw std::runtime_error("Failed to read the last line");
+    }
+
+    std::istringstream line_stream(last_line);
+    int node;
+    if (!(line_stream >> node)) {
+        throw std::runtime_error("Failed to parse integer");
+    }
+
+    file.close();
+
+    if (node < 0) {
+        throw std::runtime_error("Invalid node value");
+    }
+
+    return node + 1;  // assuming naming starts at 0
+}
 
 /**
  * @brief Parses the number of features from the features file.
@@ -166,7 +205,23 @@ int parse_node_count(std::string features_path);
  * @return Total number of features per node.
  * @throws std::runtime_error If file errors occur or parsing fails.
  */
-int parse_feature_count(std::string features_path);
+int parse_feature_count(std::string features_path) {
+    std::ifstream file(features_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + features_path);
+    }
+
+    std::string line;
+    if (!std::getline(file, line)) {
+        throw std::runtime_error("Failed to read the first line");
+    }
+
+    int comma_count = std::count(line.begin(), line.end(), ',');
+    if (comma_count == 0)
+        throw std::runtime_error("Invalid format: no commas found in the line of file '" +
+                                 features_path + "'");
+    return comma_count + 2;  // + 1 because we include the label as a feature
+}
 
 /**
  * @brief Removes duplicate integers from a vector.
@@ -174,4 +229,374 @@ int parse_feature_count(std::string features_path);
  * @param arr Input vector.
  * @return Vector with duplicates removed.
  */
-std::vector<int> remove_duplicates(const std::vector<int>& arr);
+std::vector<int> remove_duplicates(const std::vector<int>& arr) {
+    std::unordered_set<int> seen;
+    std::vector<int> result;
+
+    for (const int& num : arr) {
+        if (seen.insert(num).second) {  // Only insert if not already in set
+            result.push_back(num);
+        }
+    }
+
+    return result;
+}
+
+// Implementations (type-independent)
+
+template <typename T>
+Graph<T>::Graph() = default;
+
+template <typename T>
+Graph<T>::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
+    this->offsets = offsets;
+    this->edges = edges;
+    num_nodes = offsets.size() - 1;
+}
+
+template <typename T>
+Graph<T>::Graph(std::string edges_path, std::string features_path) {
+    num_nodes = parse_node_count(features_path);
+    num_features = parse_feature_count(features_path);
+    read_edges(edges_path);
+    read_features(features_path);
+}
+
+template <typename T>
+int Graph<T>::get_num_nodes() const {
+    return num_nodes;
+}
+
+template <typename T>
+int Graph<T>::get_num_features() const {
+    return num_features;
+}
+
+template <typename T>
+T Graph<T>::get_feature(int node, int feature) const {
+    return features[node][feature];
+}
+
+template <typename T>
+void Graph<T>::set_feature(int node, int feature, T value) {
+    features[node][feature] = value;
+}
+
+template <typename T>
+void Graph<T>::set_missing(int node, int feature, bool value) {
+    missing[node][feature] = value;
+}
+
+template <typename T>
+std::vector<int> Graph<T>::get_missing_features(int node) const {
+    std::vector<int> missing_features_list;
+    for (int feature = 0; feature < num_features; feature++) {
+        if (is_missing(node, feature)) missing_features_list.push_back(feature);
+    }
+
+    return missing_features_list;
+}
+
+template <typename T>
+std::vector<int> Graph<T>::get_neighbours(int node) const {
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+
+    std::vector<int> neighbours(offsets[node + 1] - offsets[node]);
+    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
+
+    return neighbours;
+}
+
+template <typename T>
+std::vector<int> Graph<T>::get_neighbours(int node, int depth) const {
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+
+    std::vector<int> neighbours = get_neighbours(node);  // k=1
+
+    int last_depth_start = 0;
+    int this_depth_start = neighbours.size();
+    for (int k = 2; k <= depth; k++) {
+        for (int i = last_depth_start; i < this_depth_start; i++) {
+            std::vector<int> new_neighbours = get_neighbours(neighbours[i]);
+            neighbours.insert(neighbours.end(), new_neighbours.begin(), new_neighbours.end());
+        }
+        neighbours = remove_duplicates(neighbours);
+        last_depth_start = this_depth_start;
+        this_depth_start = neighbours.size();
+    }
+
+    return neighbours;
+}
+
+template <typename T>
+int Graph<T>::get_degree(int node) const {
+    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+    return offsets[node + 1] - offsets[node];
+}
+
+template <typename T>
+bool Graph<T>::has_edge(int source, int target) const {
+    // might be optimized by checking whether source's or target's adjacency list is smaller
+    for (int i = offsets[source]; i < offsets[source + 1]; i++) {
+        if (edges[i] == target) return true;
+    }
+    return false;
+}
+
+template <typename T>
+bool Graph<T>::is_valid_node(int node) const {
+    return node >= 0 && node < num_nodes;
+}
+
+template <typename T>
+bool Graph<T>::is_missing(int node, int feature) const {
+    return missing[node][feature];
+}
+
+template <typename T>
+void Graph<T>::read_edges(std::string edges_path) {
+    if (num_nodes == -1) {
+        throw std::runtime_error("num_nodes needs to be initialised before calling read_edges");
+    }
+
+    std::ifstream file(edges_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + edges_path);
+    }
+
+    std::vector<std::vector<int>> temp_edges(num_nodes);  // temporary adjecency list
+
+    int a, b;
+    while (file >> a >> b) {
+        if (!is_valid_node(a) || !is_valid_node(b)) {
+            throw std::out_of_range("Node index out of range");
+        }
+        temp_edges[a].push_back(b);
+        temp_edges[b].push_back(a);
+    }
+
+    if (file.bad()) {
+        throw std::runtime_error("Error reading file: " + edges_path);
+    }
+
+    // Flatten to CSR
+    offsets = std::vector<int>(num_nodes + 1);
+    for (int i = 1; i < offsets.size(); i++) {
+        offsets[i] = offsets[i - 1] + temp_edges[i - 1].size();
+    }
+
+    int num_edges = offsets[offsets.size() - 1];
+    edges = std::vector<int>(num_edges);
+    for (int i = 0; i < temp_edges.size(); i++) {
+        std::copy(temp_edges[i].begin(), temp_edges[i].end(), edges.begin() + offsets[i]);
+    }
+
+    file.close();
+}
+
+template <typename T>
+void Graph<T>::print_edges() const {
+    for (int i = 0; i < num_nodes; i++) {
+        for (int j = offsets[i]; j < offsets[i + 1]; j++) {
+            int neighbour = edges[j];
+            if (neighbour <= i) {  // to only print unique edges (in descending order)
+                std::cout << i << "\t" << neighbour << "\n";
+            }
+        }
+    }
+}
+
+template <typename T>
+void Graph<T>::print_features() const {
+    std::cout << std::noboolalpha;  // bools will be printed as 1/0 instead of true/false
+
+    for (int node = 0; node < num_nodes; node++) {
+        std::cout << node << '\t';
+        for (int i = 0; i < num_features - 2; i++) {
+            if (missing[node][i]) {
+                std::cout << "\'#\'" << ", ";
+            } else {
+                std::cout << features[node][i] << ", ";
+            }
+        }
+
+        if (missing[node][num_features - 2]) {  // last feature
+            std::cout << "\'#\'" << '\t';
+        } else {
+            std::cout << features[node][num_features - 2] << '\t';
+        }
+
+        if (missing[node][num_features - 1]) {  // label
+            std::cout << "\'#\'" << '\n';
+        } else {
+            std::cout << features[node][num_features - 1] << '\n';
+        }
+    }
+}
+
+// Implementations (type-dependent)
+
+template <>
+void Graph<bool>::read_features(std::string features_path) {
+    if (num_nodes == -1) {
+        num_nodes = parse_node_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
+    }
+    if (num_features == -1) {
+        num_features = parse_feature_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
+    }
+
+    features = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
+    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
+
+    std::ifstream file(features_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
+
+    std::string line;
+    while (std::getline(file, line)) {
+        const char* ptr = line.c_str();
+        char* endptr;
+
+        // Parse node index
+        int node = std::strtol(ptr, &endptr, 10);
+        ptr = endptr;
+
+        // Parse features
+        for (int i = 0; i < num_features - 1; i++) {
+            u_long value = std::strtoul(ptr, &endptr, 10);
+            if (ptr == endptr) {  // found '#'
+                missing[node][i] = true;
+                endptr += 3;              // advance three characters
+            } else if (*endptr == '.') {  // found value with comma
+                features[node][i] = value;
+                strcspn(endptr, " ");  // skip decimal places
+            } else {                   // found value without comma
+                features[node][i] = value;
+            }
+            ptr = endptr + 2;  // skip comma and space
+        }
+
+        // Parse label
+        --ptr;  // because last feature and label are only separated by '\t'
+        int label_idx = num_features - 1;
+        int label_value = std::strtol(ptr, &endptr, 10);
+        if (ptr == endptr) {
+            missing[node][label_idx] = true;
+        } else {
+            features[node][label_idx] = label_value;
+        }
+    }
+    file.close();
+}
+
+template <>
+void Graph<int>::read_features(std::string features_path) {
+    if (num_nodes == -1) {
+        num_nodes = parse_node_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
+    }
+    if (num_features == -1) {
+        num_features = parse_feature_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
+    }
+
+    features = std::vector<std::vector<int>>(num_nodes, std::vector<int>(num_features));
+    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
+
+    std::ifstream file(features_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
+
+    std::string line;
+    while (std::getline(file, line)) {
+        const char* ptr = line.c_str();
+        char* endptr;
+
+        // Parse node index
+        int node = std::strtol(ptr, &endptr, 10);
+        ptr = endptr;
+
+        // Parse features
+        for (int i = 0; i < num_features - 1; i++) {
+            long value = std::strtol(ptr, &endptr, 10);
+            if (ptr == endptr) {  // found '#'
+                missing[node][i] = true;
+                endptr += 3;              // advance three characters
+            } else if (*endptr == '.') {  // found value with comma
+                features[node][i] = value;
+                strcspn(endptr, " ");  // skip decimal places
+            } else {                   // found value without comma
+                features[node][i] = value;
+            }
+            ptr = endptr + 2;  // skip comma and space
+        }
+
+        // Parse label
+        --ptr;  // because last feature and label are only separated by '\t'
+        int label_idx = num_features - 1;
+        int label_value = std::strtol(ptr, &endptr, 10);
+        if (ptr == endptr) {
+            missing[node][label_idx] = true;
+        } else {
+            features[node][label_idx] = label_value;
+        }
+    }
+    file.close();
+}
+
+template <>
+void Graph<double>::read_features(std::string features_path) {
+    if (num_nodes == -1) {
+        num_nodes = parse_node_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
+    }
+    if (num_features == -1) {
+        num_features = parse_feature_count(features_path);
+        if (num_nodes < 0)
+            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
+    }
+
+    features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
+    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
+
+    std::ifstream file(features_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
+
+    std::string line;
+    while (std::getline(file, line)) {
+        const char* ptr = line.c_str();
+        char* endptr;
+
+        // Parse node index
+        int node = std::strtol(ptr, &endptr, 10);
+        ptr = endptr;
+
+        // Parse features
+        for (int i = 0; i < num_features - 1; i++) {
+            double value = std::strtod(ptr, &endptr);
+            if (ptr == endptr) {  // found '#'
+                missing[node][i] = true;
+                endptr += 3;  // advance three characters
+            } else {
+                features[node][i] = value;
+            }
+            ptr = endptr + 2;  // skip comma and space
+        }
+
+        // Parse label
+        --ptr;  // because last feature and label are only separated by '\t'
+        int label_idx = num_features - 1;
+        int label_value = std::strtol(ptr, &endptr, 10);
+        if (ptr == endptr) {
+            missing[node][label_idx] = true;
+        } else {
+            features[node][label_idx] = label_value;
+        }
+    }
+    file.close();
+}
