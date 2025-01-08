@@ -2,33 +2,20 @@
 #include <pybind11/stl.h>
 
 #include "Graph.hpp"
+#include "GraphBool.hpp"
+#include "GraphDouble.hpp"
+#include "GraphInt.hpp"
 
 namespace py = pybind11;
 
 PYBIND11_MODULE(_graph, m) {
-    py::class_<Graph>(m, "Graph")
-        .def(py::init<>())  // Default constructor
-        .def(py::init<std::vector<int>&, std::vector<int>&>(), py::arg("offsets"),
-             py::arg("edges"))  // Offset-Edge constructor
-        .def(py::init<std::string, std::string>(), py::arg("edges_path"),
-             py::arg("features_path"))  // File constructor
-
-        // Getters
+    // Abstract Graph
+    py::class_<Graph, std::shared_ptr<Graph>>(m, "Graph")
+        // No constructor for abstract class
         .def("get_num_nodes", &Graph::get_num_nodes)
         .def("get_num_features", &Graph::get_num_features)
-        .def("get_feature", &Graph::get_feature, py::arg("node"), py::arg("feature"))
         .def("get_missing_features", &Graph::get_missing_features, py::arg("node"))
-
-        // Setters
-        .def("set_feature", &Graph::set_feature, py::arg("node"), py::arg("feature"),
-             py::arg("value"))
-        .def("set_missing", &Graph::set_missing, py::arg("node"), py::arg("feature"),
-             py::arg("value"))
-
-        // Queries
         .def("is_missing", &Graph::is_missing, py::arg("node"), py::arg("feature"))
-
-        // Graph operations
         .def("get_neighbours", py::overload_cast<int>(&Graph::get_neighbours, py::const_),
              py::arg("node"))
         .def("get_neighbours", py::overload_cast<int, int>(&Graph::get_neighbours, py::const_),
@@ -36,12 +23,36 @@ PYBIND11_MODULE(_graph, m) {
         .def("get_degree", &Graph::get_degree, py::arg("node"))
         .def("has_edge", &Graph::has_edge, py::arg("source"), py::arg("target"))
         .def("is_valid_node", &Graph::is_valid_node, py::arg("node"))
-
-        // File I/O
         .def("read_edges", &Graph::read_edges, py::arg("edges_path"))
-        .def("read_features", &Graph::read_features, py::arg("features_path"))
+        .def("set_missing", &Graph::set_missing, py::arg("node"), py::arg("feature"),
+             py::arg("value"))
+        .def("print_edges", &Graph::print_edges);
 
-        // Utility methods
-        .def("print_edges", &Graph::print_edges)
-        .def("print_features", &Graph::print_features);
+    // GraphInt
+    py::class_<GraphInt, Graph, std::shared_ptr<GraphInt>>(m, "GraphInt")
+        .def(py::init<std::string, std::string>(), py::arg("edges_path"), py::arg("features_path"))
+        .def("get_int_feature", &GraphInt::get_int_feature, py::arg("node"), py::arg("feature"))
+        .def("set_int_feature", &GraphInt::set_int_feature, py::arg("node"), py::arg("feature"),
+             py::arg("value"))
+        .def("read_features", &GraphInt::read_features, py::arg("features_path"))
+        .def("print_features", &GraphInt::print_features);
+
+    // GraphDouble
+    py::class_<GraphDouble, Graph, std::shared_ptr<GraphDouble>>(m, "GraphDouble")
+        .def(py::init<std::string, std::string>(), py::arg("edges_path"), py::arg("features_path"))
+        .def("get_double_feature", &GraphDouble::get_double_feature, py::arg("node"),
+             py::arg("feature"))
+        .def("set_double_feature", &GraphDouble::set_double_feature, py::arg("node"),
+             py::arg("feature"), py::arg("value"))
+        .def("read_features", &GraphDouble::read_features, py::arg("features_path"))
+        .def("print_features", &GraphDouble::print_features);
+
+    // GraphBool
+    py::class_<GraphBool, Graph, std::shared_ptr<GraphBool>>(m, "GraphBool")
+        .def(py::init<std::string, std::string>(), py::arg("edges_path"), py::arg("features_path"))
+        .def("get_bool_feature", &GraphBool::get_bool_feature, py::arg("node"), py::arg("feature"))
+        .def("set_bool_feature", &GraphBool::set_bool_feature, py::arg("node"), py::arg("feature"),
+             py::arg("value"))
+        .def("read_features", &GraphBool::read_features, py::arg("features_path"))
+        .def("print_features", &GraphBool::print_features);
 }
