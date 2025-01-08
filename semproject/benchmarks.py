@@ -61,6 +61,42 @@ def kNN_twitch_benchmark():
 
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
+def kNN_cora_full_benchmark():
+    print("Running kNN cora_full benchmark with depth 3...")
+    
+    # Create a Graph instance
+    #unzip the twitch.zip file
+    try:
+        subprocess.run(["unzip", "../data/input/cora_full.zip", "-d", "../data/input/cora_full/"], check=True)
+        print("Unzipped cora_full.zip successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while unzipping the file: {e}")
+    edges_path = "../data/input/cora_full/corafull_edges.txt"
+    features_path = "../data/input/cora_full/corafull_features.txt"
+    graph = graph_module.Graph(edges_path,features_path)
+    
+    # Create a KNNImputer instance
+    knn_imputer = strats_module.KNNImputer(graph)
+    knn_imputer.set_depth(3)
+    
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
+    
+    #delete the unzipped folder with nested folders
+    try:
+        shutil.rmtree("../data/input/cora_full/")
+        print("Deleted the unzipped folder successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
+
+    print(f"kNN cora_full benchmark completed in {end_time - start_time:.4f} seconds")
+
+
+
+
+
 def kNN_fraud_benchmark():
     print("Running kNN amazon_fraud benchmark with depth 3...")
     
@@ -97,14 +133,22 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
     parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn", "Graph"], required=True, help="The strategy to benchmark.")
-    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud"], required=False, help="The input file to use.")
-
+    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full"], required=False, help="The input file to use.")
+    
     #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
     args = parser.parse_args()
     if args.strat == "knn" and args.input == "twitch":
         kNN_twitch_benchmark()
     elif args.strat == "knn" and args.input == "amazon_fraud":
         kNN_fraud_benchmark()
+    elif args.strat == "knn" and args.input == "cora_full":
+        kNN_cora_full_benchmark()
+    elif args.strat == "louvain":
+        print("Not implemented yet. Exiting...")
+        return
+    elif args.strat == "gnn":
+        print("Not implemented yet. Exiting...")
+        return
     elif args.strat == "Graph":
         graph_benchmark()
     else:
