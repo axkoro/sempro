@@ -1,17 +1,30 @@
 import time
 import semproject.graph as graph_module
 import semproject.strats as strats_module
+import argparse
+import os
+import subprocess
 
 def graph_benchmark():
     print("Running Graph tests...")
     start_time = time.time()
     # Create a Graph instance
-    edges_path = "input/twitch/twitch_edges.txt"
-    features_path = "input/twitch/twitch_features.txt"
+    #unzip the twitch.zip file
+    try:
+        subprocess.run(["unzip", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
+        print("Unzipped twitch.zip successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while unzipping the file: {e}")
+    edges_path = "../data/input/twitch/twitch_edges.txt"
+    features_path = "../data/input/twitch/twitch_features.txt"
     graph = graph_module.Graph(edges_path,features_path)
 
     end_time = time.time()
-    
+    #delete the unzipped folder
+    os.remove("../data/input/twitch/twitch_edges.txt")
+    os.remove("../data/input/twitch/twitch_features.txt")
+    os.rmdir("../data/input/twitch/")
+
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
 def kNN_twitch_benchmark():
@@ -52,20 +65,22 @@ def kNN_fraud_benchmark():
     
     print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
 def main():
-    print("Select a benchmark to run:")
-    print("1. Graph")
-    print("2. kNN twitch")
-    print("3. kNN amazon_fraud")
+    parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
+    
+    parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn", "Graph"], required=True, help="The strategy to benchmark.")
+    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud"], required=False, help="The input file to use.")
 
-    choice = input("Enter your choice: ")
-    if choice == "1":
-        graph_benchmark()
-    elif choice == "2":
+    #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
+    args = parser.parse_args()
+    if args.strat == "knn" and args.input == "twitch":
         kNN_twitch_benchmark()
-    elif choice == "3":
+    elif args.strat == "knn" and args.input == "amazon_fraud":
         kNN_fraud_benchmark()
+    elif args.strat == "Graph":
+        graph_benchmark()
     else:
-        print("Invalid choice. Exiting...")
+        print("Invalid arguments. Exiting...")
         return
+    
 if __name__ == "__main__":
     main()
