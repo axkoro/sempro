@@ -38,6 +38,7 @@ def kNN_twitch_benchmark():
         print("Unzipped twitch.zip successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while unzipping the file: {e}")
+
     edges_path = "../data/input/twitch/twitch_edges.txt"
     features_path = "../data/input/twitch/twitch_features.txt"
     graph = graph_module.Graph(edges_path,features_path)
@@ -51,10 +52,12 @@ def kNN_twitch_benchmark():
     knn_imputer.run()
     end_time = time.time()
 
-    #delete the unzipped folder
-    os.remove("../data/input/twitch/twitch_edges.txt")
-    os.remove("../data/input/twitch/twitch_features.txt")
-    os.rmdir("../data/input/twitch/")
+    #delete the unzipped folder with nested folders
+    try:
+        shutil.rmtree("../data/input/twitch/")
+        print("Deleted the unzipped folder successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
 
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
