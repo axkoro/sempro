@@ -27,11 +27,11 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
-	# add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp)
-	# target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	# target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
-	# target_compile_options(KNNImputerTest PRIVATE -coverage)
-	# target_link_options(KNNImputerTest PRIVATE -coverage)
+	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp)
+	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_compile_options(KNNImputerTest PRIVATE -coverage)
+	target_link_options(KNNImputerTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
@@ -40,10 +40,10 @@ else() # Build Python bindings as libraries
 	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
 	
-	# pybind11_add_module(_strats src/KNNImputer.cpp src/py11_strats.cpp)
-	# target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
-	# target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	# set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
+	pybind11_add_module(_strats src/KNNImputer.cpp src/py11_strats.cpp)
+	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
+	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
 endif()
  
 set(CMAKE_CLEAN_TARGET "clean")

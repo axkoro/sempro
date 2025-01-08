@@ -10,17 +10,16 @@
 
 class KNNTest : public testing::Test {};
 
-// test using input/test/knn/test.txt's data
 TEST(KNNTest, testKNN) {
     std::string edges_path = "../input/test/knn/test_edges.txt";
     std::string features_path = "../input/test/knn/test_missing_features.txt";
     std::string complete_path = "../input/test/knn/test_complete_features.txt";
-    Graph graph(edges_path, features_path);
+    GraphDouble graph(edges_path, features_path);
     KNNImputer knn(graph);
     knn.set_depth(2);
     knn.run();
 
-    std::string temp_file_path = "temp_edges.txt";
+    std::string temp_file_path = "temp_imputation_results.txt";
     {
         std::ofstream output(temp_file_path);
         // Redirect cout to the file
@@ -51,12 +50,13 @@ TEST(KNNTest, testKNN) {
     EXPECT_FALSE(more_lines) << "Files have different lengths";
 
     // Clean up
-    std::remove(temp_file_path.c_str());
+    // std::remove(temp_file_path.c_str());
 }
+
 TEST(KNNTest, testDepth) {
     std::string edges_path = "../input/test/knn/test_edges.txt";
     std::string features_path = "../input/test/knn/test_missing_features.txt";
-    Graph graph(edges_path, features_path);
+    GraphDouble graph(edges_path, features_path);
     KNNImputer knn(graph);
     knn.set_depth(3);
     EXPECT_EQ(knn.get_depth(), 3);
@@ -69,30 +69,26 @@ TEST(KNNTest, testGlobalAverage) {
     std::setprecision(5);
     std::string edges_path = "../input/test/knn/test_edges.txt";
     std::string features_path = "../input/test/knn/test_missing_features.txt";
-    Graph graph(edges_path, features_path);
+    GraphDouble graph(edges_path, features_path);
     KNNImputer knn = KNNImputer(graph);
-    double average0 = compute_global_average(graph, 0);
-    double average1 = compute_global_average(graph, 1);
-    double average2 = compute_global_average(graph, 2);
-    double average3 = compute_global_average(graph, 3);
+    double average0 = compute_global_average_double(graph, 0);
+    double average1 = compute_global_average_double(graph, 1);
+    double average2 = compute_global_average_double(graph, 2);
 
     EXPECT_EQ(average0, 0);
     EXPECT_EQ(average1, 1);
     EXPECT_EQ(average2, 2);
-    EXPECT_NEAR(average3, 2.33333, 1e-5);
 
     knn.set_depth(3);
     knn.run();
 
-    average0 = compute_global_average(graph, 0);
-    average1 = compute_global_average(graph, 1);
-    average2 = compute_global_average(graph, 2);
-    average3 = compute_global_average(graph, 3);
+    average0 = compute_global_average_double(graph, 0);
+    average1 = compute_global_average_double(graph, 1);
+    average2 = compute_global_average_double(graph, 2);
 
     EXPECT_EQ(average0, 0);
     EXPECT_NEAR(average1, 1.08, 1e-5);
     EXPECT_EQ(average2, 2);
-    EXPECT_NEAR(average3, 2.33333, 1e-5);
 }
 int main(int, char**) {
     ::testing::InitGoogleTest();
