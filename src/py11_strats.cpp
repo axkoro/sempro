@@ -5,7 +5,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(_imputer, m) {
+PYBIND11_MODULE(_strats, m) {
     py::class_<Imputer, std::shared_ptr<Imputer>>(m, "Imputer").def("run", &Imputer::run);
 
     py::class_<KNNImputer, Imputer, std::shared_ptr<KNNImputer>>(m, "KNNImputer")
