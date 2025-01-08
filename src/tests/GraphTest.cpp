@@ -100,7 +100,8 @@ TEST(GraphTest, read_bool_features) {
         for (int feature = 0; feature < graph.get_num_features(); feature++) {
             // TODO: also check if the correct features are missing
             if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
+                EXPECT_EQ(std::get<bool>(graph.get_feature(node, feature)),
+                          actual_features[node][feature]);
             }
         }
     }
@@ -124,7 +125,8 @@ TEST(GraphTest, read_int_features) {
     for (int node = 0; node < graph.get_num_nodes(); node++) {
         for (int feature = 0; feature < graph.get_num_features(); feature++) {
             if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
+                EXPECT_EQ(std::get<int>(graph.get_feature(node, feature)),
+                          actual_features[node][feature]);
             }
         }
     }
@@ -148,7 +150,8 @@ TEST(GraphTest, read_double_features) {
     for (int node = 0; node < graph.get_num_nodes(); node++) {
         for (int feature = 0; feature < graph.get_num_features(); feature++) {
             if (!graph.is_missing(node, feature)) {
-                EXPECT_DOUBLE_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
+                EXPECT_DOUBLE_EQ(std::get<double>(graph.get_feature(node, feature)),
+                                 actual_features[node][feature]);
             }
         }
     }
