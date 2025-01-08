@@ -10,22 +10,18 @@ GraphDouble::GraphDouble(std::string edges_path, std::string features_path) {
     read_features(features_path);
 }
 
-Graph::Feature GraphDouble::get_feature(int node, int feature) const {
+double GraphDouble::get_double_feature(int node, int feature) const {
     if (node < 0 || node >= num_nodes) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
 
     return features[node][feature];
 }
 
-void GraphDouble::set_feature(int node, int feature, Feature value) {
+void GraphDouble::set_double_feature(int node, int feature, double value) {
     if (node < 0 || node >= num_nodes) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
 
-    if (auto bool_ptr = std::get_if<double>(&value)) {
-        features[node][feature] = *bool_ptr;
-    } else {
-        throw GraphException("GraphDouble only supports double features.");
-    }
+    features[node][feature] = value;
 }
 
 void GraphDouble::read_features(std::string features_path) {

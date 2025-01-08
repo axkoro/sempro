@@ -9,8 +9,6 @@
 
 GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
 
-Graph::Graph() = default;
-
 int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }

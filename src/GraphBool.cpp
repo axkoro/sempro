@@ -11,22 +11,18 @@ GraphBool::GraphBool(std::string edges_path, std::string features_path) {
     read_features(features_path);
 }
 
-Graph::Feature GraphBool::get_feature(int node, int feature) const {
+bool GraphBool::get_bool_feature(int node, int feature) const {
     if (node < 0 || node >= num_nodes) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
 
     return features[node][feature];
 }
 
-void GraphBool::set_feature(int node, int feature, Feature value) {
+void GraphBool::set_bool_feature(int node, int feature, bool value) {
     if (node < 0 || node >= num_nodes) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
 
-    if (auto bool_ptr = std::get_if<bool>(&value)) {
-        features[node][feature] = *bool_ptr;
-    } else {
-        throw GraphException("GraphBool only supports bool features.");
-    }
+    features[node][feature] = value;
 }
 
 void GraphBool::read_features(std::string features_path) {

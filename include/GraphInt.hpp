@@ -7,8 +7,6 @@ class GraphInt : public Graph {
     std::vector<std::vector<int>> features;
 
    public:
-    using Graph::Graph;  // inherit constructors
-
     /**
      * @brief Constructs a graph by reading edge and feature files.
      *
@@ -17,8 +15,8 @@ class GraphInt : public Graph {
      */
     GraphInt(std::string edges_path, std::string features_path);
 
-    Feature get_feature(int node, int feature) const override;
-    void set_feature(int node, int feature, Feature value) override;
+    int get_int_feature(int node, int feature) const override;
+    void set_int_feature(int node, int feature, int value) override;
     void read_features(std::string features_path) override;
     void print_features() const override;
 };

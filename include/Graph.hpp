@@ -21,21 +21,35 @@ class Graph {
     // std::vector<std::vector<Feature>> features;
 
    public:
-    using Feature = std::variant<bool, int, double>;
-
     // Constructors
 
     /**
      * @brief Default constructor. Creates an empty graph.
      */
-    Graph();
+    Graph() = default;
+
+    /**
+     * @brief Constructs a graph by reading edge and feature files.
+     *
+     * @param edges_path Path to the file containing edges.
+     * @param features_path Path to the file containing features.
+     */
+    Graph(std::string edges_path, std::string features_path) {};
 
     // Getters
 
     int get_num_nodes() const;
     int get_num_features() const;
 
-    virtual Feature get_feature(int node, int feature) const = 0;
+    virtual bool get_bool_feature(int node, int feature) const {
+        throw GraphException("Can't get bool feature (Graph has other type)");
+    };
+    virtual double get_double_feature(int node, int feature) const {
+        throw GraphException("Can't get double feature (Graph has other type)");
+    };
+    virtual int get_int_feature(int node, int feature) const {
+        throw GraphException("Can't get int feature (Graph has other type)");
+    };
 
     /**
      * Returns a vector of feature indices that are missing for a given node.
@@ -74,7 +88,16 @@ class Graph {
 
     // Setters
 
-    virtual void set_feature(int node, int feature, Feature value) = 0;
+    virtual void set_bool_feature(int node, int feature, bool value) {
+        throw GraphException("Can't set bool feature (Graph has other type)");
+    };
+    virtual void set_double_feature(int node, int feature, double value) {
+        throw GraphException("Can't set double feature (Graph has other type)");
+    };
+    virtual void set_int_feature(int node, int feature, int value) {
+        throw GraphException("Can't get int feature (Graph has other type)");
+    };
+
     void set_missing(int node, int feature, bool value);
 
     // Queries
