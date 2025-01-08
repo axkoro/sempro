@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <variant>
 #include <vector>
 
 class GraphException : public std::runtime_error {
@@ -95,7 +94,7 @@ class Graph {
         throw GraphException("Can't set double feature (Graph has other type)");
     };
     virtual void set_int_feature(int node, int feature, int value) {
-        throw GraphException("Can't get int feature (Graph has other type)");
+        throw GraphException("Can't set int feature (Graph has other type)");
     };
 
     void set_missing(int node, int feature, bool value);
@@ -159,10 +158,30 @@ class Graph {
     virtual void print_features() const = 0;
 };
 
-// Utility Functions
+// Utility functions
 
+/**
+ * @brief Parses the number of nodes from the features file.
+ *
+ * @param features_path Path to the features file.
+ * @return Total number of nodes.
+ * @throws std::runtime_error If file errors occur or parsing fails.
+ */
 int parse_node_count(std::string features_path);
 
+/**
+ * @brief Parses the number of features from the features file.
+ *
+ * @param features_path Path to the features file.
+ * @return Total number of features per node.
+ * @throws std::runtime_error If file errors occur or parsing fails.
+ */
 int parse_feature_count(std::string features_path);
 
+/**
+ * @brief Removes duplicate integers from a vector.
+ *
+ * @param arr Input vector.
+ * @return Vector with duplicates removed.
+ */
 std::vector<int> remove_duplicates(const std::vector<int>& arr);

@@ -167,7 +167,7 @@ double compute_global_average_double(Graph& graph, int feature) {
     return (count > 0) ? (sum / count) : 0;
 }
 
-double compute_global_average_bool(Graph& graph, int feature) {  // TODO: round
+double compute_global_average_bool(Graph& graph, int feature) {
     double sum = 0;
     int count = 0;
     for (int node = 0; node < graph.get_num_nodes(); node++) {
@@ -180,7 +180,7 @@ double compute_global_average_bool(Graph& graph, int feature) {  // TODO: round
     return (count > 0) ? (to_bool(sum / count)) : 0;
 }
 
-double compute_global_average_int(Graph& graph, int feature) {  // TODO: round
+double compute_global_average_int(Graph& graph, int feature) {
     double sum = 0;
     int count = 0;
     for (int node = 0; node < graph.get_num_nodes(); node++) {
