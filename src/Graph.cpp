@@ -7,20 +7,9 @@
 #include <sstream>
 #include <unordered_set>
 
+GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
+
 Graph::Graph() = default;
-
-Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
-    this->offsets = offsets;
-    this->edges = edges;
-    num_nodes = offsets.size() - 1;
-}
-
-Graph::Graph(std::string edges_path, std::string features_path) {
-    num_nodes = parse_node_count(features_path);
-    num_features = parse_feature_count(features_path);
-    read_edges(edges_path);
-    read_features(features_path);
-}
 
 int Graph::get_num_nodes() const { return num_nodes; }
 

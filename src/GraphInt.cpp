@@ -1,6 +1,15 @@
 #include "GraphInt.hpp"
 
 #include <cstring>
+#include <fstream>
+#include <iostream>
+
+GraphInt::GraphInt(std::string edges_path, std::string features_path) {
+    num_nodes = parse_node_count(features_path);
+    num_features = parse_feature_count(features_path);
+    read_edges(edges_path);
+    read_features(features_path);
+}
 
 Graph::Feature GraphInt::get_feature(int node, int feature) const {
     if (node < 0 || node >= num_nodes) throw GraphException("Invalid node index.");

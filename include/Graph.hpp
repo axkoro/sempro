@@ -30,22 +30,6 @@ class Graph {
      */
     Graph();
 
-    /**
-     * @brief Constructs a graph from sparse matrix representation.
-     *
-     * @param offsets Array containing offsets into edges array for each node
-     * @param edges Array containing target node IDs for edges
-     */
-    Graph(std::vector<int>& offsets, std::vector<int>& edges);  // for testing
-
-    /**
-     * @brief Constructs a graph by reading edge and feature files.
-     *
-     * @param edges_path Path to the file containing edges.
-     * @param features_path Path to the file containing features.
-     */
-    Graph(std::string edges_path, std::string features_path);
-
     // Getters
 
     int get_num_nodes() const;

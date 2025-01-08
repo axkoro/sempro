@@ -9,6 +9,14 @@ class GraphDouble : public Graph {
    public:
     using Graph::Graph;  // inherit constructors
 
+    /**
+     * @brief Constructs a graph by reading edge and feature files.
+     *
+     * @param edges_path Path to the file containing edges.
+     * @param features_path Path to the file containing features.
+     */
+    GraphDouble(std::string edges_path, std::string features_path);
+
     Feature get_feature(int node, int feature) const override;
     void set_feature(int node, int feature, Feature value) override;
     void read_features(std::string features_path) override;
