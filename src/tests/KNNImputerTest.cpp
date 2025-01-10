@@ -12,9 +12,9 @@ class KNNTest : public testing::Test {};
 
 // test using input/test/test.txt's data
 TEST(KNNTest, testKNN) {
-    std::string edges_path = "../input/test/test_edges.txt";
-    std::string features_path = "../input/test/test_missing_features.txt";
-    std::string complete_path = "../input/test/test_complete_features.txt";
+    std::string edges_path = "../data/test/knn/test_edges.txt";
+    std::string features_path = "../data/test/knn/test_missing_features.txt";
+    std::string complete_path = "../data/test/knn/test_complete_features.txt";
     Graph graph(edges_path, features_path);
     KNNImputer knn(graph);
     knn.set_depth(2);
@@ -54,8 +54,8 @@ TEST(KNNTest, testKNN) {
     std::remove(temp_file_path.c_str());
 }
 TEST(KNNTest, testDepth) {
-    std::string edges_path = "../input/test/test_edges.txt";
-    std::string features_path = "../input/test/test_missing_features.txt";
+    std::string edges_path = "../data/test/knn/test_edges.txt";
+    std::string features_path = "../data/test/knn/test_missing_features.txt";
     Graph graph(edges_path, features_path);
     KNNImputer knn(graph);
     knn.set_depth(3);
@@ -67,8 +67,8 @@ TEST(KNNTest, testDepth) {
 }
 TEST(KNNTest, testGlobalAverage) {
     std::setprecision(5);
-    std::string edges_path = "../input/test/test_edges.txt";
-    std::string features_path = "../input/test/test_missing_features.txt";
+    std::string edges_path = "../data/test/knn/test_edges.txt";
+    std::string features_path = "../data/test/knn/test_missing_features.txt";
     Graph graph(edges_path, features_path);
     KNNImputer knn = KNNImputer(graph);
     double average0 = compute_global_average(graph, 0);
