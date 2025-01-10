@@ -47,17 +47,17 @@ def kNN_twitch_benchmark():
     knn_imputer = strats_module.KNNImputer(graph)
     knn_imputer.set_depth(3)
     
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-
-    #delete the unzipped folder with nested folders
+     #delete the unzipped folder with nested folders
     try:
         shutil.rmtree("../data/input/twitch/")
         print("Deleted the unzipped folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
+        
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
 
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
@@ -78,24 +78,21 @@ def kNN_cora_full_benchmark():
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
     knn_imputer.set_depth(3)
-    
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
-    #delete the unzipped folder with nested folders
+
+     #delete the unzipped folder with nested folders
     try:
         shutil.rmtree("../data/input/cora_full/")
         print("Deleted the unzipped folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
 
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
+    
+
     print(f"kNN cora_full benchmark completed in {end_time - start_time:.4f} seconds")
-
-
-
-
 
 def kNN_fraud_benchmark():
     print("Running kNN amazon_fraud benchmark with depth 3...")
@@ -115,17 +112,17 @@ def kNN_fraud_benchmark():
     knn_imputer = strats_module.KNNImputer(graph)
     knn_imputer.set_depth(3)
     
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
     #delete the unzipped folder with nested folders
     try:
         shutil.rmtree("../data/input/amazon_fraud/")
         print("Deleted the unzipped folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
+
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
 
     print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
     
