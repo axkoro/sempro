@@ -5,6 +5,7 @@ import argparse
 import os
 import subprocess
 import shutil
+import contextlib
 
 def graph_benchmark():
     print("Running Graph tests...")
@@ -101,7 +102,7 @@ def kNN_twitch_benchmark():
     # Create a Graph instance
     #unzip the twitch.zip file
     try:
-        subprocess.run(["unzip", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
+        subprocess.run(["unzip","-q", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
         print("Unzipped twitch.zip successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while unzipping the file: {e}")
@@ -127,6 +128,12 @@ def kNN_twitch_benchmark():
     end_time = time.time()
     
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
+
+   # Print graph features using graph.print_features and redirect to twitch_output.txt and save in ../data/output/knn_twitch_output.txt
+    output_path = "../data/output/knn_twitch_output.txt"
+    with open(output_path, "w") as f:
+        with contextlib.redirect_stdout(f):
+            graph.print_features() 
 
 def kNN_cora_full_benchmark():
     print("Running kNN cora_full benchmark with depth 3...")
