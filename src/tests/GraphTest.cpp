@@ -23,19 +23,19 @@ TEST(GraphTest, FileNotOpenThrowsError) {
 }
 
 TEST(GraphTest, parse_node_count) {
-    std::string amazon_features = "../input/amazon/amazon_features.txt";
+    std::string amazon_features = "../data/input/unzipped/amazon_features.txt";
     EXPECT_EQ(parse_node_count(amazon_features),
               13751 + 1);  // 13751: largest node, +1: numbering begins at 0
 
-    std::string genius_features = "../input/genius/genius_features.txt";
+    std::string genius_features = "../data/input/unzipped/genius_features.txt";
     EXPECT_EQ(parse_node_count(genius_features), 421960 + 1);
 }
 
 TEST(GraphTest, parse_feature_count) {
-    std::string github_features = "../input/github/github_features.txt";
+    std::string github_features = "../data/input/unzipped/github_features.txt";
     EXPECT_EQ(parse_feature_count(github_features), 128 + 1);
 
-    std::string amazon_fraud_features = "../input/amazon_fraud/amazon_fraud_features.txt";
+    std::string amazon_fraud_features = "../data/input/unzipped/amazon_fraud_features.txt";
     EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25 + 1);
 }
 
