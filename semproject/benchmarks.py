@@ -130,7 +130,7 @@ def kNN_twitch_benchmark():
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
    # Print graph features using graph.print_features and redirect to twitch_output.txt and save in ../data/output/knn_twitch_output.txt
-    output_path = "../data/output/knn_twitch_output.txt"
+    output_path = "../data/output/knn/knn_twitch_output.txt"
     with open(output_path, "w") as f:
         with contextlib.redirect_stdout(f):
             graph.print_features() 
