@@ -5,6 +5,7 @@ import argparse
 import os
 import subprocess
 import shutil
+
 def graph_benchmark():
     print("Running Graph tests...")
     start_time = time.time()
@@ -28,6 +29,72 @@ def graph_benchmark():
 
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
+def kNN_amazon_benchmark():
+    print("Running kNN amazon benchmark with depth 3...")
+
+ # Create a Graph instance
+    #unzip the cornell.zip file
+    try:
+        subprocess.run(["unzip", "../data/input/Amazon.zip", "-d", "../data/input/amazon/"], check=True)
+        print("Unzipped amazon.zip successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while unzipping the file: {e}")
+
+    edges_path = "../data/input/amazon/amazon_edges.txt"
+    features_path = "../data/input/amazon/amazon_features.txt"
+    graph = graph_module.Graph(edges_path,features_path)
+
+    # Create a KNNImputer instance
+    knn_imputer = strats_module.KNNImputer(graph)
+    knn_imputer.set_depth(3)
+
+    #delete the unzipped folder with nested folders
+    try:
+        shutil.rmtree("../data/input/amazon/")
+        print("Deleted the unzipped folder successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
+
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
+    
+    print(f"kNN amazon benchmark completed in {end_time - start_time:.4f} seconds")
+
+def kNN_genius_benchmark():
+    print("Running kNN genius benchmark with depth 3...")
+
+    # Create a Graph instance
+    #unzip the cornell.zip file
+    try:
+        subprocess.run(["unzip", "../data/input/genius.zip", "-d", "../data/input/genius/"], check=True)
+        print("Unzipped genius.zip successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while unzipping the file: {e}")
+
+    edges_path = "../data/input/genius/genius_edges.txt"
+    features_path = "../data/input/genius/genius_features.txt"
+    graph = graph_module.Graph(edges_path,features_path)
+
+    # Create a KNNImputer instance
+    knn_imputer = strats_module.KNNImputer(graph)
+    knn_imputer.set_depth(3)
+
+    #delete the unzipped folder with nested folders
+    try:
+        shutil.rmtree("../data/input/genius/")
+        print("Deleted the unzipped folder successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
+
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
+    
+    print(f"kNN genius benchmark completed in {end_time - start_time:.4f} seconds")
+    
 def kNN_twitch_benchmark():
     print("Running kNN twitch benchmark with depth 3...")
     
@@ -47,18 +114,18 @@ def kNN_twitch_benchmark():
     knn_imputer = strats_module.KNNImputer(graph)
     knn_imputer.set_depth(3)
     
-     #delete the unzipped folder with nested folders
+    #delete the unzipped folder with nested folders
     try:
         shutil.rmtree("../data/input/twitch/")
         print("Deleted the unzipped folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
-        
+
     # Run the KNNImputer
     start_time = time.time()
     knn_imputer.run()
     end_time = time.time()
-
+    
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
 def kNN_cora_full_benchmark():
@@ -130,7 +197,7 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
     parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn", "Graph"], required=True, help="The strategy to benchmark.")
-    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full"], required=False, help="The input file to use.")
+    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full","genius","amazon"], required=False, help="The input file to use.")
     
     #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
     args = parser.parse_args()
@@ -140,6 +207,10 @@ def main():
         kNN_fraud_benchmark()
     elif args.strat == "knn" and args.input == "cora_full":
         kNN_cora_full_benchmark()
+    elif args.strat == "knn" and args.input == "genius":
+        kNN_genius_benchmark()
+    elif args.strat == "knn" and args.input == "amazon":
+        kNN_amazon_benchmark()
     elif args.strat == "louvain":
         print("Not implemented yet. Exiting...")
         return
