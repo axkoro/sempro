@@ -118,7 +118,7 @@ TEST(GraphTest, print_features) {
     std::streambuf* oldCoutBuffer = std::cout.rdbuf(output.rdbuf());
 
     // Call the function to capture its output
-    graph.print_features();
+    graph.print_features("");
 
     // Restore std::cout
     std::cout.rdbuf(oldCoutBuffer);

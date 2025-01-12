@@ -21,14 +21,7 @@ TEST(KNNTest, testKNN) {
     knn.run();
 
     std::string temp_file_path = "temp_edges.txt";
-    {
-        std::ofstream output(temp_file_path);
-        // Redirect cout to the file
-        std::streambuf* old = std::cout.rdbuf(output.rdbuf());
-        graph.print_features();
-        std::cout.rdbuf(old);
-        output.close();
-    }
+    graph.print_features(temp_file_path);
 
     // Compare files line by line
     std::ifstream file1(complete_path);
