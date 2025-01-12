@@ -5,7 +5,6 @@ import argparse
 import os
 import subprocess
 import shutil
-import contextlib
 
 def graph_benchmark():
     print("Running Graph tests...")
@@ -130,10 +129,8 @@ def kNN_twitch_benchmark():
     print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
 
    # Print graph features using graph.print_features and redirect to twitch_output.txt and save in ../data/output/knn_twitch_output.txt
-    output_path = "../data/output/knn/knn_twitch_output.txt"
-    with open(output_path, "w") as f:
-        with contextlib.redirect_stdout(f):
-            graph.print_features() 
+    output_path = "../data/output/knn/twitch_features.txt" 
+    graph.print_features(output_path)
 
 def kNN_cora_full_benchmark():
     print("Running kNN cora_full benchmark with depth 3...")
