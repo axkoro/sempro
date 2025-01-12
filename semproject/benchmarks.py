@@ -94,6 +94,9 @@ def kNN_genius_benchmark():
     end_time = time.time()
     
     print(f"kNN genius benchmark completed in {end_time - start_time:.4f} seconds")
+
+    output_path = "../data/output/knn/genius_features.txt" 
+    graph.print_features(output_path)
     
 def kNN_twitch_benchmark():
     print("Running kNN twitch benchmark with depth 3...")
