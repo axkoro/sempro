@@ -2,23 +2,21 @@ import subprocess
 import os
 
 def main():
-    twitch_input = "../data/input/twitch.zip"
-    twitch_output ="../data/output/twitch.zip"
-    twitch_reference = "twitch_output.txt"
+    twitch_output_path ="../data/output/knn/twitch.zip"
     print("Enter Evaluation parameters")
-#run benchmarks.py as subprocess
-    env = os.environ.copy()
-    env["PYTHONUNBUFFERED"] = "1"
+   
+    #run the benchmarks.py file with the input twitch
+    subprocess.run(["python", "benchmarks.py", "--strat","knn","--input","twitch"], check=True,text=True)
+   
+    # Zip the output .txt file into a twitch.zip file
+    try:
+        subprocess.run(["zip","-j", twitch_output_path, "../data/output/knn/twitch_features.txt"], check=True)
+        print("Zipped twitch output successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while zipping the file: {e}")
+     # Run the measure-quality.py script and print output in real-time
+    result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i twitch -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
+    print(result.stdout)
 
-    process = subprocess.Popen("python benchmarks.py --strat knn --input twitch",stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1,shell=True,universal_newlines=True,env=env)
-    for line in process.stdout:
-        print(line, end='',flush=True)
-    process.wait()
-
-        # Check for errors
-    if process.returncode != 0:
-        print(f"An error occurred while running the subprocess: {process.stderr.read()}")
-
-    
 if __name__ == "__main__":
     main()
