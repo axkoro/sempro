@@ -4,7 +4,8 @@
 ### Custom ###
 # Download from evaluation
 semproject/download/
-
+# data Output from benchmark
+data/output/knn/*
 # MacOS
 .DS_store
 
