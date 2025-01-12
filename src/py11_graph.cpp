@@ -43,5 +43,5 @@ PYBIND11_MODULE(_graph, m) {
 
         // Utility methods
         .def("print_edges", &Graph::print_edges)
-        .def("print_features", &Graph::print_features);
+        .def("print_features", &Graph::print_features), py::arg("output_path");
 }

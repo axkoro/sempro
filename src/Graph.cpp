@@ -190,27 +190,41 @@ void Graph::print_edges() const {
     }
 }
 
-void Graph::print_features() const {
+void Graph::print_features(std::string output_path = "") const {
+    std::ostream* out = &std::cout;
+    std::ofstream file;
+
+    if (!output_path.empty()) {
+        file.open(output_path);
+        if (!file.is_open()) {
+            std::cerr << "Could not open file: " + output_path << std::endl;
+            return;
+        }
+        out = &file;
+    }
+
     for (int node = 0; node < num_nodes; node++) {
-        std::cout << node << '\t';
+        (*out) << node << '\t';
         for (int i = 0; i < num_features - 2; i++) {
             if (missing[node][i]) {
-                std::cout << "\'#\'" << ", ";
+                (*out) << "\'#\'" << ", ";
             } else {
-                std::cout << features[node][i] << ", ";
+                (*out) << features[node][i] << ", ";
             }
         }
 
-        if (missing[node][num_features - 2]) {  // last feature
-            std::cout << "\'#\'" << '\t';
+        // Last feature
+        if (missing[node][num_features - 2]) {
+            (*out) << "\'#\'" << '\t';
         } else {
-            std::cout << features[node][num_features - 2] << '\t';
+            (*out) << features[node][num_features - 2] << '\t';
         }
 
-        if (missing[node][num_features - 1]) {  // label
-            std::cout << "\'#\'" << '\n';
+        // Label
+        if (missing[node][num_features - 1]) {
+            (*out) << "\'#\'" << '\n';
         } else {
-            std::cout << features[node][num_features - 1] << '\n';
+            (*out) << features[node][num_features - 1] << '\n';
         }
     }
 }

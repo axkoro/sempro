@@ -143,9 +143,9 @@ class Graph {
     void print_edges() const;
 
     /**
-     * @brief Prints features of all nodes to the console.
+     * @brief Prints features of all nodes to the console or to a file 
      */
-    void print_features() const;
+    void print_features(std::string output_path) const;
 };
 
 // Utility functions
