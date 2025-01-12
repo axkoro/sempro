@@ -46,7 +46,24 @@ def main():
        
     if input_input == "2":
         print("You have chosen to use the amazon input file.")
-        return
+        
+        #if amazon.zip exists in ../data/output/knn dont run benchmark
+        run_bench = True
+        if os.path.exists("../data/output/knn/amazon.zip"):
+            run_bench = False
+        if run_bench:
+        #run the benchmarks.py file with the input twitch
+            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "amazon"], check=True,text=True)
+             # Zip the output .txt file into a twitch.zip file
+            try:
+                subprocess.run(["zip","-j", "../data/output/knn/amazon.zip", "../data/output/knn/amazon_features.txt"], check=True)
+                print("Zipped amazon output successfully")
+            except subprocess.CalledProcessError as e:
+                print(f"An error occurred while zipping the file: {e}")
+
+        # Run the measure-quality.py script and print output in real-time
+        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i amazon -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
+        print(result.stdout)
     if input_input == "3":
         print("You have chosen to use the cora input file.")
         return

@@ -62,6 +62,9 @@ def kNN_amazon_benchmark():
     
     print(f"kNN amazon benchmark completed in {end_time - start_time:.4f} seconds")
 
+    output_path = "../data/output/knn/amazon_features.txt" 
+    graph.print_features(output_path)
+
 def kNN_genius_benchmark():
     print("Running kNN genius benchmark with depth 3...")
 
@@ -97,7 +100,7 @@ def kNN_genius_benchmark():
 
     output_path = "../data/output/knn/genius_features.txt" 
     graph.print_features(output_path)
-    
+
 def kNN_twitch_benchmark():
     print("Running kNN twitch benchmark with depth 3...")
     
