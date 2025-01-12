@@ -2,6 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,python,cmake
 
 ### Custom ###
+# Download from evaluation
+semproject/download/
 
 # MacOS
 .DS_store
