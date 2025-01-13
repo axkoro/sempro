@@ -4,37 +4,36 @@
 #include "Graph.hpp"
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <numeric>
 
 class LouvainClustering {
 public:
-    // Constructor: Takes a reference to the graph object
-    LouvainClustering(Graph& graph);
+    // Constructor
+    LouvainClustering(const Graph& graph);
 
-    // Main method to execute Louvain clustering
-    std::vector<int> run();
+    // Method to execute Louvain Clustering
+    std::vector<int> execute(double resolution = 1.0, int max_iter = 100);
 
 private:
-    Graph& graph;                          // Reference to the input graph
-    std::vector<int> communities;          // Stores the community assignment of each node
-    std::unordered_map<int, double> community_totals; // Total degree of each community
+    // Reference to the input graph
+    const Graph& graph;
 
-    // Initialize each node to its own community
-    void initialize_communities();
+    // Current modularity
+    double current_modularity;
 
-    // Phase 1: Optimize modularity by moving nodes between communities
-    bool phase_one();
+    // Node to community mapping
+    std::vector<int> node_to_community;
 
-    // Phase 2: Aggregate communities into a new graph
-    void phase_two();
+    // Community to total degree mapping
+    std::unordered_map<int, int> community_totals;
 
-    // Calculate the modularity gain of moving a node to a different community
-    double modularity_gain(int node, int community, double edge_weight);
-
-    // Update community assignments and totals
-    void update_community(int node, int old_community, int new_community);
-
-    // Aggregate the graph by merging nodes in the same community
-    void aggregate_communities(std::vector<int>& new_offsets, std::vector<int>& new_edges);
+    // Helper functions
+    void initialize();
+    double calculate_modularity(const std::vector<int>& community_assignment) const;
+    void move_node_to_best_community(int node);
+    void rebuild_graph();
 };
 
 #endif // LOUVAIN_CLUSTERING_HPP
