@@ -22,7 +22,7 @@ def main():
         return
 
     #ask which input file to use
-    print("Which input file would you like to use ?\n 1.twitch \n 2.amazon \n 3.cora \n 4.genius \n 5.amazon_fraud \n 6. github") 
+    print("Which input file would you like to use ?\n 1.twitch \n 2.amazon \n 3.cora \n 4.genius \n 5.amazon_fraud \n 6.github") 
     input_input = input("Enter the number of the input file you would like to use: ")
     if input_input == "1":
         print("You have chosen to use the twitch input file.")
@@ -66,6 +66,7 @@ def main():
         print(result.stdout)
     if input_input == "3":
         print("You have chosen to use the cora input file.")
+        print("Cora is still in development.")
         return
     if input_input == "4":
         print("You have chosen to use the genius input file.")
@@ -90,10 +91,12 @@ def main():
 
     if input_input == "5":
         print("You have chosen to use the amazon_fraud input file.")
+        print("Amazon_fraud evaluation is not working yet.")
         return
     if input_input == "6":
         print("You have chosen to use the github input file.")
-        
+        print("Github is still in development.")
+        return
         #if github.zip exists in ../data/output/knn dont run benchmark
         run_bench = True
         if os.path.exists("../data/output/knn/github.zip"):
