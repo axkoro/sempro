@@ -138,6 +138,43 @@ def kNN_twitch_benchmark():
     output_path = "../data/output/knn/twitch_features.txt" 
     graph.print_features(output_path)
 
+def kNN_github_benchmark():
+    print("Running kNN github benchmark with depth 3...")
+    
+    # Create a Graph instance
+    #unzip the github.zip file
+    try:
+        subprocess.run(["unzip","-q", "../data/input/GitHub.zip", "-d", "../data/input/github/"], check=True)
+        print("Unzipped twitch.zip successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while unzipping the file: {e}")
+
+    edges_path = "../data/input/github/github_edges.txt"
+    features_path = "../data/input/github/github_features.txt"
+    graph = graph_module.Graph(edges_path,features_path)
+    
+    # Create a KNNImputer instance
+    knn_imputer = strats_module.KNNImputer(graph)
+    knn_imputer.set_depth(3)
+    
+    #delete the unzipped folder with nested folders
+    try:
+        shutil.rmtree("../data/input/github/")
+        print("Deleted the unzipped folder successfully.")
+    except Exception as e:
+        print(f"An error occurred while deleting the folder: {e}")
+
+    # Run the KNNImputer
+    start_time = time.time()
+    knn_imputer.run()
+    end_time = time.time()
+    
+    print(f"kNN github benchmark completed in {end_time - start_time:.4f} seconds")
+
+   # Print graph features using graph.print_features and redirect to github_output.txt and save in ../data/output/knn_twitch_output.txt
+    output_path = "../data/output/knn/github_features.txt" 
+    graph.print_features(output_path)
+
 def kNN_cora_full_benchmark():
     print("Running kNN cora_full benchmark with depth 3...")
     
@@ -207,7 +244,7 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
     parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn", "Graph"], required=True, help="The strategy to benchmark.")
-    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full","genius","amazon"], required=False, help="The input file to use.")
+    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full","genius","amazon","github"], required=False, help="The input file to use.")
     
     #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
     args = parser.parse_args()
@@ -221,6 +258,8 @@ def main():
         kNN_genius_benchmark()
     elif args.strat == "knn" and args.input == "amazon":
         kNN_amazon_benchmark()
+    elif args.strat == "knn" and args.input == "github":
+        kNN_github_benchmark()
     elif args.strat == "louvain":
         print("Not implemented yet. Exiting...")
         return
