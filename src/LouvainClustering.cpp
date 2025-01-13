@@ -35,19 +35,26 @@ double LouvainClustering::calculate_modularity(const std::vector<int>& community
     }
     m /= 2; // Each edge is counted twice
 
+    std::unordered_map<int, double> community_intra_edges;
+    std::unordered_map<int, double> community_degrees;
+
     for (int i = 0; i < graph.get_num_nodes(); ++i) {
-        for (int j = 0; j < graph.get_num_nodes(); ++j) {
-            if (community_assignment[i] == community_assignment[j]) {
-                int Aij = graph.has_edge(i, j);
-                double ki = graph.get_degree(i);
-                double kj = graph.get_degree(j);
-                modularity += Aij - (ki * kj) / (2.0 * m);
-    }
+        int community = community_assignment[i];
+        community_degrees[community] += graph.get_degree(i);
+        for (int neighbor : graph.get_neighbours(i)) {
+            if (community_assignment[neighbor] == community) {
+                community_intra_edges[community] += 1.0;
+            }
         }
     }
-    return modularity / (2.0 * m);
-}
 
+    for (const auto& [community, intra_edges] : community_intra_edges) {
+        double degree_sum = community_degrees[community];
+        modularity += (intra_edges / (2.0 * m)) - (degree_sum * degree_sum) / (4.0 * m * m);
+    }
+
+    return modularity;
+}
 
 void LouvainClustering::move_node_to_best_community(int node) {
     int original_community = node_to_community[node];
