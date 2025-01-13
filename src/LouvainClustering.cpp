@@ -48,3 +48,39 @@ double LouvainClustering::calculate_modularity(const std::vector<int>& community
     return modularity / (2.0 * m);
 }
 
+
+void LouvainClustering::move_node_to_best_community(int node) {
+    // Move Node to Best Community
+    // Tries to find the best community for a node to maximize modularity
+}
+
+// Rebuild Graph
+// Aggregates the graph based on current communities
+void LouvainClustering::rebuild_graph() {
+    // Placeholder for graph aggregation logic
+    // You can implement this part to create a new graph where each community becomes a single node
+    
+}
+
+// Execute Louvain Clustering
+std::vector<int> LouvainClustering::execute(double resolution, int max_iter) {
+    const double MODULARITY_THRESHOLD = 1e-6;
+    bool improvement = true;
+    int iteration = 0;
+
+    while (improvement && iteration < max_iter) {
+        improvement = false;
+        for (int node = 0; node < graph.get_num_nodes(); ++node) {
+            move_node_to_best_community(node);
+        }
+
+        double new_modularity = calculate_modularity(node_to_community);
+        if (new_modularity - current_modularity > MODULARITY_THRESHOLD) {
+            improvement = true;
+            current_modularity = new_modularity;
+        }
+        iteration++;
+    }
+
+    return node_to_community;
+}
