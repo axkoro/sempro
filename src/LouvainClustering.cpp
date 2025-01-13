@@ -50,8 +50,35 @@ double LouvainClustering::calculate_modularity(const std::vector<int>& community
 
 
 void LouvainClustering::move_node_to_best_community(int node) {
-    // Move Node to Best Community
-    // Tries to find the best community for a node to maximize modularity
+    int original_community = node_to_community[node];
+    double max_gain = 0.0;
+    int best_community = original_community;
+
+    // Remove the node from its current community
+    community_totals[original_community] -= graph.get_degree(node);
+
+    // Check all neighboring communities
+    std::unordered_map<int, int> neighbor_communities;
+    for (int neighbor : graph.get_neighbours(node)) {
+        neighbor_communities[node_to_community[neighbor]]++;
+    }
+
+    for (const auto& [community, edge_count] : neighbor_communities) {
+        int m = 0;
+        for (int i = 0; i < graph.get_num_nodes(); ++i) {
+            m += graph.get_degree(i);
+        }
+        m /= 2; // Each edge is counted twice
+        double gain = edge_count - (graph.get_degree(node) * community_totals[community]) / (2.0 * m);
+        if (gain > max_gain) {
+            max_gain = gain;
+            best_community = community;
+        }
+    }
+
+    // Assign the node to the best community
+    node_to_community[node] = best_community;
+    community_totals[best_community] += graph.get_degree(node);
 }
 
 // Rebuild Graph
@@ -59,7 +86,6 @@ void LouvainClustering::move_node_to_best_community(int node) {
 void LouvainClustering::rebuild_graph() {
     // Placeholder for graph aggregation logic
     // You can implement this part to create a new graph where each community becomes a single node
-    
 }
 
 // Execute Louvain Clustering
