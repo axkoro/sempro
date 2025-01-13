@@ -14,7 +14,7 @@ public:
     LouvainClustering(const Graph& graph);
 
     // Method to execute Louvain Clustering
-    std::vector<int> execute(double resolution = 1.0, int max_iter = 100);
+    std::vector<int> execute(int max_iter = 5);
 
 private:
     // Reference to the input graph
