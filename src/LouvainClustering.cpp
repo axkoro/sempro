@@ -42,7 +42,7 @@ double LouvainClustering::calculate_modularity(const std::vector<int>& community
                 double ki = graph.get_degree(i);
                 double kj = graph.get_degree(j);
                 modularity += Aij - (ki * kj) / (2.0 * m);
-            }
+    }
         }
     }
     return modularity / (2.0 * m);
@@ -51,11 +51,18 @@ double LouvainClustering::calculate_modularity(const std::vector<int>& community
 
 void LouvainClustering::move_node_to_best_community(int node) {
     int original_community = node_to_community[node];
-    double max_gain = 0.0;
+    double max_gain = -std::numeric_limits<double>::max();
     int best_community = original_community;
 
     // Remove the node from its current community
     community_totals[original_community] -= graph.get_degree(node);
+
+    // Calculate the total number of edges in the graph
+    int m = 0;
+    for (int i = 0; i < graph.get_num_nodes(); ++i) {
+        m += graph.get_degree(i);
+    }
+    m /= 2; // Each edge is counted twice
 
     // Check all neighboring communities
     std::unordered_map<int, int> neighbor_communities;
@@ -64,11 +71,6 @@ void LouvainClustering::move_node_to_best_community(int node) {
     }
 
     for (const auto& [community, edge_count] : neighbor_communities) {
-        int m = 0;
-        for (int i = 0; i < graph.get_num_nodes(); ++i) {
-            m += graph.get_degree(i);
-        }
-        m /= 2; // Each edge is counted twice
         double gain = edge_count - (graph.get_degree(node) * community_totals[community]) / (2.0 * m);
         if (gain > max_gain) {
             max_gain = gain;
@@ -79,6 +81,11 @@ void LouvainClustering::move_node_to_best_community(int node) {
     // Assign the node to the best community
     node_to_community[node] = best_community;
     community_totals[best_community] += graph.get_degree(node);
+
+    // If the best community is the original community, revert the change
+    if (best_community != original_community) {
+        community_totals[original_community] += graph.get_degree(node);
+    }
 }
 
 // Rebuild Graph
@@ -89,7 +96,7 @@ void LouvainClustering::rebuild_graph() {
 }
 
 // Execute Louvain Clustering
-std::vector<int> LouvainClustering::execute(double resolution, int max_iter) {
+std::vector<int> LouvainClustering::execute(int max_iter) {
     const double MODULARITY_THRESHOLD = 1e-6;
     bool improvement = true;
     int iteration = 0;
