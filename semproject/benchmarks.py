@@ -208,6 +208,9 @@ def kNN_cora_full_benchmark():
 
     print(f"kNN cora_full benchmark completed in {end_time - start_time:.4f} seconds")
 
+    output_path = "../data/output/knn/corafull_features.txt" 
+    graph.print_features(output_path)
+
 def kNN_fraud_benchmark():
     print("Running kNN amazon_fraud benchmark with depth 3...")
     
@@ -239,7 +242,9 @@ def kNN_fraud_benchmark():
     end_time = time.time()
 
     print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
-    
+
+    output_path = "../data/output/knn/amazonfraud_features.txt" 
+    graph.print_features(output_path)
 def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
