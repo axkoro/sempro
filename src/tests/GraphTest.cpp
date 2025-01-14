@@ -24,6 +24,31 @@ TEST(GraphTest, file_not_open_throws_error) {
         std::runtime_error);
 }
 
+TEST(GraphTest, get_double_feature_from_int_graph_throws) {
+    // Create a small int-based graph
+    GraphInt intGraph("../input/test/graph/edges_example.txt",
+                      "../input/test/graph/features_example.txt");
+
+    // Attempt to get a double feature where only int features exist
+    EXPECT_THROW(intGraph.get_double_feature(0, 0), GraphException);
+}
+
+TEST(GraphTest, invalid_node_index_throws) {
+    GraphDouble graph("../input/test/graph/edges_example.txt",
+                      "../input/test/graph/features_example.txt");
+
+    // Node index out of range
+    EXPECT_THROW(graph.get_double_feature(graph.get_num_nodes(), 0), GraphException);
+}
+
+TEST(GraphTest, invalid_feature_index_throws) {
+    GraphDouble graph("../input/test/graph/edges_example.txt",
+                      "../input/test/graph/features_example.txt");
+
+    // Feature index out of range
+    EXPECT_THROW(graph.get_double_feature(0, graph.get_num_features()), GraphException);
+}
+
 TEST(GraphTest, parse_node_count) {
     std::string amazon_features = "../input/amazon/amazon_features.txt";
     EXPECT_EQ(parse_node_count(amazon_features),
