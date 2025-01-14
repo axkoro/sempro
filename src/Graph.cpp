@@ -7,28 +7,13 @@
 #include <sstream>
 #include <unordered_set>
 
-Graph::Graph() = default;
-
-Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
-    this->offsets = offsets;
-    this->edges = edges;
-    num_nodes = offsets.size() - 1;
-}
-
-Graph::Graph(std::string edges_path, std::string features_path) {
-    num_nodes = parse_node_count(features_path);
-    num_features = parse_feature_count(features_path);
-    read_edges(edges_path);
-    read_features(features_path);
-}
+GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
 
 int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
-double Graph::get_feature(int node, int feature) const { return features[node][feature]; }
-
-void Graph::set_feature(int node, int feature, double value) { features[node][feature] = value; }
+int Graph::get_label(int node) const { return labels[node]; }
 
 void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
 
@@ -127,58 +112,6 @@ void Graph::read_edges(std::string edges_path) {
     file.close();
 }
 
-void Graph::read_features(std::string features_path) {
-    if (num_nodes == -1) {
-        num_nodes = parse_node_count(features_path);
-        if (num_nodes < 0)
-            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
-    }
-    if (num_features == -1) {
-        num_features = parse_feature_count(features_path);
-        if (num_nodes < 0)
-            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
-    }
-
-    features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
-    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
-
-    std::ifstream file(features_path);
-    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
-
-    std::string line;
-    while (std::getline(file, line)) {
-        const char* ptr = line.c_str();
-        char* endptr;
-
-        // Parse node index
-        int node = std::strtol(ptr, &endptr, 10);
-        ptr = endptr;
-
-        // Parse features
-        for (int i = 0; i < num_features - 1; i++) {
-            double value = std::strtod(ptr, &endptr);
-            if (ptr == endptr) {  // found '#'
-                missing[node][i] = true;
-                endptr += 3;  // advance three characters
-            } else {
-                features[node][i] = value;
-            }
-            ptr = endptr + 2;  // skip comma and space
-        }
-
-        // Parse label
-        --ptr;  // because last feature and label are only separated by '\t'
-        int label_idx = num_features - 1;
-        int label_value = std::strtol(ptr, &endptr, 10);
-        if (ptr == endptr) {
-            missing[node][label_idx] = true;
-        } else {
-            features[node][label_idx] = label_value;
-        }
-    }
-    file.close();
-}
-
 void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
@@ -186,31 +119,6 @@ void Graph::print_edges() const {
             if (neighbour <= i) {  // to only print unique edges (in descending order)
                 std::cout << i << "\t" << neighbour << "\n";
             }
-        }
-    }
-}
-
-void Graph::print_features() const {
-    for (int node = 0; node < num_nodes; node++) {
-        std::cout << node << '\t';
-        for (int i = 0; i < num_features - 2; i++) {
-            if (missing[node][i]) {
-                std::cout << "\'#\'" << ", ";
-            } else {
-                std::cout << features[node][i] << ", ";
-            }
-        }
-
-        if (missing[node][num_features - 2]) {  // last feature
-            std::cout << "\'#\'" << '\t';
-        } else {
-            std::cout << features[node][num_features - 2] << '\t';
-        }
-
-        if (missing[node][num_features - 1]) {  // label
-            std::cout << "\'#\'" << '\n';
-        } else {
-            std::cout << features[node][num_features - 1] << '\n';
         }
     }
 }
@@ -264,7 +172,7 @@ int parse_feature_count(std::string features_path) {
     if (comma_count == 0)
         throw std::runtime_error("Invalid format: no commas found in the line of file '" +
                                  features_path + "'");
-    return comma_count + 2;  // + 1 because we include the label as a feature
+    return comma_count + 1;  // assuming one comma after every feature except the last
 }
 
 std::vector<int> remove_duplicates(const std::vector<int>& arr) {

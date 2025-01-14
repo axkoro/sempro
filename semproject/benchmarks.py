@@ -8,7 +8,7 @@ def graph_benchmark():
     # Create a Graph instance
     edges_path = "input/twitch/twitch_edges.txt"
     features_path = "input/twitch/twitch_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
 
     end_time = time.time()
     
@@ -20,7 +20,7 @@ def kNN_twitch_benchmark():
     # Create a Graph instance
     edges_path = "input/twitch/twitch_edges.txt"
     features_path = "input/twitch/twitch_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -39,7 +39,7 @@ def kNN_fraud_benchmark():
     # Create a Graph instance
     edges_path = "input/amazon_fraud/amazon_fraud_edges.txt"
     features_path = "input/amazon_fraud/amazon_fraud_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)

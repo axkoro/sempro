@@ -10,13 +10,14 @@ class GraphException : public std::runtime_error {
 };
 
 class Graph {
-   private:
+   protected:
     int num_nodes = -1;
     int num_features = -1;
     std::vector<int> offsets;
     std::vector<int> edges;
-    std::vector<std::vector<double>> features;
+    std::vector<int> labels;
     std::vector<std::vector<bool>> missing;
+    // std::vector<std::vector<Feature>> features;
 
    public:
     // Constructors
@@ -24,15 +25,7 @@ class Graph {
     /**
      * @brief Default constructor. Creates an empty graph.
      */
-    Graph();
-
-    /**
-     * @brief Constructs a graph from sparse matrix representation.
-     *
-     * @param offsets Array containing offsets into edges array for each node
-     * @param edges Array containing target node IDs for edges
-     */
-    Graph(std::vector<int>& offsets, std::vector<int>& edges);  // for testing
+    Graph() = default;
 
     /**
      * @brief Constructs a graph by reading edge and feature files.
@@ -40,14 +33,24 @@ class Graph {
      * @param edges_path Path to the file containing edges.
      * @param features_path Path to the file containing features.
      */
-    Graph(std::string edges_path, std::string features_path);
+    Graph(std::string edges_path, std::string features_path) {};
 
     // Getters
 
     int get_num_nodes() const;
     int get_num_features() const;
 
-    double get_feature(int node, int feature) const;
+    virtual bool get_bool_feature(int node, int feature) const {
+        throw GraphException("Can't get bool feature (Graph has other type)");
+    };
+    virtual double get_double_feature(int node, int feature) const {
+        throw GraphException("Can't get double feature (Graph has other type)");
+    };
+    virtual int get_int_feature(int node, int feature) const {
+        throw GraphException("Can't get int feature (Graph has other type)");
+    };
+
+    int get_label(int node) const;
 
     /**
      * Returns a vector of feature indices that are missing for a given node.
@@ -86,7 +89,16 @@ class Graph {
 
     // Setters
 
-    void set_feature(int node, int feature, double value);
+    virtual void set_bool_feature(int node, int feature, bool value) {
+        throw GraphException("Can't set bool feature (Graph has other type)");
+    };
+    virtual void set_double_feature(int node, int feature, double value) {
+        throw GraphException("Can't set double feature (Graph has other type)");
+    };
+    virtual void set_int_feature(int node, int feature, int value) {
+        throw GraphException("Can't set int feature (Graph has other type)");
+    };
+
     void set_missing(int node, int feature, bool value);
 
     // Queries
@@ -133,7 +145,7 @@ class Graph {
      * @param features_path Path to the file containing features.
      * @throws std::runtime_error If file errors occur or parsing fails.
      */
-    void read_features(std::string features_path);
+    virtual void read_features(std::string features_path) = 0;
 
     // Debug/Display
 
@@ -144,8 +156,10 @@ class Graph {
 
     /**
      * @brief Prints features of all nodes to the console.
+     * @note Had to be implemented in the subclasses because the abstract Graph class doesn't have
+     * the features vector as a member variable.
      */
-    void print_features() const;
+    virtual void print_features() const = 0;
 };
 
 // Utility functions
