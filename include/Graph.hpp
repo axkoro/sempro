@@ -156,6 +156,8 @@ class Graph {
 
     /**
      * @brief Prints features of all nodes to the console.
+     * @note Had to be implemented in the subclasses because the abstract Graph class doesn't have
+     * the features vector as a member variable.
      */
     virtual void print_features() const = 0;
 };
