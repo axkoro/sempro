@@ -14,6 +14,7 @@ PYBIND11_MODULE(_graph, m) {
         // No constructor for abstract class
         .def("get_num_nodes", &Graph::get_num_nodes)
         .def("get_num_features", &Graph::get_num_features)
+        .def("get_label", &Graph::get_label)
         .def("get_missing_features", &Graph::get_missing_features, py::arg("node"))
         .def("is_missing", &Graph::is_missing, py::arg("node"), py::arg("feature"))
         .def("get_neighbours", py::overload_cast<int>(&Graph::get_neighbours, py::const_),
