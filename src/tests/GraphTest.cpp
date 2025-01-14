@@ -9,7 +9,7 @@
 
 class GraphTest : public testing::Test {};
 
-TEST(GraphTest, FileNotOpenThrowsError) {
+TEST(GraphTest, file_not_open_throws_error) {
     // Provide a non-existent file path to trigger the error
     std::string invalid_file_path = "non_existent_file.txt";
 
@@ -41,7 +41,7 @@ TEST(GraphTest, parse_feature_count) {
     EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25);
 }
 
-// TODO: Currently checks reading of both edges and features (should only load edges)
+// FIXME: Currently checks reading of both edges and features (should only load edges)
 TEST(GraphTest, read_edges) {
     std::string edges_path = "../input/test/graph/edges_example.txt";
     std::string features_path = "../input/test/graph/features_example.txt";
@@ -81,80 +81,6 @@ TEST(GraphTest, read_edges) {
     std::remove(temp_file_path.c_str());
 }
 
-TEST(GraphTest, read_bool_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
-    GraphBool graph(edges_path, features_path);
-
-    // clang-format off
-    std::vector<std::vector<double>> actual_features = {
-        {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2},
-        {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0},
-        {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1},
-        {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3},
-        {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4}
-    };
-    // clang-format on
-
-    for (int node = 0; node < graph.get_num_nodes(); node++) {
-        for (int feature = 0; feature < graph.get_num_features(); feature++) {
-            // TODO: also check if the correct features are missing
-            if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_bool_feature(node, feature), actual_features[node][feature]);
-            }
-        }
-    }
-}
-
-TEST(GraphTest, read_int_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
-    GraphInt graph(edges_path, features_path);
-
-    // clang-format off
-    std::vector<std::vector<double>> actual_features = {
-        {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2},
-        {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0},
-        {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1},
-        {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3},
-        {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4}
-    };
-    // clang-format on
-
-    for (int node = 0; node < graph.get_num_nodes(); node++) {
-        for (int feature = 0; feature < graph.get_num_features(); feature++) {
-            if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_int_feature(node, feature), actual_features[node][feature]);
-            }
-        }
-    }
-}
-
-TEST(GraphTest, read_double_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
-
-    // clang-format off
-    std::vector<std::vector<double>> actual_features = {
-        {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2},
-        {0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0},
-        {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1},
-        {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3},
-        {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 4}
-    };
-    // clang-format on
-
-    for (int node = 0; node < graph.get_num_nodes(); node++) {
-        for (int feature = 0; feature < graph.get_num_features(); feature++) {
-            if (!graph.is_missing(node, feature)) {
-                EXPECT_DOUBLE_EQ(graph.get_double_feature(node, feature),
-                                 actual_features[node][feature]);
-            }
-        }
-    }
-}
-
 TEST(GraphTest, print_edges) {
     std::string edges_path = "../input/test/graph/edges_example.txt";
     std::string features_path = "../input/test/graph/features_example.txt";
@@ -178,6 +104,136 @@ TEST(GraphTest, print_edges) {
         "4\t0\n";
 
     EXPECT_EQ(output.str(), expected_print);
+}
+
+TEST(GraphTest, read_bool_features) {
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    GraphBool graph(edges_path, features_path);
+
+    // clang-format off
+    std::vector<std::vector<bool>> actual_features = {
+        {true, false, false, false, false, false},
+        {false, true, false, false, false, false},
+        {false, false, false, true, false, false},
+        {false, false, false, false, true, false},
+        {false, false, false, false, false, true}
+    };
+
+    std::vector<std::vector<bool>> actual_missing = {
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false}
+    };
+    // clang-format on
+
+    std::vector<int> actual_labels = {2, 0, 1, 3, 4};
+
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        for (int feature = 0; feature < graph.get_num_features(); feature++) {
+            // check if the correct features are loaded as missing
+            EXPECT_EQ(graph.is_missing(node, feature), actual_missing[node][feature]);
+
+            // check features
+            if (!graph.is_missing(node, feature)) {
+                EXPECT_EQ(graph.get_bool_feature(node, feature), actual_features[node][feature]);
+            }
+        }
+    }
+
+    // check labels
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        EXPECT_EQ(graph.get_label(node), actual_labels[node]);
+    }
+}
+
+TEST(GraphTest, read_int_features) {
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    GraphInt graph(edges_path, features_path);
+
+    // clang-format off
+    std::vector<std::vector<int>> actual_features = {
+        {1, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0, 1}
+    };
+
+    std::vector<std::vector<bool>> actual_missing = {
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false}
+    };
+    // clang-format on
+
+    std::vector<int> actual_labels = {2, 0, 1, 3, 4};
+
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        for (int feature = 0; feature < graph.get_num_features(); feature++) {
+            // check if the correct features are loaded as missing
+            EXPECT_EQ(graph.is_missing(node, feature), actual_missing[node][feature]);
+
+            // check features
+            if (!graph.is_missing(node, feature)) {
+                EXPECT_EQ(graph.get_int_feature(node, feature), actual_features[node][feature]);
+            }
+        }
+    }
+
+    // check labels
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        EXPECT_EQ(graph.get_label(node), actual_labels[node]);
+    }
+}
+
+TEST(GraphTest, read_double_features) {
+    std::string edges_path = "../input/test/graph/edges_example.txt";
+    std::string features_path = "../input/test/graph/features_example.txt";
+    GraphDouble graph(edges_path, features_path);
+
+    // clang-format off
+    std::vector<std::vector<double>> actual_features = {
+        {1.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+        {0.0, 1.0, 0.0, 0.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0, 1.0, 0.0, 0.0},
+        {0.0, 0.0, 0.0, 0.0, 1.0, 0.0},
+        {0.0, 0.0, 0.0, 0.0, 0.0, 1.0}
+    };
+
+    std::vector<std::vector<bool>> actual_missing = {
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false},
+        {false, false, true, false, false, false}
+    };
+    // clang-format on
+
+    std::vector<int> actual_labels = {2, 0, 1, 3, 4};
+
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        for (int feature = 0; feature < graph.get_num_features(); feature++) {
+            // check if the correct features are loaded as missing
+            EXPECT_EQ(graph.is_missing(node, feature), actual_missing[node][feature]);
+
+            // check features
+            if (!graph.is_missing(node, feature)) {
+                EXPECT_DOUBLE_EQ(graph.get_double_feature(node, feature),
+                                 actual_features[node][feature]);
+            }
+        }
+    }
+
+    // check labels
+    for (int node = 0; node < graph.get_num_nodes(); node++) {
+        EXPECT_EQ(graph.get_label(node), actual_labels[node]);
+    }
 }
 
 TEST(GraphTest, print_bool_features) {
