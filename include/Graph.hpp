@@ -50,6 +50,8 @@ class Graph {
         throw GraphException("Can't get int feature (Graph has other type)");
     };
 
+    int get_label(int node) const;
+
     /**
      * Returns a vector of feature indices that are missing for a given node.
      * @param node The node index to check for missing features
