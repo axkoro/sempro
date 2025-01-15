@@ -103,3 +103,14 @@ void GraphBool::print_features() const {
         std::cout << labels[node] << '\n';  // label
     }
 }
+// redirect std to file and print features
+void GraphBool::print_features_to_file(std::string output_path) const {
+    std::ofstream file(output_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + output_path);
+    // print features on file
+    std::streambuf* coutbuf = std::cout.rdbuf();  // save old buf
+    std::cout.rdbuf(file.rdbuf());                // redirect std::cout to file
+    print_features();
+    std::cout.rdbuf(coutbuf);  // reset to standard output again
+    file.close();
+}

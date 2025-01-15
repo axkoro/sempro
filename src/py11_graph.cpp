@@ -36,7 +36,8 @@ PYBIND11_MODULE(_graph, m) {
         .def("set_int_feature", &GraphInt::set_int_feature, py::arg("node"), py::arg("feature"),
              py::arg("value"))
         .def("read_features", &GraphInt::read_features, py::arg("features_path"))
-        .def("print_features", &GraphInt::print_features);
+        .def("print_features", &GraphInt::print_features)
+        .def("print_features_to_file", &GraphInt::print_features_to_file, py::arg("output_path"));
 
     // GraphDouble
     py::class_<GraphDouble, Graph, std::shared_ptr<GraphDouble>>(m, "GraphDouble")
@@ -46,8 +47,8 @@ PYBIND11_MODULE(_graph, m) {
         .def("set_double_feature", &GraphDouble::set_double_feature, py::arg("node"),
              py::arg("feature"), py::arg("value"))
         .def("read_features", &GraphDouble::read_features, py::arg("features_path"))
-        .def("print_features", &GraphDouble::print_features);
-
+        .def("print_features", &GraphDouble::print_features)
+        .def("print_features_to_file", &GraphDouble::print_features_to_file, py::arg("output_path"));
     // GraphBool
     py::class_<GraphBool, Graph, std::shared_ptr<GraphBool>>(m, "GraphBool")
         .def(py::init<std::string, std::string>(), py::arg("edges_path"), py::arg("features_path"))
@@ -55,5 +56,6 @@ PYBIND11_MODULE(_graph, m) {
         .def("set_bool_feature", &GraphBool::set_bool_feature, py::arg("node"), py::arg("feature"),
              py::arg("value"))
         .def("read_features", &GraphBool::read_features, py::arg("features_path"))
-        .def("print_features", &GraphBool::print_features);
+        .def("print_features", &GraphBool::print_features)
+        .def("print_features_to_file", &GraphBool::print_features_to_file, py::arg("output_path"));
 }
