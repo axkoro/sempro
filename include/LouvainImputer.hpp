@@ -1,4 +1,3 @@
-// LouvainFeatureImputation.hpp
 #ifndef LOUVAIN_IMPUTER_HPP
 #define LOUVAIN_IMPUTER_HPP
 
@@ -24,4 +23,4 @@ private:
 
 };
 
-#endif // LOUVAIN_IMPUTATION_HPP
+#endif 
