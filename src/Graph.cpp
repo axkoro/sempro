@@ -13,6 +13,8 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
+int Graph::get_num_edges() const { return edges.size(); }
+
 int Graph::get_label(int node) const { return labels[node]; }
 
 void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
