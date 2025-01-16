@@ -26,24 +26,24 @@ TEST(GraphTest, file_not_open_throws_error) {
 
 TEST(GraphTest, get_double_feature_from_int_graph_throws) {
     // Create a small int-based graph
-    GraphInt intGraph("../input/test/graph/edges_example.txt",
-                      "../input/test/graph/features_example.txt");
+    GraphInt intGraph("../data/test/graph/edges_example.txt",
+                      "../data/test/graph/features_example.txt");
 
     // Attempt to get a double feature where only int features exist
     EXPECT_THROW(intGraph.get_double_feature(0, 0), GraphException);
 }
 
 TEST(GraphTest, invalid_node_index_throws) {
-    GraphDouble graph("../input/test/graph/edges_example.txt",
-                      "../input/test/graph/features_example.txt");
+    GraphDouble graph("../data/test/graph/edges_example.txt",
+                      "../data/test/graph/features_example.txt");
 
     // Node index out of range
     EXPECT_THROW(graph.get_double_feature(graph.get_num_nodes(), 0), GraphException);
 }
 
 TEST(GraphTest, invalid_feature_index_throws) {
-    GraphDouble graph("../input/test/graph/edges_example.txt",
-                      "../input/test/graph/features_example.txt");
+    GraphDouble graph("../data/test/graph/edges_example.txt",
+                      "../data/test/graph/features_example.txt");
 
     // Feature index out of range
     EXPECT_THROW(graph.get_double_feature(0, graph.get_num_features()), GraphException);
@@ -59,17 +59,17 @@ TEST(GraphTest, parse_node_count) {
 }
 
 TEST(GraphTest, parse_feature_count) {
-    std::string github_features = "../input/github/github_features.txt";
+    std::string github_features = "../data/input/unzipped/github_features.txt";
     EXPECT_EQ(parse_feature_count(github_features), 128);
 
-    std::string amazon_fraud_features = "../input/amazon_fraud/amazon_fraud_features.txt";
+    std::string amazon_fraud_features = "../data/input/unzipped/amazon_fraud_features.txt";
     EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25);
 }
 
 // FIXME: Currently checks reading of both edges and features (should only load edges)
 TEST(GraphTest, read_edges) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     // Create temporary file for output
@@ -107,8 +107,8 @@ TEST(GraphTest, read_edges) {
 }
 
 TEST(GraphTest, print_edges) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
@@ -132,8 +132,8 @@ TEST(GraphTest, print_edges) {
 }
 
 TEST(GraphTest, read_bool_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphBool graph(edges_path, features_path);
 
     // clang-format off
@@ -175,8 +175,8 @@ TEST(GraphTest, read_bool_features) {
 }
 
 TEST(GraphTest, read_int_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphInt graph(edges_path, features_path);
 
     // clang-format off
@@ -218,8 +218,8 @@ TEST(GraphTest, read_int_features) {
 }
 
 TEST(GraphTest, read_double_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     // clang-format off
@@ -262,8 +262,8 @@ TEST(GraphTest, read_double_features) {
 }
 
 TEST(GraphTest, print_bool_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphBool graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
@@ -287,8 +287,8 @@ TEST(GraphTest, print_bool_features) {
 }
 
 TEST(GraphTest, print_int_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphInt graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
@@ -312,8 +312,8 @@ TEST(GraphTest, print_int_features) {
 }
 
 TEST(GraphTest, print_double_features) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
@@ -337,8 +337,8 @@ TEST(GraphTest, print_double_features) {
 }
 
 TEST(GraphTest, get_neighbours) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     std::vector<int> neighbours = graph.get_neighbours(0);
@@ -354,8 +354,8 @@ TEST(GraphTest, get_neighbours) {
 }
 
 TEST(GraphTest, get_degree) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     int degree = graph.get_degree(0);
@@ -363,8 +363,8 @@ TEST(GraphTest, get_degree) {
 }
 
 TEST(GraphTest, has_edge) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.has_edge(0, 4));   // Assumes edge exists
@@ -372,8 +372,8 @@ TEST(GraphTest, has_edge) {
 }
 
 TEST(GraphTest, is_valid_node) {
-    std::string edges_path = "../input/test/graph/edges_example.txt";
-    std::string features_path = "../input/test/graph/features_example.txt";
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.is_valid_node(0));
