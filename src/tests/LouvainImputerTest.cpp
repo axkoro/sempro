@@ -5,19 +5,15 @@
 #include <string>
 
 
-// Test Case: Feature Imputation with Files
 TEST(LouvainImputerTest, TestFeatureImputation) {
-    // Paths to test files
     std::string edges_path = "../input/Gtests/edges_example.txt";
     std::string features_path = "../input/Gtests/features2_example.txt";
     Graph graph(edges_path, features_path);
 
 
-    // Dummy community assignments (e.g., result of Louvain clustering)
     // Assigning nodes to two communities for testing purposes
     std::vector<int> communities = {0, 0, 0, 1, 1};
 
-    // Create and run the feature imputation
     LouvainImputer imputer(graph, communities);
     imputer.run();
 
