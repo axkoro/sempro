@@ -23,6 +23,18 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_link_libraries(KNNImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
+
+	add_executable(LouvainClusteringTest src/tests/LouvainClusteringTest.cpp src/LouvainClustering.cpp src/Graph.cpp)
+	target_include_directories(LouvainClusteringTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LouvainClusteringTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(LouvainClusteringTest PRIVATE -coverage)
+	target_link_options(LouvainClusteringTest PRIVATE -coverage)
+
+	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/Graph.cpp)
+	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LouvainImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(LouvainImputerTest PRIVATE -coverage)
+	target_link_options(LouvainImputerTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
