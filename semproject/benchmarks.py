@@ -18,7 +18,7 @@ def graph_benchmark():
         print(f"An error occurred while unzipping the file: {e}")
     edges_path = "../data/input/twitch/twitch_edges.txt"
     features_path = "../data/input/twitch/twitch_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
 
     end_time = time.time()
 
@@ -42,7 +42,7 @@ def kNN_amazon_benchmark():
 
     edges_path = "../data/input/amazon/amazon_edges.txt"
     features_path = "../data/input/amazon/amazon_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphBool(edges_path,features_path)
 
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -63,7 +63,7 @@ def kNN_amazon_benchmark():
     print(f"kNN amazon benchmark completed in {end_time - start_time:.4f} seconds")
 
     output_path = "../data/output/knn/amazon_features.txt" 
-    graph.print_features(output_path)
+    graph.print_features_to_file(output_path)
 
 def kNN_genius_benchmark():
     print("Running kNN genius benchmark with depth 3...")
@@ -78,7 +78,7 @@ def kNN_genius_benchmark():
 
     edges_path = "../data/input/genius/genius_edges.txt"
     features_path = "../data/input/genius/genius_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphInt(edges_path,features_path)
 
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -99,7 +99,7 @@ def kNN_genius_benchmark():
     print(f"kNN genius benchmark completed in {end_time - start_time:.4f} seconds")
 
     output_path = "../data/output/knn/genius_features.txt" 
-    graph.print_features(output_path)
+    graph.print_features_to_file(output_path)
 
 def kNN_twitch_benchmark():
     print("Running kNN twitch benchmark with depth 3...")
@@ -114,7 +114,7 @@ def kNN_twitch_benchmark():
 
     edges_path = "../data/input/twitch/twitch_edges.txt"
     features_path = "../data/input/twitch/twitch_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -136,8 +136,7 @@ def kNN_twitch_benchmark():
 
    # Print graph features using graph.print_features and redirect to twitch_output.txt and save in ../data/output/knn_twitch_output.txt
     output_path = "../data/output/knn/twitch_features.txt" 
-    graph.print_features(output_path)
-
+    graph.print_features_to_file(output_path)
 def kNN_github_benchmark():
     print("Running kNN github benchmark with depth 3...")
     
@@ -151,7 +150,7 @@ def kNN_github_benchmark():
 
     edges_path = "../data/input/github/github_edges.txt"
     features_path = "../data/input/github/github_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -173,7 +172,7 @@ def kNN_github_benchmark():
 
    # Print graph features using graph.print_features and redirect to github_output.txt and save in ../data/output/knn_twitch_output.txt
     output_path = "../data/output/knn/github_features.txt" 
-    graph.print_features(output_path)
+    graph.print_features_to_file(output_path)
 
 def kNN_cora_full_benchmark():
     print("Running kNN cora_full benchmark with depth 3...")
@@ -187,7 +186,7 @@ def kNN_cora_full_benchmark():
         print(f"An error occurred while unzipping the file: {e}")
     edges_path = "../data/input/cora_full/corafull_edges.txt"
     features_path = "../data/input/cora_full/corafull_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphBool(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -209,7 +208,7 @@ def kNN_cora_full_benchmark():
     print(f"kNN cora_full benchmark completed in {end_time - start_time:.4f} seconds")
 
     output_path = "../data/output/knn/corafull_features.txt" 
-    graph.print_features(output_path)
+    graph.print_features_to_file(output_path)
 
 def kNN_fraud_benchmark():
     print("Running kNN amazon_fraud benchmark with depth 3...")
@@ -223,7 +222,7 @@ def kNN_fraud_benchmark():
         print(f"An error occurred while unzipping the file: {e}")
     edges_path = "../data/input/amazon_fraud/amazon_fraud_edges.txt"
     features_path = "../data/input/amazon_fraud/amazon_fraud_features.txt"
-    graph = graph_module.Graph(edges_path,features_path)
+    graph = graph_module.GraphDouble(edges_path,features_path)
     
     # Create a KNNImputer instance
     knn_imputer = strats_module.KNNImputer(graph)
@@ -244,7 +243,7 @@ def kNN_fraud_benchmark():
     print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
 
     output_path = "../data/output/knn/amazonfraud_features.txt" 
-    graph.print_features(output_path)
+    graph.print_features_to_file(output_path)
 def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
