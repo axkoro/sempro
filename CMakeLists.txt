@@ -30,7 +30,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(LouvainClusteringTest PRIVATE -coverage)
 	target_link_options(LouvainClusteringTest PRIVATE -coverage)
 
-	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/Graph.cpp)
+	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/KNNImputer.cpp src/Graph.cpp)
 	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
