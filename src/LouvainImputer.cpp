@@ -1,4 +1,3 @@
-// LouvainFeatureImputation.cpp
 #include "LouvainImputer.hpp"
 #include "KNNImputer.hpp"
 #include <numeric>
@@ -28,9 +27,16 @@ std::unordered_map<int, std::vector<double>> LouvainImputer::compute_community_a
         }
     }
     // Calculate means
+    // Check weither the feature is missing for all nodes in the community
+    // If so, use global average from KNN imputer
     for (auto& [community, sums] : community_sums) {
         for (int feature = 0; feature < sums.size(); ++feature) {
-            sums[feature] /= community_counts[community][feature];
+            if (community_counts[community][feature] == 0) {
+                sums[feature] = compute_global_average(graph, feature);
+            }
+            else {
+                sums[feature] /= community_counts[community][feature];
+            }
         }
     }
 
