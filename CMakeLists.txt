@@ -32,6 +32,13 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
+
+
+	add_executable(LouvainTest src/tests/LouvainCommunityDetectionTest.cpp src/LouvainCommunityDetection.cpp src/MinimalGraph.cpp)
+	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LouvainTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_compile_options(LouvainTest PRIVATE -coverage)
+	target_link_options(LouvainTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
