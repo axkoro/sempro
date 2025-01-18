@@ -35,6 +35,11 @@ class Graph {
      */
     Graph(std::string edges_path, std::string features_path) {};
 
+    /**
+     * @brief Debugging/testing constructor for creating a Graph without features.
+     */
+    Graph(std::vector<int> offsets, std::vector<int> edges);
+
     // Getters
 
     int get_num_nodes() const;

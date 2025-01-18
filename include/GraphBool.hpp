@@ -7,6 +7,8 @@ class GraphBool : public Graph {
     std::vector<std::vector<bool>> features;
 
    public:
+    using Graph::Graph;  // inherit constructors
+
     /**
      * @brief Constructs a graph by reading edge and feature files.
      *

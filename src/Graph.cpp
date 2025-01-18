@@ -9,11 +9,17 @@
 
 GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
 
+Graph::Graph(std::vector<int> offsets, std::vector<int> edges) {
+    this->offsets = offsets;
+    this->edges = edges;
+    num_nodes = offsets.size() - 1;
+}
+
 int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
-int Graph::get_num_edges() const { return edges.size(); }
+int Graph::get_num_edges() const { return edges.size() / 2; }
 
 int Graph::get_label(int node) const { return labels[node]; }
 
