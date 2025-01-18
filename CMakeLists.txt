@@ -19,7 +19,7 @@ target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
 
 if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
 	add_subdirectory(extlibs/gtest)
-	set(CMAKE_BUILD_TYPE "Debug")
+	set(CMAKE_BUILD_TYPE Debug)
 	
 	add_executable(GraphTest src/tests/GraphTest.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
@@ -52,5 +52,3 @@ else() # Build Python bindings as libraries
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
 endif()
- 
-set(CMAKE_CLEAN_TARGET "clean")
