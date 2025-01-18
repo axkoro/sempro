@@ -22,8 +22,11 @@ void LouvainCommunityDetection::initialize() {
     for (int node = 0; node < num_nodes; node++) {
         // Initialize community connections
         for (auto pair : current_graph.get_neighbours(node)) {
-            long comm_pair = encode_community_pair(node, pair.first);
-            community_connections[comm_pair]++;
+            int neighbour = pair.first;
+            if (neighbour >= node) {  // prevent double counting of edges
+                long comm_pair = encode_community_pair(node, neighbour);
+                community_connections[comm_pair] += 1.0;
+            }
         }
 
         community_stats[node].total_weight = current_graph.get_degree(node);
@@ -31,12 +34,12 @@ void LouvainCommunityDetection::initialize() {
 }
 
 std::vector<int> LouvainCommunityDetection::execute() {
-    bool improvement = true;
-    while (improvement) {
+    bool improvement;
+    do {
         improvement = optimize_modularity();
-        if (!improvement) break;
-        aggregate_communities();
-    }
+        if (improvement) aggregate_communities();
+    } while (improvement);
+
     return node_to_community;
 }
 
@@ -59,7 +62,8 @@ bool LouvainCommunityDetection::optimize_modularity() {
             std::unordered_set<int> neighbour_communities;
             auto neighbours = current_graph.get_neighbours(node);
             for (auto pair : neighbours) {
-                neighbour_communities.insert(node_to_community[pair.first]);
+                int neighbour = pair.first;
+                neighbour_communities.insert(node_to_community[neighbour]);
             }
 
             // Find best community
@@ -102,7 +106,7 @@ double LouvainCommunityDetection::calculate_modularity_gain(int node, int target
     double ki_in = weight_to_community;
     double sigma_tot = community_stats[target_comm].total_weight;
 
-    return (ki_in - (sigma_tot * ki) / m2);  // TODO: verify
+    return (ki_in - (sigma_tot * ki) / m2);  // TODO: source?
 }
 
 void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) {
@@ -116,7 +120,7 @@ void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) 
 
     for (auto pair : current_graph.get_neighbours(node)) {
         int neighbour = pair.first;
-        int weight = pair.second;
+        double weight = pair.second;
 
         update_community_connection(old_comm, node_to_community[neighbour], -weight);
         update_community_connection(new_comm, node_to_community[neighbour], weight);
@@ -125,20 +129,20 @@ void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) 
 
 void LouvainCommunityDetection::aggregate_communities() {
     int num_nodes = current_graph.get_num_nodes();
-    std::vector<int> new_community_ids(num_nodes, -1);
+    std::vector<int> old_to_new_community_ids(num_nodes, -1);
     int next_community_id = 0;
 
     // Create mapping of old to new (consecutive) community IDs
     for (int i = 0; i < num_nodes; i++) {
         int old_comm = node_to_community[i];
-        if (new_community_ids[old_comm] == -1) {
-            new_community_ids[old_comm] = next_community_id++;
+        if (old_to_new_community_ids[old_comm] == -1) {
+            old_to_new_community_ids[old_comm] = next_community_id++;
         }
     }
 
     // Update node community assignments
     for (int i = 0; i < num_nodes; i++) {
-        node_to_community[i] = new_community_ids[node_to_community[i]];
+        node_to_community[i] = old_to_new_community_ids[node_to_community[i]];
     }
 
     // Update community_connections to match renaming
@@ -148,22 +152,21 @@ void LouvainCommunityDetection::aggregate_communities() {
             long old_key = p.first;
             double weight = p.second;
 
+            // apply remapping to key
             std::pair<int, int> comms = decode_community_pair(old_key);
+            int comm1 = old_to_new_community_ids[comms.first];
+            int comm2 = old_to_new_community_ids[comms.second];
+            long new_key = encode_community_pair(comm1, comm2);
 
-            int comm1 = new_community_ids[comms.first];
-            int comm2 = new_community_ids[comms.second];
-
-            long long new_key = encode_community_pair(comm1, comm2);
-            new_community_connections[new_key] += weight;
+            new_community_connections.emplace(new_key, weight);
         }
         community_connections = std::move(new_community_connections);
     }
 
     MinimalGraph new_graph(next_community_id);
 
-    // Fill it with the aggregated edges from community_connections
     for (auto& pair : community_connections) {
-        long long key = pair.first;
+        long key = pair.first;
         double weight = pair.second;
 
         std::pair<int, int> comms = decode_community_pair(key);

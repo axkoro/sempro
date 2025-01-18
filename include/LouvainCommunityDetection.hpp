@@ -2,21 +2,21 @@
 #include <unordered_map>
 #include <vector>
 
-#include "graph.hpp"  // Your graph class header
+#include "Graph.hpp"
+#include "MinimalGraph.hpp"
 
 class LouvainCommunityDetection {
    public:
-    explicit LouvainCommunityDetection(const Graph& g);
+    explicit LouvainCommunityDetection(const Graph &g);
 
     std::vector<int> execute();
 
     double get_modularity() const;
 
    private:
-    // TODO: change weights to ints?
-    struct CommunityStats {
-        double internal_weight{0.0};  // sum of all internal edges // TODO: why is this not used?
-        double total_weight{0.0};     // sum of all edges (including edges to other communities)
+    struct CommunityStats {  // TODO: change weights to ints?
+        // double internal_weight{0.0};  // sum of all internal edges
+        double total_weight{0.0};  // sum of all edges (including edges to other communities)
     };
 
     MinimalGraph current_graph;
