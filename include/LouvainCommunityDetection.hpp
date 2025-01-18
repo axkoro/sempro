@@ -14,16 +14,23 @@ class LouvainCommunityDetection {
     double get_modularity() const;
 
    private:
-    struct CommunityStats {  // TODO: change weights to ints?
-        // double internal_weight{0.0};  // sum of all internal edges
-        double total_weight{0.0};  // sum of all edges (including edges to other communities)
-    };
+    int max_phase1_iterations = 5;  // TODO: make configurable
 
     MinimalGraph current_graph;
-    std::vector<int> node_to_community;  // maps each node to a community
-    std::unordered_map<long, double>
-        community_connections;  // maps each community edge (encoded as a long) to a weight
-    std::vector<CommunityStats> community_stats;
+
+    // maps each node to a community
+    std::vector<int> node_to_community;
+
+    // maps each community edge (encoded as a long) to a weight
+    std::unordered_map<long, double> community_connections;
+
+    // TODO: change weight values from double to int
+
+    // stores the sum of all edge weights within a given community (used for modularity
+    // calculations)
+    std::vector<double> community_total_weights;
+
+    double total_edge_weight;
 
     void initialize();
     bool optimize_modularity();
