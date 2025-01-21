@@ -8,18 +8,18 @@ import shutil
 
 def graph_benchmark():
     print("Running Graph tests...")
-    start_time = time.time()
-    # Create a Graph instance
-    #unzip the twitch.zip file
+
     try:
         subprocess.run(["unzip", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
         print("Unzipped twitch.zip successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while unzipping the file: {e}")
+
     edges_path = "../data/input/twitch/twitch_edges.txt"
     features_path = "../data/input/twitch/twitch_features.txt"
-    graph = graph_module.GraphDouble(edges_path,features_path)
 
+    start_time = time.time()
+    graph_module.GraphDouble(edges_path, features_path)
     end_time = time.time()
 
     #delete the unzipped folder
