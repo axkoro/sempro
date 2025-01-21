@@ -3,6 +3,19 @@
 
 ### Custom ###
 
+# Downloads from the evaluation script
+download/
+
+# Data output from benchmark
+data/output/knn/*
+!data/output/knn/.gitkeep
+
+data/output/louvain/*
+!data/output/louvain/.gitkeep
+
+data/output/gnn/*
+!data/output/gnn/.gitkeep
+
 # MacOS
 .DS_store
 

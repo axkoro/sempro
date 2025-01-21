@@ -6,3 +6,6 @@
 	path = extlibs/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = stable
+[submodule "extlibs/evaluation"]
+	path = extlibs/evaluation
+	url = https://gitlab.informatik.hu-berlin.de/brandtfa/wise2425-evaluation.git

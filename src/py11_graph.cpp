@@ -27,7 +27,8 @@ PYBIND11_MODULE(_graph, m) {
         .def("read_edges", &Graph::read_edges, py::arg("edges_path"))
         .def("set_missing", &Graph::set_missing, py::arg("node"), py::arg("feature"),
              py::arg("value"))
-        .def("print_edges", &Graph::print_edges);
+        .def("print_edges", &Graph::print_edges)
+        .def("print_features_to_file", &Graph::print_features_to_file, py::arg("output_path"));
 
     // GraphInt
     py::class_<GraphInt, Graph, std::shared_ptr<GraphInt>>(m, "GraphInt")

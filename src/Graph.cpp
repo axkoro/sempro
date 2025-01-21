@@ -123,6 +123,19 @@ void Graph::print_edges() const {
     }
 }
 
+void Graph::print_features_to_file(std::string output_path) const {
+    std::ofstream file(output_path, std::ios::out | std::ios::trunc);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + output_path);
+
+    std::streambuf* coutbuf = std::cout.rdbuf();  // save old buf
+    std::cout.rdbuf(file.rdbuf());                // redirect std::cout to file
+
+    print_features();
+
+    std::cout.rdbuf(coutbuf);  // reset to standard output again
+    file.close();
+}
+
 int parse_node_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {

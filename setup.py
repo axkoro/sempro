@@ -123,6 +123,9 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
         )
 
+def load_submodule_requirements():
+    with open('extlibs/evaluation/requirements_full.txt') as f:
+        return f.read().splitlines()
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
@@ -138,5 +141,12 @@ setup(
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
     packages=['semproject'],
-    python_requires=">=3.8",
+    python_requires=">=3.8, <3.13", # < 3.13 due to current incompatablity with torch
+    entry_points={
+        'console_scripts': [
+            'evaluate=semproject.evaluate:main',
+            'benchmark=semproject.benchmark:main',
+        ],
+    },
+    install_requires=load_submodule_requirements()
 )
