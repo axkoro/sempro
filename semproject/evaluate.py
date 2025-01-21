@@ -28,8 +28,10 @@ def main():
         
     # Run the measure-quality.py script and print output in real-time
     print("")
-    result = subprocess.run("python ../extlibs/evaluation/measure-quality.py -i github -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-    print(result.stdout)
+    evaluation_cmd = sys.executable + " ../extlibs/evaluation/measure-quality.py" + " --instance" + " twitch" + " --input-folder" + " ../data/input" + " --feature-folder" + " ../data/output/knn" + " --reference-folder" + " ../data/reference" + " --train" + " --txt"
+    process = subprocess.run(evaluation_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, shell=True, text=True)
+    for line in process.stdout:
+        print(line, end='')
 
 def get_user_choice_strategy():
     print("Select imputation strategy to evaluate:\n 1. kNN \n 2. Louvain \n 3. GNN")
