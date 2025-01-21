@@ -29,249 +29,71 @@ def graph_benchmark():
 
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
-def kNN_amazon_benchmark():
-    print("Running kNN amazon benchmark with depth 3...")
+def kNN_benchmark(data_set, depth=3):
+    print(f"Running kNN {data_set} benchmark with depth {depth}...")
 
- # Create a Graph instance
-    #unzip the cornell.zip file
+    graph_class_map = {
+        "amazon": graph_module.GraphBool,
+        "genius": graph_module.GraphInt,
+        "twitch": graph_module.GraphDouble,
+        "github": graph_module.GraphDouble,
+        "cora_full": graph_module.GraphBool,
+        "amazon_fraud": graph_module.GraphDouble
+    }
+    graph_class = graph_class_map.get(data_set)
+    if not graph_class:
+        print(f"No graph class found for {data_set}, exiting...")
+        return
+
+    zip_path = f"../data/input/{data_set}.zip"
+    folder_path = f"../data/input/{data_set}/"
+    edges_path = f"../data/input/{data_set}/{data_set}_edges.txt"
+    features_path = f"../data/input/{data_set}/{data_set}_features.txt"
+    output_path = f"../data/output/knn/{data_set}_features.txt"
+
     try:
-        subprocess.run(["unzip", "../data/input/Amazon.zip", "-d", "../data/input/amazon/"], check=True)
-        print("Unzipped amazon.zip successfully.")
+        subprocess.run(["unzip", zip_path, "-d", folder_path], check=True)
+        print(f"Unzipped {data_set}.zip successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while unzipping the file: {e}")
 
-    edges_path = "../data/input/amazon/amazon_edges.txt"
-    features_path = "../data/input/amazon/amazon_features.txt"
-    graph = graph_module.GraphBool(edges_path,features_path)
-
-    # Create a KNNImputer instance
+    graph = graph_class(edges_path, features_path)
     knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
+    knn_imputer.set_depth(depth)
 
-    #delete the unzipped folder with nested folders
     try:
-        shutil.rmtree("../data/input/amazon/")
-        print("Deleted the unzipped folder successfully.")
+        shutil.rmtree(folder_path)
+        print(f"Deleted the unzipped {data_set} folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
 
-    # Run the KNNImputer
     start_time = time.time()
     knn_imputer.run()
     end_time = time.time()
-    
-    print(f"kNN amazon benchmark completed in {end_time - start_time:.4f} seconds")
+    print(f"kNN {data_set} benchmark completed in {end_time - start_time:.4f} seconds")
 
-    output_path = "../data/output/knn/amazon_features.txt" 
     graph.print_features_to_file(output_path)
 
-def kNN_genius_benchmark():
-    print("Running kNN genius benchmark with depth 3...")
-
-    # Create a Graph instance
-    #unzip the cornell.zip file
-    try:
-        subprocess.run(["unzip", "../data/input/genius.zip", "-d", "../data/input/genius/"], check=True)
-        print("Unzipped genius.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
-
-    edges_path = "../data/input/genius/genius_edges.txt"
-    features_path = "../data/input/genius/genius_features.txt"
-    graph = graph_module.GraphInt(edges_path,features_path)
-
-    # Create a KNNImputer instance
-    knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
-
-    #delete the unzipped folder with nested folders
-    try:
-        shutil.rmtree("../data/input/genius/")
-        print("Deleted the unzipped folder successfully.")
-    except Exception as e:
-        print(f"An error occurred while deleting the folder: {e}")
-
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
-    print(f"kNN genius benchmark completed in {end_time - start_time:.4f} seconds")
-
-    output_path = "../data/output/knn/genius_features.txt" 
-    graph.print_features_to_file(output_path)
-
-def kNN_twitch_benchmark():
-    print("Running kNN twitch benchmark with depth 3...")
-    
-    # Create a Graph instance
-    #unzip the twitch.zip file
-    try:
-        subprocess.run(["unzip","-q", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
-        print("Unzipped twitch.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
-
-    edges_path = "../data/input/twitch/twitch_edges.txt"
-    features_path = "../data/input/twitch/twitch_features.txt"
-    graph = graph_module.GraphDouble(edges_path,features_path)
-    
-    # Create a KNNImputer instance
-    knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
-    
-    #delete the unzipped folder with nested folders
-    try:
-        shutil.rmtree("../data/input/twitch/")
-        print("Deleted the unzipped folder successfully.")
-    except Exception as e:
-        print(f"An error occurred while deleting the folder: {e}")
-
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
-    print(f"kNN twitch benchmark completed in {end_time - start_time:.4f} seconds")
-
-   # Print graph features using graph.print_features and redirect to twitch_output.txt and save in ../data/output/knn_twitch_output.txt
-    output_path = "../data/output/knn/twitch_features.txt" 
-    graph.print_features_to_file(output_path)
-def kNN_github_benchmark():
-    print("Running kNN github benchmark with depth 3...")
-    
-    # Create a Graph instance
-    #unzip the github.zip file
-    try:
-        subprocess.run(["unzip","-q", "../data/input/GitHub.zip", "-d", "../data/input/github/"], check=True)
-        print("Unzipped twitch.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
-
-    edges_path = "../data/input/github/github_edges.txt"
-    features_path = "../data/input/github/github_features.txt"
-    graph = graph_module.GraphDouble(edges_path,features_path)
-    
-    # Create a KNNImputer instance
-    knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
-    
-    #delete the unzipped folder with nested folders
-    try:
-        shutil.rmtree("../data/input/github/")
-        print("Deleted the unzipped folder successfully.")
-    except Exception as e:
-        print(f"An error occurred while deleting the folder: {e}")
-
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
-    print(f"kNN github benchmark completed in {end_time - start_time:.4f} seconds")
-
-   # Print graph features using graph.print_features and redirect to github_output.txt and save in ../data/output/knn_twitch_output.txt
-    output_path = "../data/output/knn/github_features.txt" 
-    graph.print_features_to_file(output_path)
-
-def kNN_cora_full_benchmark():
-    print("Running kNN cora_full benchmark with depth 3...")
-    
-    # Create a Graph instance
-    #unzip the twitch.zip file
-    try:
-        subprocess.run(["unzip", "../data/input/cora_full.zip", "-d", "../data/input/cora_full/"], check=True)
-        print("Unzipped cora_full.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
-    edges_path = "../data/input/cora_full/corafull_edges.txt"
-    features_path = "../data/input/cora_full/corafull_features.txt"
-    graph = graph_module.GraphBool(edges_path,features_path)
-    
-    # Create a KNNImputer instance
-    knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
-
-     #delete the unzipped folder with nested folders
-    try:
-        shutil.rmtree("../data/input/cora_full/")
-        print("Deleted the unzipped folder successfully.")
-    except Exception as e:
-        print(f"An error occurred while deleting the folder: {e}")
-
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-    
-
-    print(f"kNN cora_full benchmark completed in {end_time - start_time:.4f} seconds")
-
-    output_path = "../data/output/knn/corafull_features.txt" 
-    graph.print_features_to_file(output_path)
-
-def kNN_fraud_benchmark():
-    print("Running kNN amazon_fraud benchmark with depth 3...")
-    
-    # Create a Graph instance
-    #unzip the twitch.zip file
-    try:
-        subprocess.run(["unzip", "../data/input/amazon_fraud.zip", "-d", "../data/input/amazon_fraud/"], check=True)
-        print("Unzipped amazon_fraud.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
-    edges_path = "../data/input/amazon_fraud/amazon_fraud_edges.txt"
-    features_path = "../data/input/amazon_fraud/amazon_fraud_features.txt"
-    graph = graph_module.GraphDouble(edges_path,features_path)
-    
-    # Create a KNNImputer instance
-    knn_imputer = strats_module.KNNImputer(graph)
-    knn_imputer.set_depth(3)
-    
-    #delete the unzipped folder with nested folders
-    try:
-        shutil.rmtree("../data/input/amazon_fraud/")
-        print("Deleted the unzipped folder successfully.")
-    except Exception as e:
-        print(f"An error occurred while deleting the folder: {e}")
-
-    # Run the KNNImputer
-    start_time = time.time()
-    knn_imputer.run()
-    end_time = time.time()
-
-    print(f"kNN amazon_fraud benchmark completed in {end_time - start_time:.4f} seconds")
-
-    output_path = "../data/output/knn/amazonfraud_features.txt" 
-    graph.print_features_to_file(output_path)
 def main():
     parser = argparse.ArgumentParser(description="Benchmarking different strategies.")
     
-    parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn", "Graph"], required=True, help="The strategy to benchmark.")
-    parser.add_argument("--input", type=str, choices=["twitch","amazon_fraud","cora_full","genius","amazon","github"], required=False, help="The input file to use.")
+    parser.add_argument("--graph", action='store_true', help="Only benchmark graph loading.")
+    parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn"], help="The strategy to benchmark.")
+    parser.add_argument("--input", type=str, choices=["twitch", "amazon_fraud", "cora_full", "genius", "amazon", "github"], help="The data set to use.")
     
     #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
     args = parser.parse_args()
-    if args.strat == "knn" and args.input == "twitch":
-        kNN_twitch_benchmark()
-    elif args.strat == "knn" and args.input == "amazon_fraud":
-        kNN_fraud_benchmark()
-    elif args.strat == "knn" and args.input == "cora_full":
-        kNN_cora_full_benchmark()
-    elif args.strat == "knn" and args.input == "genius":
-        kNN_genius_benchmark()
-    elif args.strat == "knn" and args.input == "amazon":
-        kNN_amazon_benchmark()
-    elif args.strat == "knn" and args.input == "github":
-        kNN_github_benchmark()
+    if args.graph:
+        graph_benchmark()
+    elif args.strat == "knn":
+        if args.input:
+            kNN_benchmark(args.input)
     elif args.strat == "louvain":
         print("Not implemented yet. Exiting...")
         return
     elif args.strat == "gnn":
         print("Not implemented yet. Exiting...")
         return
-    elif args.strat == "Graph":
-        graph_benchmark()
     else:
         print("Invalid arguments. Exiting...")
         return
