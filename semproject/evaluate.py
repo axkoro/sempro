@@ -1,155 +1,78 @@
 import subprocess
 import os
+import sys
 
 def main():
-    strat_choice = ""
-   
-    #ask wich evaluation to run 
-    print("Which strategie would you like to evaluate? \n 1.knn \n 2.louvain \n 3.gnn")
-    strat_input = input("Enter the number of the strategy you would like to evaluate: ")
-    if strat_input == "1":
-        print("You have chosen to evaluate the kNN strategy.")
-        strat_choice = "knn"
-    elif strat_input == "2":
-        print("You have chosen to evaluate the Louvain strategy.")
-        strat_choice = "louvain"
-        print("Louvain strategy not implemented yet.")
-        return
-    elif strat_input == "3":
-        print("You have chosen to evaluate the GNN strategy.")
-        strat_choice = "gnn"
-        print("GNN strategy not implemented yet.")
-        return
+    strat_choice = get_user_choice_strategy()
+    print(strat_choice + " was chosen.\n")
 
-    #ask which input file to use
-    print("Which input file would you like to use ?\n 1.twitch \n 2.amazon \n 3.cora \n 4.genius \n 5.amazon_fraud \n 6.github") 
-    input_input = input("Enter the number of the input file you would like to use: ")
-    if input_input == "1":
-        print("You have chosen to use the twitch input file.")
-        #if twitch.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/twitch.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "twitch"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/twitch.zip", "../data/output/knn/twitch_features.txt"], check=True)
-                print("Zipped twitch output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
+    data_set_choice = get_user_choice_data_set()
+    print(data_set_choice + " was chosen.\n")
 
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i twitch -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
-       
-    if input_input == "2":
-        print("You have chosen to use the amazon input file.")
+    # Run the strategy
+    output_txt_path = "../data/output/" + strat_choice + "/" + data_set_choice + "_features.txt"
+
+    run_strat = True
+    if os.path.exists(output_txt_path):
+        choice = input("Output files already exists. Rerun the strategy? [Y]/n: ").strip().lower()
+        if choice in ['y', 'yes', '']:
+            run_strat = True
+        else:
+            run_strat = False
+            print("Using existing output files for evaluation.")
+
+
+    if run_strat:
+        print("")
+        subprocess.run([sys.executable, "benchmarks.py", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
         
-        #if amazon.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/amazon.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "amazon"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/amazon.zip", "../data/output/knn/amazon_features.txt"], check=True)
-                print("Zipped amazon output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
+    # Run the measure-quality.py script and print output in real-time
+    print("")
+    result = subprocess.run("python ../extlibs/evaluation/measure-quality.py -i github -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
+    print(result.stdout)
 
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i amazon -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
-    if input_input == "3":
-        print("You have chosen to use the cora input file.")
-        print("Cora is still in development.")
+def get_user_choice_strategy():
+    print("Select imputation strategy to evaluate:\n 1. kNN \n 2. Louvain \n 3. GNN")
+    try:
+        strat_input = int(input("Enter number: "))
+    except ValueError:
+        print("Invalid choice")
         return
-        #if cora.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/cora_full.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "cora_full"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/cora_full.zip", "../data/output/knn/corafull_features.txt"], check=True)
-                print("Zipped cora_full output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
 
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i cora -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
+    strat_dict = {
+        1: "knn",
+        2: "louvain",
+        3: "gnn"
+    }
+
+    if strat_input not in strat_dict:
+        print("Invalid choice")
+        return
+
+    return strat_dict[strat_input]
+
+def get_user_choice_data_set():
+    print("Select data set to run the strategy on:\n 1. twitch\n 2. amazon\n 3. cora\n 4. genius\n 5. amazon_fraud\n 6. github")
+    try:
+        data_set_input = int(input("Enter number: "))
+    except ValueError:
+        print("Invalid choice")
+        return
+
+    data_set_dict = {
+        1: "twitch",
+        2: "amazon",
+        3: "cora",
+        4: "genius",
+        5: "amazon_fraud",
+        6: "github"
+    }
+
+    if data_set_input not in data_set_dict:
+        print("Invalid choice")
+        return
     
-    if input_input == "4":
-        print("You have chosen to use the genius input file.")
-        
-        #if genius.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/genius.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "genius"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/genius.zip", "../data/output/knn/genius_features.txt"], check=True)
-                print("Zipped genius output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
-
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i genius -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
-
-    if input_input == "5":
-        print("You have chosen to use the amazon_fraud input file.")
-        print("Amazon_fraud evaluation is not working yet.")
-        return
-        #if amazon_fraud.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/amazon_fraud.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "amazon_fraud"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/amazon_fraud.zip", "../data/output/knn/amazonfraud_features.txt"], check=True)
-                print("Zipped amazon_fraud output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
-
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i amazon_fraud -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
-    if input_input == "6":
-        print("You have chosen to use the github input file.")
-        print("Github is still in development.")
-        return
-        #if github.zip exists in ../data/output/knn dont run benchmark
-        run_bench = True
-        if os.path.exists("../data/output/knn/github.zip"):
-            run_bench = False
-        if run_bench:
-        #run the benchmarks.py file with the input twitch
-            subprocess.run(["python", "benchmarks.py", "--strat",strat_choice,"--input", "github"], check=True,text=True)
-             # Zip the output .txt file into a twitch.zip file
-            try:
-                subprocess.run(["zip","-j", "../data/output/knn/github.zip", "../data/output/knn/github_features.txt"], check=True)
-                print("Zipped github output successfully")
-            except subprocess.CalledProcessError as e:
-                print(f"An error occurred while zipping the file: {e}")
-
-        # Run the measure-quality.py script and print output in real-time
-        result =subprocess.run("python ../extlibs/evaluation/measure-quality.py -i github -if ../data/input -ff ../data/output/knn -rf ../data/reference",shell=True,capture_output=True,text=True)
-        print(result.stdout)
-
+    return data_set_dict[data_set_input]
 
 if __name__ == "__main__":
     main()
