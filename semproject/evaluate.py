@@ -24,7 +24,7 @@ def main():
 
     if run_strat:
         print("")
-        subprocess.run([sys.executable, "benchmarks.py", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
+        subprocess.run([sys.executable, "benchmark.py", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
         
     # Run the measure-quality.py script and print output in real-time
     print("")
