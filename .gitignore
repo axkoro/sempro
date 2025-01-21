@@ -2,10 +2,20 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,python,cmake
 
 ### Custom ###
-# Download from evaluation
+
+# Downloads from the evaluation script
 semproject/download/
-# data Output from benchmark
+
+# Data output from benchmark
 data/output/knn/*
+!data/output/knn/.gitkeep
+
+data/output/louvain/*
+!data/output/louvain/.gitkeep
+
+data/output/gnn/*
+!data/output/gnn/.gitkeep
+
 # MacOS
 .DS_store
 
