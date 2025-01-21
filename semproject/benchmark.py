@@ -10,22 +10,22 @@ def graph_benchmark():
     print("Running Graph tests...")
 
     try:
-        subprocess.run(["unzip", "../data/input/twitch.zip", "-d", "../data/input/twitch/"], check=True)
+        subprocess.run(["unzip", "./data/input/twitch.zip", "-d", "./data/input/twitch/"], check=True)
         print("Unzipped twitch.zip successfully.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred while unzipping the file: {e}")
 
-    edges_path = "../data/input/twitch/twitch_edges.txt"
-    features_path = "../data/input/twitch/twitch_features.txt"
+    edges_path = "./data/input/twitch/twitch_edges.txt"
+    features_path = "./data/input/twitch/twitch_features.txt"
 
     start_time = time.time()
     graph_module.GraphDouble(edges_path, features_path)
     end_time = time.time()
 
     #delete the unzipped folder
-    os.remove("../data/input/twitch/twitch_edges.txt")
-    os.remove("../data/input/twitch/twitch_features.txt")
-    os.rmdir("../data/input/twitch/")
+    os.remove("./data/input/twitch/twitch_edges.txt")
+    os.remove("./data/input/twitch/twitch_features.txt")
+    os.rmdir("./data/input/twitch/")
 
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
@@ -45,11 +45,11 @@ def kNN_benchmark(data_set, depth=3):
         print(f"No graph class found for {data_set}, exiting...")
         return
 
-    zip_path = f"../data/input/{data_set}.zip"
-    folder_path = f"../data/input/{data_set}/"
-    edges_path = f"../data/input/{data_set}/{data_set}_edges.txt"
-    features_path = f"../data/input/{data_set}/{data_set}_features.txt"
-    output_path = f"../data/output/knn/{data_set}_features.txt"
+    zip_path = f"./data/input/{data_set}.zip"
+    folder_path = f"./data/input/{data_set}/"
+    edges_path = f"./data/input/{data_set}/{data_set}_edges.txt"
+    features_path = f"./data/input/{data_set}/{data_set}_features.txt"
+    output_path = f"./data/output/knn/{data_set}_features.txt"
 
     try:
         subprocess.run(["unzip", zip_path, "-d", folder_path], check=True)

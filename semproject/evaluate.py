@@ -10,28 +10,42 @@ def main():
     print(data_set_choice + " was chosen.\n")
 
     # Run the strategy
-    output_txt_path = "../data/output/" + strat_choice + "/" + data_set_choice + "_features.txt"
+    output_txt_path = f"./data/output/{strat_choice}/{data_set_choice}_features.txt"
 
     run_strat = True
     if os.path.exists(output_txt_path):
-        choice = input("Output files already exists. Rerun the strategy? [Y]/n: ").strip().lower()
+        choice = input("Output file already exists. Rerun the strategy? [Y]/n: ").strip().lower()
         if choice in ['y', 'yes', '']:
             run_strat = True
         else:
             run_strat = False
-            print("Using existing output files for evaluation.")
+            print("Using existing output file for evaluation.")
 
 
     if run_strat:
         print("")
-        subprocess.run([sys.executable, "benchmark.py", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
+        subprocess.run(["benchmark", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
         
-    # Run the measure-quality.py script and print output in real-time
     print("")
-    evaluation_cmd = sys.executable + " ../extlibs/evaluation/measure-quality.py" + " --instance" + " twitch" + " --input-folder" + " ../data/input" + " --feature-folder" + " ../data/output/knn" + " --reference-folder" + " ../data/reference" + " --train" + " --txt"
-    process = subprocess.run(evaluation_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, shell=True, text=True)
+    evaluation_cmd = [
+        sys.executable,
+        "./extlibs/evaluation/measure-quality.py",
+        "--instance", "twitch",
+        "--input-folder", "./data/input",
+        "--feature-folder", "./data/output/knn",
+        "--reference-folder", "./data/reference",
+        "--train",
+        "--txt"
+    ]
+    # TODO: redirect output from subprocess in real-time
+    process = subprocess.run(
+        evaluation_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True
+    )
     for line in process.stdout:
-        print(line, end='')
+        print(line, flush=True, end='')
 
 def get_user_choice_strategy():
     print("Select imputation strategy to evaluate:\n 1. kNN \n 2. Louvain \n 3. GNN")
