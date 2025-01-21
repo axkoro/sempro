@@ -141,7 +141,7 @@ setup(
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
     packages=['semproject'],
-    python_requires=">=3.8",
+    python_requires=">=3.8, <3.13", # < 3.13 due to current incompatablity with torch
     entry_points={
         'console_scripts': [
             'evaluate=semproject.evaluate:main',
