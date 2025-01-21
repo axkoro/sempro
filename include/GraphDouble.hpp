@@ -19,5 +19,4 @@ class GraphDouble : public Graph {
     void set_double_feature(int node, int feature, double value) override;
     void read_features(std::string features_path) override;
     virtual void print_features() const override;
-    virtual void print_features_to_file(std::string features_path) const override;
 };

@@ -164,7 +164,7 @@ class Graph {
      * @brief Prints features using print_features to a file with the given path.
      * @param output_path Path to the file to write the features to.
      */
-    virtual void print_features_to_file(std::string output_path) const = 0;
+    void print_features_to_file(std::string output_path) const;
 };
 
 // Utility functions
