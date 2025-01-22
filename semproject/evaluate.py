@@ -4,10 +4,13 @@ import sys
 
 def main():
     strat_choice = get_user_choice_strategy()
-    print(strat_choice + " was chosen.\n")
+    print("")
 
     data_set_choice = get_user_choice_data_set()
-    print(data_set_choice + " was chosen.\n")
+    print("")
+
+    train_choice = get_user_choice_train()
+    print("")
 
     # Run the strategy
     output_txt_path = f"./data/output/{strat_choice}/{data_set_choice}_features.txt"
@@ -20,24 +23,24 @@ def main():
         else:
             run_strat = False
             print("Using existing output file for evaluation.")
-
+        print("")
 
     if run_strat:
-        print("")
         subprocess.run(["benchmark", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
+        print("")
         
-    print("")
     evaluation_cmd = [
         sys.executable,
         "./extlibs/evaluation/measure-quality.py",
-        "--instance", "twitch",
+        "--instance", data_set_choice,
         "--input-folder", "./data/input",
-        "--feature-folder", "./data/output/knn",
+        "--feature-folder", f"./data/output/{strat_choice}",
         "--reference-folder", "./data/reference",
-        "--train",
         "--txt"
     ]
-    # TODO: redirect output from subprocess in real-time
+    if train_choice:
+        evaluation_cmd.append("--train")
+
     process = subprocess.run(
         evaluation_cmd,
         stdout=subprocess.PIPE,
@@ -89,6 +92,13 @@ def get_user_choice_data_set():
         return
     
     return data_set_dict[data_set_input]
+
+def get_user_choice_train():
+    choice = input("Additionally evaluate the output using downstream tasks (train a neural network)? y/[N]: ").strip().lower()
+    if choice in ['n', 'no', '']:
+        return False
+    else:
+        return True
 
 if __name__ == "__main__":
     main()

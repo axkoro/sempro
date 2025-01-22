@@ -30,7 +30,7 @@ def graph_benchmark():
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
 def kNN_benchmark(data_set, depth=3):
-    print(f"Running kNN {data_set} benchmark with depth {depth}...")
+    print(f"Running kNN imputation on '{data_set}' with depth {depth}...")
 
     graph_class_map = {
         "amazon": graph_module.GraphBool,
@@ -52,10 +52,10 @@ def kNN_benchmark(data_set, depth=3):
     output_path = f"./data/output/knn/{data_set}_features.txt"
 
     try:
-        subprocess.run(["unzip", zip_path, "-d", folder_path], check=True)
-        print(f"Unzipped {data_set}.zip successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred while unzipping the file: {e}")
+        subprocess.run(["unzip", zip_path, "-d", folder_path], stdout=subprocess.DEVNULL, check=True)
+        # print(f"Unzipped {data_set}.zip successfully.")
+    except subprocess.CalledProcessError:
+        raise Exception("Failed to unzip the dataset.")
 
     graph = graph_class(edges_path, features_path)
     knn_imputer = strats_module.KNNImputer(graph)
@@ -63,7 +63,7 @@ def kNN_benchmark(data_set, depth=3):
 
     try:
         shutil.rmtree(folder_path)
-        print(f"Deleted the unzipped {data_set} folder successfully.")
+        # print(f"Deleted the unzipped {data_set} folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
 
@@ -81,7 +81,6 @@ def main():
     parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn"], help="The strategy to benchmark.")
     parser.add_argument("--input", type=str, choices=["twitch", "amazon_fraud", "cora_full", "genius", "amazon", "github"], help="The data set to use.")
     
-    #if --strat arg = knn and --input arg = twitch run kNN_twitch_benchmark
     args = parser.parse_args()
     if args.graph:
         graph_benchmark()
