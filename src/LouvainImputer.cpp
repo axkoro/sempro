@@ -45,11 +45,12 @@ std::unordered_map<int, std::vector<double>> LouvainImputer::compute_community_a
 
 // Perform feature imputation
 void LouvainImputer::run() {
-    auto community_means = compute_community_average();
+    std::unordered_map<int, std::vector<double>> community_means = compute_community_average();
 
     // Impute missing features with community means
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         int community = communities[node];
+
         for (int feature = 0; feature < graph.get_num_features(); ++feature) {
             if (graph.is_missing(node, feature)) {
                 graph.set_feature(node, feature, community_means[community][feature]);
