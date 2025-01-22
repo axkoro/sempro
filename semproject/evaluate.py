@@ -21,7 +21,6 @@ def main():
             run_strat = False
             print("Using existing output file for evaluation.")
 
-
     if run_strat:
         print("")
         subprocess.run(["benchmark", "--strat", strat_choice, "--input", data_set_choice], check=True, text=True)
@@ -30,14 +29,13 @@ def main():
     evaluation_cmd = [
         sys.executable,
         "./extlibs/evaluation/measure-quality.py",
-        "--instance", "twitch",
+        "--instance", data_set_choice,
         "--input-folder", "./data/input",
-        "--feature-folder", "./data/output/knn",
+        "--feature-folder", f"./data/output/{strat_choice}",
         "--reference-folder", "./data/reference",
         "--train",
         "--txt"
     ]
-    # TODO: redirect output from subprocess in real-time
     process = subprocess.run(
         evaluation_cmd,
         stdout=subprocess.PIPE,
