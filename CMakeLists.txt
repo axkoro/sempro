@@ -50,6 +50,11 @@ else() # Build Python bindings as libraries
 	target_link_libraries(_strats PRIVATE graph_lib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
+
+	pybind11_add_module(_louvainimputer src/LouvainImputer.cpp src/KNNImputer.cpp src/py11_louvainimputer.cpp)
+	target_link_libraries(_louvainimputer PRIVATE graph_lib OpenMP::OpenMP_CXX)
+	target_include_directories(_louvainimputer PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_louvainimputer PROPERTIES LINKER_LANGUAGE CXX)
 endif()
  
 set(CMAKE_CLEAN_TARGET "clean")
