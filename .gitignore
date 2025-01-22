@@ -6,6 +6,11 @@
 # Downloads from the evaluation script
 download/
 
+# Ignore files that are unzipped during benchmarking (and failed to delete)
+data/input/*
+!data/input/*.zip
+!data/input/unzipped/
+
 # Data output from benchmark
 data/output/knn/*
 !data/output/knn/.gitkeep
@@ -17,7 +22,7 @@ data/output/gnn/*
 !data/output/gnn/.gitkeep
 
 # MacOS
-.DS_store
+.DS_Store
 
 # VSCode
 .vscode/

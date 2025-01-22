@@ -9,6 +9,10 @@ def main():
     data_set_choice = get_user_choice_data_set()
     print("")
 
+    if data_set_choice == "amazon_fraud":
+        print(f"{data_set_choice} can't be evaluated at the moment.\nIf you want to run the strategy without evaluation, use the 'benchmark' script instead.")
+        return
+
     train_choice = get_user_choice_train()
     print("")
 
@@ -81,7 +85,7 @@ def get_user_choice_data_set():
     data_set_dict = {
         1: "twitch",
         2: "amazon",
-        3: "cora",
+        3: "corafull",
         4: "genius",
         5: "amazon_fraud",
         6: "github"
@@ -90,7 +94,7 @@ def get_user_choice_data_set():
     if data_set_input not in data_set_dict:
         print("Invalid choice")
         return
-    
+
     return data_set_dict[data_set_input]
 
 def get_user_choice_train():
