@@ -13,13 +13,13 @@ public:
     // Perform feature imputation
     void run();
 
+    // Helper to compute mean feature values for each community
+    std::unordered_map<int, std::vector<double>> compute_community_average();
+
 
 private:
     Graph& graph; // Reference to the graph
-    const std::vector<int>& communities; // Community assignments for each node
-
-    // Helper to compute mean feature values for each community
-    std::unordered_map<int, std::vector<double>> compute_community_average();
+    const std::vector<int> communities; // Community assignments for each node
 
 };
 
