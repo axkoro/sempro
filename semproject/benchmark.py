@@ -37,7 +37,7 @@ def kNN_benchmark(data_set, depth=3):
         "genius": graph_module.GraphInt,
         "twitch": graph_module.GraphDouble,
         "github": graph_module.GraphDouble,
-        "cora_full": graph_module.GraphBool,
+        "corafull": graph_module.GraphBool,
         "amazon_fraud": graph_module.GraphDouble
     }
     graph_class = graph_class_map.get(data_set)
@@ -79,7 +79,7 @@ def main():
     
     parser.add_argument("--graph", action='store_true', help="Only benchmark graph loading.")
     parser.add_argument("--strat", type=str, choices=["knn", "louvain", "gnn"], help="The strategy to benchmark.")
-    parser.add_argument("--input", type=str, choices=["twitch", "amazon_fraud", "cora_full", "genius", "amazon", "github"], help="The data set to use.")
+    parser.add_argument("--input", type=str, choices=["twitch", "amazon_fraud", "corafull", "genius", "amazon", "github"], help="The data set to use.")
     
     args = parser.parse_args()
     if args.graph:
