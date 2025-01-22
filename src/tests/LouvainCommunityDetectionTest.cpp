@@ -4,25 +4,6 @@
 #include "GraphDouble.hpp"
 #include "LouvainCommunityDetection.hpp"
 
-// Helper function to compare two integer vectors (communities) as sets of labels
-// (ignoring label permutations).
-bool samePartitionShape(const std::vector<int>& comm1, const std::vector<int>& comm2) {
-    if (comm1.size() != comm2.size()) return false;
-
-    // We only check that two nodes are in the same (or different) community
-    // in both partitions, ignoring the actual numeric label.
-    for (size_t i = 0; i < comm1.size(); i++) {
-        for (size_t j = i + 1; j < comm1.size(); j++) {
-            const bool sameInFirst = (comm1[i] == comm1[j]);
-            const bool sameInSecond = (comm2[i] == comm2[j]);
-            if (sameInFirst != sameInSecond) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 TEST(LouvainCommunityDetectionTest, SingleNodeGraph) {
     // Graph with 1 node (node 0) and zero edges.
     // offsets[0] = 0, offsets[1] = 0  => node 0 has no neighbors
@@ -170,8 +151,8 @@ TEST(LouvainCommunityDetectionTest, TwoComponents) {
 }
 
 TEST(LouvainCommunityDetectionTest, LargeGraph) {
-    std::string edges_path = "../input/twitch/twitch_edges.txt";
-    std::string features_path = "../input/twitch/twitch_features.txt";
+    std::string edges_path = "../data/input/unzipped/twitch_edges.txt";
+    std::string features_path = "../data/input/unzipped/twitch_features.txt";
 
     GraphDouble g(edges_path, features_path);
 
