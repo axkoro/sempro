@@ -14,7 +14,8 @@ class LouvainCommunityDetection {
     double get_modularity() const;
 
    private:
-    int max_phase1_iterations = 5;  // TODO: make configurable
+    bool executed = false;
+    int max_iterations = 50;
 
     MinimalGraph current_graph;
 
@@ -30,6 +31,8 @@ class LouvainCommunityDetection {
     std::vector<int> community_total_weights;
 
     int total_edge_weight;
+
+    void set_max_iterations(int max_iterations);
 
     void initialize();
     bool optimize_modularity();

@@ -13,6 +13,10 @@ LouvainCommunityDetection::LouvainCommunityDetection(const Graph& g) : current_g
     initialize();
 }
 
+void LouvainCommunityDetection::set_max_iterations(int max_iterations) {
+    this->max_iterations = max_iterations;
+}
+
 void LouvainCommunityDetection::initialize() {
     int num_nodes = current_graph.get_num_nodes();
     total_node_to_community.resize(num_nodes);
@@ -36,6 +40,9 @@ void LouvainCommunityDetection::initialize() {
 }
 
 std::vector<int> LouvainCommunityDetection::execute() {
+    if (executed) throw std::runtime_error("LouvainCommunityDetection has already been executed.");
+    executed = true;
+
     bool improvement;
     do {
         improvement = optimize_modularity();
@@ -54,6 +61,7 @@ bool LouvainCommunityDetection::optimize_modularity() {
     bool local_improvement;
     int iterations = 0;
     do {
+        // std::cout << get_modularity() << std::endl;
         local_improvement = false;
 
         // Process nodes in random order
@@ -91,7 +99,7 @@ bool LouvainCommunityDetection::optimize_modularity() {
             }
         }
         iterations++;
-    } while (local_improvement && iterations < max_phase1_iterations);
+    } while (local_improvement && iterations < max_iterations);
 
     return improved;
 }
@@ -109,21 +117,18 @@ double LouvainCommunityDetection::calculate_modularity_gain(int node, int target
     }
 
     double m2 = 2.0 * current_graph.get_num_edges();
-    double ki = current_graph.get_degree(node);
-    double ki_in = weight_to_community;
-    double sigma_tot = community_total_weights[target_comm];
+    double deg = current_graph.get_degree(node);
+    double total_community_weight = community_total_weights[target_comm];
 
-    return (ki_in - (sigma_tot * ki) / m2);  // TODO: source?
+    return (weight_to_community - (total_community_weight * deg) / m2);
 }
 
 void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) {
     local_node_to_community[node] = new_comm;
 
     int node_weight = current_graph.get_degree(node);
-    community_total_weights[old_comm] -=
-        node_weight;  // TODO: does this remove one edge too much (the connection remains, right?)
-    community_total_weights[new_comm] +=
-        node_weight;  // TODO: does this count the connecting edge between the communities twice?
+    community_total_weights[old_comm] -= node_weight;
+    community_total_weights[new_comm] += node_weight;
 
     for (auto pair : current_graph.get_neighbours(node)) {
         int neighbour = pair.first;
@@ -170,11 +175,7 @@ void LouvainCommunityDetection::aggregate_communities() {
             int comm2 = old_to_new_community_ids[comms.second];
             uint64_t new_key = encode_community_pair(comm1, comm2);
 
-            if (comm1 == -1 || comm2 == -1) continue;  // means this community doesn't exist
-            // anymore
-            // FIXME: this actually shouldn't be required but somehow community_connections.
-            // sometimes holds connections to communities that don't exist anymore (meaning it isn't
-            // being properly updated)
+            if (comm1 == -1 || comm2 == -1) continue;  // means this community doesn't exist anymore
 
             bool inserted = new_community_connections.try_emplace(new_key, weight)
                                 .second;  // won't be inserted if key already exists in map
@@ -225,24 +226,21 @@ void LouvainCommunityDetection::update_community_connection(int comm1, int comm2
 }
 
 double LouvainCommunityDetection::get_modularity() const {
-    // m2 = 2 * M, where M is the sum of all (weighted) edges
-    double m2 = 2.0 * total_edge_weight;
+    int m2 = 2 * total_edge_weight;
 
-    double Q = 0.0;  // This accumulates Σ_c [ e_c - (K_c^2 / m2) ]
+    double Q = 0.0;
 
     for (int comm = 0; comm < community_total_weights.size(); ++comm) {
-        // e_c: internal edge weight of a community
-        double e_c = 0.0;
+        int internal_community_weight = 0;
         uint64_t key = encode_community_pair(comm, comm);
         auto it = community_connections.find(key);
         if (it != community_connections.end()) {
-            e_c = it->second;
+            internal_community_weight = it->second;
         }
 
-        // K_c: total edge weight of a community
-        double K_c = community_total_weights[comm];
+        int total_community_weight = community_total_weights[comm];
 
-        Q += (e_c - (K_c * K_c / m2));
+        Q += (internal_community_weight - (total_community_weight * total_community_weight / m2));
     }
 
     return Q / m2;
