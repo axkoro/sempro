@@ -5,9 +5,9 @@
 #include "Graph.hpp"
 #include "MinimalGraph.hpp"
 
-class LouvainCommunityDetection {
+class Louvain {
    public:
-    explicit LouvainCommunityDetection(const Graph &g);
+    explicit Louvain(const Graph &g);
 
     std::vector<int> execute();
 

@@ -1,4 +1,4 @@
-#include "LouvainCommunityDetection.hpp"
+#include "Louvain.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -8,16 +8,14 @@
 
 #include "MinimalGraph.hpp"
 
-LouvainCommunityDetection::LouvainCommunityDetection(const Graph& g) : current_graph(g) {
+Louvain::Louvain(const Graph& g) : current_graph(g) {
     total_edge_weight = g.get_num_edges();
     initialize();
 }
 
-void LouvainCommunityDetection::set_max_iterations(int max_iterations) {
-    this->max_iterations = max_iterations;
-}
+void Louvain::set_max_iterations(int max_iterations) { this->max_iterations = max_iterations; }
 
-void LouvainCommunityDetection::initialize() {
+void Louvain::initialize() {
     int num_nodes = current_graph.get_num_nodes();
     total_node_to_community.resize(num_nodes);
     community_total_weights.resize(num_nodes);
@@ -39,8 +37,8 @@ void LouvainCommunityDetection::initialize() {
     }
 }
 
-std::vector<int> LouvainCommunityDetection::execute() {
-    if (executed) throw std::runtime_error("LouvainCommunityDetection has already been executed.");
+std::vector<int> Louvain::execute() {
+    if (executed) throw std::runtime_error("Louvain has already been executed.");
     executed = true;
 
     bool improvement;
@@ -52,7 +50,7 @@ std::vector<int> LouvainCommunityDetection::execute() {
     return total_node_to_community;
 }
 
-bool LouvainCommunityDetection::optimize_modularity() {
+bool Louvain::optimize_modularity() {
     bool improved = false;
 
     local_node_to_community.resize(current_graph.get_num_nodes());
@@ -82,7 +80,7 @@ bool LouvainCommunityDetection::optimize_modularity() {
 
             // Find best community
             int best_community = current_comm;
-            double best_gain = 0.0;
+            double best_gain = 0;
 
             for (int candidate_comm : neighbour_communities) {
                 double gain = calculate_modularity_gain(node, candidate_comm);
@@ -104,7 +102,7 @@ bool LouvainCommunityDetection::optimize_modularity() {
     return improved;
 }
 
-double LouvainCommunityDetection::calculate_modularity_gain(int node, int target_comm) {
+double Louvain::calculate_modularity_gain(int node, int target_comm) {
     int weight_to_community = 0;
 
     for (auto pair : current_graph.get_neighbours(node)) {
@@ -116,14 +114,14 @@ double LouvainCommunityDetection::calculate_modularity_gain(int node, int target
         }
     }
 
-    double m2 = 2.0 * current_graph.get_num_edges();
+    double m2 = 2.0 * total_edge_weight;
     double deg = current_graph.get_degree(node);
     double total_community_weight = community_total_weights[target_comm];
 
     return (weight_to_community - (total_community_weight * deg) / m2);
 }
 
-void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) {
+void Louvain::move_node(int node, int old_comm, int new_comm) {
     local_node_to_community[node] = new_comm;
 
     int node_weight = current_graph.get_degree(node);
@@ -139,7 +137,7 @@ void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) 
     }
 }
 
-void LouvainCommunityDetection::aggregate_communities() {
+void Louvain::aggregate_communities() {
     int num_nodes = current_graph.get_num_nodes();
     std::vector<int> old_to_new_community_ids(num_nodes, -1);
     int next_community_id = 0;
@@ -207,25 +205,24 @@ void LouvainCommunityDetection::aggregate_communities() {
     }
 }
 
-uint64_t LouvainCommunityDetection::encode_community_pair(int comm1, int comm2) {
+uint64_t Louvain::encode_community_pair(int comm1, int comm2) {
     if (comm1 > comm2) std::swap(comm1, comm2);
     return (static_cast<uint64_t>(comm1) << 32) | static_cast<uint64_t>(comm2);
 }
 
-std::pair<int, int> LouvainCommunityDetection::decode_community_pair(uint64_t comm_pair) {
+std::pair<int, int> Louvain::decode_community_pair(uint64_t comm_pair) {
     uint32_t c1 = static_cast<uint32_t>(comm_pair >> 32);
     uint32_t c2 = static_cast<uint32_t>(comm_pair & 0xFFFFFFFF);
     return {static_cast<int>(c1), static_cast<int>(c2)};
 }
 
-void LouvainCommunityDetection::update_community_connection(int comm1, int comm2,
-                                                            int weight_delta) {
+void Louvain::update_community_connection(int comm1, int comm2, int weight_delta) {
     uint64_t pair = encode_community_pair(comm1, comm2);
     community_connections[pair] += weight_delta;
     if (community_connections[pair] == 0) community_connections.erase(pair);
 }
 
-double LouvainCommunityDetection::get_modularity() const {
+double Louvain::get_modularity() const {
     int m2 = 2 * total_edge_weight;
 
     double Q = 0.0;

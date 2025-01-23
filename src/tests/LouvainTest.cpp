@@ -2,16 +2,16 @@
 
 #include "GraphBool.hpp"
 #include "GraphDouble.hpp"
-#include "LouvainCommunityDetection.hpp"
+#include "Louvain.hpp"
 
-TEST(LouvainCommunityDetectionTest, SingleNodeGraph) {
+TEST(LouvainTest, SingleNodeGraph) {
     // Graph with 1 node (node 0) and zero edges.
     // offsets[0] = 0, offsets[1] = 0  => node 0 has no neighbors
     std::vector<int> offsets = {0, 0};
     std::vector<int> edges = {};
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 1u);
@@ -19,7 +19,7 @@ TEST(LouvainCommunityDetectionTest, SingleNodeGraph) {
     EXPECT_EQ(communities[0], 0);
 }
 
-TEST(LouvainCommunityDetectionTest, TwoNodeNoEdge) {
+TEST(LouvainTest, TwoNodeNoEdge) {
     // Graph with 2 nodes, no edges:
     // node 0 => no neighbors
     // node 1 => no neighbors
@@ -28,7 +28,7 @@ TEST(LouvainCommunityDetectionTest, TwoNodeNoEdge) {
     std::vector<int> edges = {};
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 2u);
@@ -36,7 +36,7 @@ TEST(LouvainCommunityDetectionTest, TwoNodeNoEdge) {
     EXPECT_NE(communities[0], communities[1]);
 }
 
-TEST(LouvainCommunityDetectionTest, TwoNodeOneEdge) {
+TEST(LouvainTest, TwoNodeOneEdge) {
     // Graph with 2 nodes and 1 edge: 0 <-> 1
     // node 0 neighbors: edges[0..1) => [1]
     // node 1 neighbors: edges[1..2) => [0]
@@ -45,7 +45,7 @@ TEST(LouvainCommunityDetectionTest, TwoNodeOneEdge) {
     std::vector<int> edges = {1, 0};
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 2u);
@@ -53,7 +53,7 @@ TEST(LouvainCommunityDetectionTest, TwoNodeOneEdge) {
     EXPECT_EQ(communities[0], communities[1]);
 }
 
-TEST(LouvainCommunityDetectionTest, ThreeNodeChain) {
+TEST(LouvainTest, ThreeNodeChain) {
     // A chain of 3 nodes: 0--1--2
     // Adjacency lists:
     //   node 0 => [1]
@@ -68,7 +68,7 @@ TEST(LouvainCommunityDetectionTest, ThreeNodeChain) {
     std::vector<int> edges = {1, 0, 2, 1};
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 3u);
@@ -80,7 +80,7 @@ TEST(LouvainCommunityDetectionTest, ThreeNodeChain) {
     EXPECT_TRUE(somePairSame);
 }
 
-TEST(LouvainCommunityDetectionTest, CompleteGraph) {
+TEST(LouvainTest, CompleteGraph) {
     // A complete graph with 4 nodes; each node connected to the other 3.
     // We'll use adjacency lists:
     //   node 0 => [1,2,3]
@@ -97,7 +97,7 @@ TEST(LouvainCommunityDetectionTest, CompleteGraph) {
     };
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 4u);
@@ -110,7 +110,7 @@ TEST(LouvainCommunityDetectionTest, CompleteGraph) {
     }
 }
 
-TEST(LouvainCommunityDetectionTest, TwoComponents) {
+TEST(LouvainTest, TwoComponents) {
     // 5 nodes in two components:
     //   - A triangle among {0,1,2}
     //   - A single edge connecting 3 <-> 4
@@ -132,7 +132,7 @@ TEST(LouvainCommunityDetectionTest, TwoComponents) {
     std::vector<int> edges = {1, 2, 0, 2, 0, 1, 4, 3};
     GraphBool g(offsets, edges);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 5u);
@@ -150,17 +150,19 @@ TEST(LouvainCommunityDetectionTest, TwoComponents) {
     EXPECT_EQ(communities[4], comm3);
 }
 
-TEST(LouvainCommunityDetectionTest, LargeGraph) {
+TEST(LouvainTest, LargeGraph) {
     std::string edges_path = "../data/input/unzipped/twitch_edges.txt";
     std::string features_path = "../data/input/unzipped/twitch_features.txt";
 
     GraphDouble g(edges_path, features_path);
 
-    LouvainCommunityDetection lcd(g);
+    Louvain lcd(g);
+    double pre_modularity = lcd.get_modularity();
 
     EXPECT_NO_THROW(lcd.execute());
+    double post_modularity = lcd.get_modularity();
 
-    // lcd.get_modularity();
+    EXPECT_GT(post_modularity, pre_modularity);
 }
 
 int main(int argc, char** argv) {
