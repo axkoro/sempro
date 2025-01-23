@@ -5,7 +5,7 @@
 
 class MinimalGraph {
    private:
-    std::vector<std::vector<std::pair<int, double>>> edges;
+    std::vector<std::vector<std::pair<int, int>>> edges;
     int num_edges;
 
    public:
@@ -19,11 +19,11 @@ class MinimalGraph {
 
     // Return adjacency list for node "u"
     // Each entry is (neighbor, weight)
-    const std::vector<std::pair<int, double>>& get_neighbours(int u) const;
+    const std::vector<std::pair<int, int>>& get_neighbours(int u) const;
 
     // Return sum of weights of edges from node "u"  (the "weighted degree")
-    double get_degree(int u) const;
+    int get_degree(int u) const;
 
     // Add an edge with a given weight in an undirected manner
-    void add_edge(int u, int v, double w);
+    void add_edge(int u, int v, int w);
 };

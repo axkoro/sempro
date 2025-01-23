@@ -15,19 +15,19 @@ LouvainCommunityDetection::LouvainCommunityDetection(const Graph& g) : current_g
 
 void LouvainCommunityDetection::initialize() {
     int num_nodes = current_graph.get_num_nodes();
-    node_to_community.resize(num_nodes);
+    total_node_to_community.resize(num_nodes);
     community_total_weights.resize(num_nodes);
 
     // Initialize each node to its own community
-    std::iota(node_to_community.begin(), node_to_community.end(), 0);
+    std::iota(total_node_to_community.begin(), total_node_to_community.end(), 0);
 
     for (int node = 0; node < num_nodes; node++) {
         // Initialize community connections
         for (auto pair : current_graph.get_neighbours(node)) {
             int neighbour = pair.first;
             if (neighbour >= node) {  // prevent double counting of edges
-                long comm_pair = encode_community_pair(node, neighbour);
-                community_connections.emplace(comm_pair, 1.0);
+                uint64_t comm_pair = encode_community_pair(node, neighbour);
+                community_connections.emplace(comm_pair, 1);  // initial graph is unweighted
             }
         }
 
@@ -39,20 +39,21 @@ std::vector<int> LouvainCommunityDetection::execute() {
     bool improvement;
     do {
         improvement = optimize_modularity();
-        // std::cout << get_modularity() << std::endl;
         if (improvement) aggregate_communities();
     } while (improvement);
 
-    return node_to_community;
+    return total_node_to_community;
 }
 
 bool LouvainCommunityDetection::optimize_modularity() {
     bool improved = false;
 
+    local_node_to_community.resize(current_graph.get_num_nodes());
+    std::iota(local_node_to_community.begin(), local_node_to_community.end(), 0);
+
     bool local_improvement;
     int iterations = 0;
     do {
-        std::cout << get_modularity() << std::endl;
         local_improvement = false;
 
         // Process nodes in random order
@@ -61,14 +62,14 @@ bool LouvainCommunityDetection::optimize_modularity() {
         std::shuffle(nodes.begin(), nodes.end(), std::random_device{});
 
         for (int node : nodes) {
-            int current_comm = node_to_community[node];
+            int current_comm = local_node_to_community[node];
 
             // Find neighbouring communities
             std::unordered_set<int> neighbour_communities;
             auto neighbours = current_graph.get_neighbours(node);
             for (auto pair : neighbours) {
                 int neighbour = pair.first;
-                neighbour_communities.insert(node_to_community[neighbour]);
+                neighbour_communities.insert(local_node_to_community[neighbour]);
             }
 
             // Find best community
@@ -96,13 +97,13 @@ bool LouvainCommunityDetection::optimize_modularity() {
 }
 
 double LouvainCommunityDetection::calculate_modularity_gain(int node, int target_comm) {
-    double weight_to_community = 0.0;
+    int weight_to_community = 0;
 
     for (auto pair : current_graph.get_neighbours(node)) {
         int neighbour = pair.first;
-        double weight = pair.second;
+        int weight = pair.second;
 
-        if (node_to_community[neighbour] == target_comm) {
+        if (local_node_to_community[neighbour] == target_comm) {
             weight_to_community += weight;
         }
     }
@@ -116,9 +117,9 @@ double LouvainCommunityDetection::calculate_modularity_gain(int node, int target
 }
 
 void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) {
-    node_to_community[node] = new_comm;
+    local_node_to_community[node] = new_comm;
 
-    double node_weight = current_graph.get_degree(node);
+    int node_weight = current_graph.get_degree(node);
     community_total_weights[old_comm] -=
         node_weight;  // TODO: does this remove one edge too much (the connection remains, right?)
     community_total_weights[new_comm] +=
@@ -126,10 +127,10 @@ void LouvainCommunityDetection::move_node(int node, int old_comm, int new_comm) 
 
     for (auto pair : current_graph.get_neighbours(node)) {
         int neighbour = pair.first;
-        double weight = pair.second;
+        int weight = pair.second;
 
-        update_community_connection(old_comm, node_to_community[neighbour], -weight);
-        update_community_connection(new_comm, node_to_community[neighbour], weight);
+        update_community_connection(old_comm, local_node_to_community[neighbour], -weight);
+        update_community_connection(new_comm, local_node_to_community[neighbour], weight);
     }
 }
 
@@ -140,7 +141,7 @@ void LouvainCommunityDetection::aggregate_communities() {
 
     // Create mapping of old to new (consecutive) community IDs
     for (int i = 0; i < num_nodes; i++) {
-        int old_comm = node_to_community[i];
+        int old_comm = local_node_to_community[i];
         if (old_to_new_community_ids[old_comm] == -1) {
             old_to_new_community_ids[old_comm] = next_community_id++;
         }
@@ -148,23 +149,38 @@ void LouvainCommunityDetection::aggregate_communities() {
 
     // Update node community assignments
     for (int i = 0; i < num_nodes; i++) {
-        node_to_community[i] = old_to_new_community_ids[node_to_community[i]];
+        local_node_to_community[i] = old_to_new_community_ids[local_node_to_community[i]];
+    }
+
+    // Update global node_to_community mapping
+    for (int node = 0; node < total_node_to_community.size(); node++) {
+        int prev_comm = total_node_to_community[node];
+        total_node_to_community[node] = local_node_to_community[prev_comm];
     }
 
     // Update community_connections to match renaming
     {
-        std::unordered_map<long, double> new_community_connections;
+        std::unordered_map<uint64_t, int> new_community_connections;
         for (const auto& p : community_connections) {
-            long old_key = p.first;
-            double weight = p.second;
+            uint64_t old_key = p.first;
+            int weight = p.second;
 
-            // apply remapping to key
             std::pair<int, int> comms = decode_community_pair(old_key);
             int comm1 = old_to_new_community_ids[comms.first];
             int comm2 = old_to_new_community_ids[comms.second];
-            long new_key = encode_community_pair(comm1, comm2);
+            uint64_t new_key = encode_community_pair(comm1, comm2);
 
-            new_community_connections.emplace(new_key, weight);
+            if (comm1 == -1 || comm2 == -1) continue;  // means this community doesn't exist
+            // anymore
+            // FIXME: this actually shouldn't be required but somehow community_connections.
+            // sometimes holds connections to communities that don't exist anymore (meaning it isn't
+            // being properly updated)
+
+            bool inserted = new_community_connections.try_emplace(new_key, weight)
+                                .second;  // won't be inserted if key already exists in map
+            if (!inserted) {              // only in case of merged communities (comm1==comm2)
+                new_community_connections.at(new_key) += weight;
+            }
         }
         community_connections = std::move(new_community_connections);
     }
@@ -172,8 +188,8 @@ void LouvainCommunityDetection::aggregate_communities() {
     MinimalGraph new_graph(next_community_id);
 
     for (auto& pair : community_connections) {
-        long key = pair.first;
-        double weight = pair.second;
+        uint64_t key = pair.first;
+        int weight = pair.second;
 
         std::pair<int, int> comms = decode_community_pair(key);
 
@@ -190,26 +206,22 @@ void LouvainCommunityDetection::aggregate_communities() {
     }
 }
 
-long LouvainCommunityDetection::encode_community_pair(int comm1, int comm2) {
+uint64_t LouvainCommunityDetection::encode_community_pair(int comm1, int comm2) {
     if (comm1 > comm2) std::swap(comm1, comm2);
-    return (long)comm1 << 32 | (long)comm2;
+    return (static_cast<uint64_t>(comm1) << 32) | static_cast<uint64_t>(comm2);
 }
 
-std::pair<int, int> LouvainCommunityDetection::decode_community_pair(long comm_pair) {
-    uint64_t unsigned_comm_pair = static_cast<uint64_t>(comm_pair);
-    uint32_t c1 = static_cast<uint32_t>(unsigned_comm_pair >> 32);
-    uint32_t c2 = static_cast<uint32_t>(unsigned_comm_pair & 0xFFFFFFFF);
+std::pair<int, int> LouvainCommunityDetection::decode_community_pair(uint64_t comm_pair) {
+    uint32_t c1 = static_cast<uint32_t>(comm_pair >> 32);
+    uint32_t c2 = static_cast<uint32_t>(comm_pair & 0xFFFFFFFF);
     return {static_cast<int>(c1), static_cast<int>(c2)};
 }
 
 void LouvainCommunityDetection::update_community_connection(int comm1, int comm2,
-                                                            double weight_delta) {
-    long pair = encode_community_pair(comm1, comm2);
+                                                            int weight_delta) {
+    uint64_t pair = encode_community_pair(comm1, comm2);
     community_connections[pair] += weight_delta;
-    if (std::abs(community_connections[pair]) <
-        1e-10) {  // TODO: remove when switching to int weights
-        community_connections.erase(pair);
-    }
+    if (community_connections[pair] == 0) community_connections.erase(pair);
 }
 
 double LouvainCommunityDetection::get_modularity() const {
@@ -221,7 +233,7 @@ double LouvainCommunityDetection::get_modularity() const {
     for (int comm = 0; comm < community_total_weights.size(); ++comm) {
         // e_c: internal edge weight of a community
         double e_c = 0.0;
-        long key = encode_community_pair(comm, comm);
+        uint64_t key = encode_community_pair(comm, comm);
         auto it = community_connections.find(key);
         if (it != community_connections.end()) {
             e_c = it->second;

@@ -11,8 +11,8 @@ MinimalGraph::MinimalGraph(const Graph& g) {
         const auto& neighbours = g.get_neighbours(node);
         for (int neighbour : neighbours) {
             if (neighbour > node) {  // to avoid double counting
-                edges[node].push_back({neighbour, 1.0});
-                edges[neighbour].push_back({node, 1.0});
+                edges[node].push_back({neighbour, 1});
+                edges[neighbour].push_back({node, 1});
             }
         }
     }
@@ -22,19 +22,19 @@ int MinimalGraph::get_num_nodes() const { return (int)edges.size(); }
 
 int MinimalGraph::get_num_edges() const { return num_edges; }
 
-const std::vector<std::pair<int, double>>& MinimalGraph::get_neighbours(int u) const {
+const std::vector<std::pair<int, int>>& MinimalGraph::get_neighbours(int u) const {
     return edges[u];
 }
 
-double MinimalGraph::get_degree(int u) const {
-    double deg = 0.0;
+int MinimalGraph::get_degree(int u) const {
+    int deg = 0.0;
     for (auto& p : edges[u]) {
         deg += p.second;
     }
     return deg;
 }
 
-void MinimalGraph::add_edge(int u, int v, double w) {
+void MinimalGraph::add_edge(int u, int v, int w) {
     if (u == v) {  // self-loop
         edges[u].push_back({v, w});
         num_edges++;
