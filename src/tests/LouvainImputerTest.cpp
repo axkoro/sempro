@@ -33,14 +33,37 @@ TEST(LouvainImputerTest, TestFeatureImputation) {
         }
     }
 
-    std::cout << "Imputed Features:\n";
+    graph.print_features();
+}
+
+TEST(LouvainImputerTest, TestFeatureImputationwithGlobalAverage) {
+    std::string edges_path = "../input/Gtests/edges_example.txt";
+    std::string features_path = "../input/Gtests/features3_example.txt";
+    Graph graph(edges_path, features_path);
+
+    std::vector<int> communities = {0, 0, 0, 1, 1};
+
+    std::vector<std::vector<double>> expected_output = {
+        {1, 0, 2.5, 0, 0, 0},
+        {0, 1, 2.5, 0, 0, 0},
+        {0, 0, 2.5, 1, 0, 0},
+        {0, 0, 2, 0, 1, 0},
+        {0, 0, 3, 0, 0, 1}
+    };
+
+    LouvainImputer imputer(graph, communities);
+    imputer.run();
+
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
-        std::cout << "Node " << node << ": ";
-        for (int feature = 0; feature < graph.get_num_features(); ++feature) {
-            std::cout << graph.get_feature(node, feature) << " ";
+        for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
+            EXPECT_NEAR(graph.get_feature(node, feature), expected_output[node][feature], 1e-2)
+                << "Node " << node << " Feature " << feature << " is incorrect.";
         }
-        std::cout << "\n";
     }
+
+    graph.print_features();
+
+
 }
 
 
