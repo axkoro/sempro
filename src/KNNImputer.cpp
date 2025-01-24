@@ -24,7 +24,7 @@ void KNNImputer::run() {
     if (type == b) {
         std::unordered_map<int, bool> global_averages;  // stores global averages for each feature
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
@@ -67,7 +67,7 @@ void KNNImputer::run() {
     } else if (type == d) {
         std::unordered_map<int, double> global_averages;  // stores global averages for each feature
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
@@ -110,7 +110,7 @@ void KNNImputer::run() {
     } else if (type == i) {
         std::unordered_map<int, int> global_averages;  // stores global averages for each feature
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
