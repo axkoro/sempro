@@ -1,7 +1,10 @@
 #include "LouvainImputer.hpp"
-#include "KNNImputer.hpp"
-#include <numeric>
+
 #include <iostream>
+#include <numeric>
+
+#include "KNNImputer.hpp"
+#include "Louvain.hpp"
 
 // Constructor: Initializes the feature imputation class
 LouvainImputer::LouvainImputer(Graph& graph, const std::vector<int>& communities)
@@ -33,8 +36,7 @@ std::unordered_map<int, std::vector<double>> LouvainImputer::compute_community_a
         for (int feature = 0; feature < sums.size(); ++feature) {
             if (community_counts[community][feature] == 0) {
                 sums[feature] = compute_global_average(graph, feature);
-            }
-            else {
+            } else {
                 sums[feature] /= community_counts[community][feature];
             }
         }
@@ -54,10 +56,8 @@ void LouvainImputer::run() {
         for (int feature = 0; feature < graph.get_num_features(); ++feature) {
             if (graph.is_missing(node, feature)) {
                 graph.set_feature(node, feature, community_means[community][feature]);
-                graph.set_missing(node, feature, false); // Mark as imputed
+                graph.set_missing(node, feature, false);  // Mark as imputed
             }
         }
     }
 }
-
-

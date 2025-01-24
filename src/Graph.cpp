@@ -4,31 +4,25 @@
 #include <charconv>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <sstream>
 #include <unordered_set>
 
-Graph::Graph() = default;
+GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
 
-Graph::Graph(std::vector<int>& offsets, std::vector<int>& edges) {
+Graph::Graph(std::vector<int> offsets, std::vector<int> edges) {
     this->offsets = offsets;
     this->edges = edges;
     num_nodes = offsets.size() - 1;
-}
-
-Graph::Graph(std::string edges_path, std::string features_path) {
-    num_nodes = parse_node_count(features_path);
-    num_features = parse_feature_count(features_path);
-    read_edges(edges_path);
-    read_features(features_path);
 }
 
 int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_features() const { return num_features; }
 
-double Graph::get_feature(int node, int feature) const { return features[node][feature]; }
+int Graph::get_num_edges() const { return edges.size() / 2; }
 
-void Graph::set_feature(int node, int feature, double value) { features[node][feature] = value; }
+int Graph::get_label(int node) const { return labels[node]; }
 
 void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
 
@@ -53,19 +47,25 @@ std::vector<int> Graph::get_neighbours(int node) const {
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
     if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
 
-    std::vector<int> neighbours = get_neighbours(node);  // k=1
+    std::unordered_set<int> visited;
+    std::queue<int> frontier;
+    frontier.push(node);
+    visited.insert(node);
 
-    int last_depth_start = 0;
-    int this_depth_start = neighbours.size();
-    for (int k = 2; k <= depth; k++) {
-        for (int i = last_depth_start; i < this_depth_start; i++) {
-            std::vector<int> new_neighbours = get_neighbours(neighbours[i]);
-            neighbours.insert(neighbours.end(), new_neighbours.begin(), new_neighbours.end());
+    for (int d = 0; d < depth; ++d) {
+        int frontierSize = frontier.size();
+        for (int i = 0; i < frontierSize; ++i) {
+            int curr = frontier.front();
+            frontier.pop();
+            for (auto&& nbr : get_neighbours(curr)) {
+                if (!visited.count(nbr)) {
+                    visited.insert(nbr);
+                    frontier.push(nbr);
+                }
+            }
         }
-        neighbours = remove_duplicates(neighbours);
-        last_depth_start = this_depth_start;
-        this_depth_start = neighbours.size();
     }
+    std::vector<int> neighbours(visited.begin(), visited.end());
 
     return neighbours;
 }
@@ -127,58 +127,6 @@ void Graph::read_edges(std::string edges_path) {
     file.close();
 }
 
-void Graph::read_features(std::string features_path) {
-    if (num_nodes == -1) {
-        num_nodes = parse_node_count(features_path);
-        if (num_nodes < 0)
-            throw std::runtime_error("Couldn't parse node count from file: " + features_path);
-    }
-    if (num_features == -1) {
-        num_features = parse_feature_count(features_path);
-        if (num_nodes < 0)
-            throw std::runtime_error("Couldn't parse feature count from file: " + features_path);
-    }
-
-    features = std::vector<std::vector<double>>(num_nodes, std::vector<double>(num_features));
-    missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
-
-    std::ifstream file(features_path);
-    if (!file.is_open()) throw std::runtime_error("Could not open file: " + features_path);
-
-    std::string line;
-    while (std::getline(file, line)) {
-        const char* ptr = line.c_str();
-        char* endptr;
-
-        // Parse node index
-        int node = std::strtol(ptr, &endptr, 10);
-        ptr = endptr;
-
-        // Parse features
-        for (int i = 0; i < num_features - 1; i++) {
-            double value = std::strtod(ptr, &endptr);
-            if (ptr == endptr) {  // found '#'
-                missing[node][i] = true;
-                endptr += 3;  // advance three characters
-            } else {
-                features[node][i] = value;
-            }
-            ptr = endptr + 2;  // skip comma and space
-        }
-
-        // Parse label
-        --ptr;  // because last feature and label are only separated by '\t'
-        int label_idx = num_features - 1;
-        int label_value = std::strtol(ptr, &endptr, 10);
-        if (ptr == endptr) {
-            missing[node][label_idx] = true;
-        } else {
-            features[node][label_idx] = label_value;
-        }
-    }
-    file.close();
-}
-
 void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
@@ -190,29 +138,17 @@ void Graph::print_edges() const {
     }
 }
 
-void Graph::print_features() const {
-    for (int node = 0; node < num_nodes; node++) {
-        std::cout << node << '\t';
-        for (int i = 0; i < num_features - 2; i++) {
-            if (missing[node][i]) {
-                std::cout << "\'#\'" << ", ";
-            } else {
-                std::cout << features[node][i] << ", ";
-            }
-        }
+void Graph::print_features_to_file(std::string output_path) const {
+    std::ofstream file(output_path, std::ios::out | std::ios::trunc);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + output_path);
 
-        if (missing[node][num_features - 2]) {  // last feature
-            std::cout << "\'#\'" << '\t';
-        } else {
-            std::cout << features[node][num_features - 2] << '\t';
-        }
+    std::streambuf* coutbuf = std::cout.rdbuf();  // save old buf
+    std::cout.rdbuf(file.rdbuf());                // redirect std::cout to file
 
-        if (missing[node][num_features - 1]) {  // label
-            std::cout << "\'#\'" << '\n';
-        } else {
-            std::cout << features[node][num_features - 1] << '\n';
-        }
-    }
+    print_features();
+
+    std::cout.rdbuf(coutbuf);  // reset to standard output again
+    file.close();
 }
 
 int parse_node_count(std::string features_path) {
@@ -264,18 +200,5 @@ int parse_feature_count(std::string features_path) {
     if (comma_count == 0)
         throw std::runtime_error("Invalid format: no commas found in the line of file '" +
                                  features_path + "'");
-    return comma_count + 2;  // + 1 because we include the label as a feature
-}
-
-std::vector<int> remove_duplicates(const std::vector<int>& arr) {
-    std::unordered_set<int> seen;
-    std::vector<int> result;
-
-    for (const int& num : arr) {
-        if (seen.insert(num).second) {  // Only insert if not already in set
-            result.push_back(num);
-        }
-    }
-
-    return result;
+    return comma_count + 1;  // assuming one comma after every feature except the last
 }

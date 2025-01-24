@@ -8,53 +8,52 @@ option(BUILD_TESTS "Build tests" ON)
 
 find_package(OpenMP REQUIRED)
 
+add_library(GraphLib
+    src/Graph.cpp
+    src/GraphDouble.cpp
+    src/GraphInt.cpp
+    src/GraphBool.cpp
+)
+target_include_directories(GraphLib PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
+
 if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
 	add_subdirectory(extlibs/gtest)
-	set(CMAKE_BUILD_TYPE "Debug")
+	set(CMAKE_BUILD_TYPE Debug)
 	
-	add_executable(GraphTest src/tests/GraphTest.cpp src/Graph.cpp)
+	add_executable(GraphTest src/tests/GraphTest.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(GraphTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_link_libraries(GraphTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
-	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp src/Graph.cpp)
+	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp)
 	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(KNNImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
 
-	add_executable(LouvainClusteringTest src/tests/LouvainClusteringTest.cpp src/LouvainClustering.cpp src/Graph.cpp)
-	target_include_directories(LouvainClusteringTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(LouvainClusteringTest PRIVATE gtest OpenMP::OpenMP_CXX)
-	target_compile_options(LouvainClusteringTest PRIVATE -coverage)
-	target_link_options(LouvainClusteringTest PRIVATE -coverage)
+	add_executable(LouvainTest src/tests/LouvainTest.cpp src/Louvain.cpp src/MinimalGraph.cpp)
+	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LouvainTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_compile_options(LouvainTest PRIVATE -coverage)
+	target_link_options(LouvainTest PRIVATE -coverage)
 
-	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/KNNImputer.cpp src/Graph.cpp)
+	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/Louvain.cpp src/KNNImputer.cpp)
 	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(LouvainImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_link_libraries(LouvainImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
 	target_link_options(LouvainImputerTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
-	pybind11_add_module(_graph src/Graph.cpp src/py11_graph.cpp)
-	target_link_libraries(_graph PRIVATE OpenMP::OpenMP_CXX)
+	pybind11_add_module(_graph src/py11_graph.cpp)
+	target_link_libraries(_graph PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
-
-	add_library(graph_lib src/Graph.cpp)
-	target_include_directories(graph_lib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	
 	pybind11_add_module(_strats src/KNNImputer.cpp src/py11_strats.cpp)
-	target_link_libraries(_strats PRIVATE graph_lib OpenMP::OpenMP_CXX)
+	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
-
-	pybind11_add_module(_louvainimputer src/LouvainImputer.cpp src/KNNImputer.cpp src/py11_louvainimputer.cpp)
-	target_link_libraries(_louvainimputer PRIVATE graph_lib OpenMP::OpenMP_CXX)
-	target_include_directories(_louvainimputer PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_louvainimputer PROPERTIES LINKER_LANGUAGE CXX)
 endif()
- 
-set(CMAKE_CLEAN_TARGET "clean")
