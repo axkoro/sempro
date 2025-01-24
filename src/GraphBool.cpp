@@ -56,9 +56,9 @@ void GraphBool::read_features(std::string features_path) {
         // Parse features
         for (int i = 0; i < num_features; i++) {
             unsigned long value = std::strtoul(ptr, &endptr, 10);
-            if (ptr == endptr) {  // found '#'
+            if (ptr == endptr) {  // found #
                 missing[node][i] = true;
-                endptr += 3;              // advance three characters
+                endptr += 1;              // skip the #
             } else if (*endptr == '.') {  // found value with comma
                 features[node][i] = value;
 
@@ -88,14 +88,14 @@ void GraphBool::print_features() const {
         std::cout << node << '\t';
         for (int i = 0; i < num_features - 1; i++) {
             if (missing[node][i]) {
-                std::cout << "\'#\'" << ", ";
+                std::cout << "#" << ", ";
             } else {
                 std::cout << features[node][i] << ", ";
             }
         }
 
         if (missing[node][num_features - 1]) {  // last feature
-            std::cout << "\'#\'" << '\t';
+            std::cout << "#" << '\t';
         } else {
             std::cout << features[node][num_features - 1] << '\t';
         }

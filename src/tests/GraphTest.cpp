@@ -277,11 +277,11 @@ TEST(GraphTest, print_bool_features) {
     std::cout.rdbuf(oldCoutBuffer);
 
     std::string expected_print =
-        "0\t1, 0, '#', 0, 0, 0\t2\n"
-        "1\t0, 1, '#', 0, 0, 0\t0\n"
-        "2\t0, 0, '#', 1, 0, 0\t1\n"
-        "3\t0, 0, '#', 0, 1, 0\t3\n"
-        "4\t0, 0, '#', 0, 0, 1\t4\n";
+        "0\t1, 0, #, 0, 0, 0\t2\n"
+        "1\t0, 1, #, 0, 0, 0\t0\n"
+        "2\t0, 0, #, 1, 0, 0\t1\n"
+        "3\t0, 0, #, 0, 1, 0\t3\n"
+        "4\t0, 0, #, 0, 0, 1\t4\n";
 
     EXPECT_EQ(output.str(), expected_print);
 }
@@ -302,11 +302,11 @@ TEST(GraphTest, print_int_features) {
     std::cout.rdbuf(oldCoutBuffer);
 
     std::string expected_print =
-        "0\t1, 0, '#', 0, 0, 0\t2\n"
-        "1\t0, 1, '#', 0, 0, 0\t0\n"
-        "2\t0, 0, '#', 1, 0, 0\t1\n"
-        "3\t0, 0, '#', 0, 1, 0\t3\n"
-        "4\t0, 0, '#', 0, 0, 1\t4\n";
+        "0\t1, 0, #, 0, 0, 0\t2\n"
+        "1\t0, 1, #, 0, 0, 0\t0\n"
+        "2\t0, 0, #, 1, 0, 0\t1\n"
+        "3\t0, 0, #, 0, 1, 0\t3\n"
+        "4\t0, 0, #, 0, 0, 1\t4\n";
 
     EXPECT_EQ(output.str(), expected_print);
 }
@@ -327,11 +327,11 @@ TEST(GraphTest, print_double_features) {
     std::cout.rdbuf(oldCoutBuffer);
 
     std::string expected_print =
-        "0\t1, 0, '#', 0, 0, 0\t2\n"
-        "1\t0, 1, '#', 0, 0, 0\t0\n"
-        "2\t0, 0, '#', 1, 0, 0\t1\n"
-        "3\t0, 0, '#', 0, 1, 0\t3\n"
-        "4\t0, 0, '#', 0, 0, 1\t4\n";
+        "0\t1, 0, #, 0, 0, 0\t2\n"
+        "1\t0, 1, #, 0, 0, 0\t0\n"
+        "2\t0, 0, #, 1, 0, 0\t1\n"
+        "3\t0, 0, #, 0, 1, 0\t3\n"
+        "4\t0, 0, #, 0, 0, 1\t4\n";
 
     EXPECT_EQ(output.str(), expected_print);
 }
