@@ -4,6 +4,7 @@
 #include <charconv>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <sstream>
 #include <unordered_set>
 
@@ -46,19 +47,25 @@ std::vector<int> Graph::get_neighbours(int node) const {
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
     if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
 
-    std::vector<int> neighbours = get_neighbours(node);  // k=1
+    std::unordered_set<int> visited;
+    std::queue<int> frontier;
+    frontier.push(node);
+    visited.insert(node);
 
-    int last_depth_start = 0;
-    int this_depth_start = neighbours.size();
-    for (int k = 2; k <= depth; k++) {
-        for (int i = last_depth_start; i < this_depth_start; i++) {
-            std::vector<int> new_neighbours = get_neighbours(neighbours[i]);
-            neighbours.insert(neighbours.end(), new_neighbours.begin(), new_neighbours.end());
+    for (int d = 0; d < depth; ++d) {
+        int frontierSize = frontier.size();
+        for (int i = 0; i < frontierSize; ++i) {
+            int curr = frontier.front();
+            frontier.pop();
+            for (auto&& nbr : get_neighbours(curr)) {
+                if (!visited.count(nbr)) {
+                    visited.insert(nbr);
+                    frontier.push(nbr);
+                }
+            }
         }
-        neighbours = remove_duplicates(neighbours);
-        last_depth_start = this_depth_start;
-        this_depth_start = neighbours.size();
     }
+    std::vector<int> neighbours(visited.begin(), visited.end());
 
     return neighbours;
 }
@@ -194,17 +201,4 @@ int parse_feature_count(std::string features_path) {
         throw std::runtime_error("Invalid format: no commas found in the line of file '" +
                                  features_path + "'");
     return comma_count + 1;  // assuming one comma after every feature except the last
-}
-
-std::vector<int> remove_duplicates(const std::vector<int>& arr) {
-    std::unordered_set<int> seen;
-    std::vector<int> result;
-
-    for (const int& num : arr) {
-        if (seen.insert(num).second) {  // Only insert if not already in set
-            result.push_back(num);
-        }
-    }
-
-    return result;
 }
