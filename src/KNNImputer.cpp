@@ -23,8 +23,9 @@ void KNNImputer::run() {
 
     if (type == b) {
         std::unordered_map<int, bool> global_averages;  // stores global averages for each feature
+        std::mutex global_averages_mutex;
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
@@ -45,18 +46,16 @@ void KNNImputer::run() {
                 if (count > 0) {
                     graph.set_bool_feature(node, feature, to_bool((double)sum / (double)count));
                 } else {  // if no neighbours have the feature, use global average
+                    std::lock_guard<std::mutex> lock(global_averages_mutex);
                     auto it = global_averages.find(feature);
-                    if (it != global_averages.end()) {
+
+                    if (it != global_averages.end()) {  // already calculated
                         graph.set_bool_feature(node, feature, it->second);
                     } else {
                         double global_avg = compute_global_average_bool(graph, feature);
                         graph.set_bool_feature(node, feature, global_avg);
 
-                        std::mutex avg_mutex;
-                        {
-                            std::lock_guard<std::mutex> lock(avg_mutex);
-                            global_averages[feature] = global_avg;
-                        }
+                        global_averages[feature] = global_avg;
                     }
                 }
 
@@ -66,8 +65,9 @@ void KNNImputer::run() {
         }
     } else if (type == d) {
         std::unordered_map<int, double> global_averages;  // stores global averages for each feature
+        std::mutex global_averages_mutex;
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
@@ -88,18 +88,16 @@ void KNNImputer::run() {
                 if (count > 0) {
                     graph.set_double_feature(node, feature, sum / count);
                 } else {  // if no neighbours have the feature, use global average
+                    std::lock_guard<std::mutex> lock(global_averages_mutex);
                     auto it = global_averages.find(feature);
-                    if (it != global_averages.end()) {
+
+                    if (it != global_averages.end()) {  // already calculated
                         graph.set_double_feature(node, feature, it->second);
                     } else {
                         double global_avg = compute_global_average_double(graph, feature);
                         graph.set_double_feature(node, feature, global_avg);
 
-                        std::mutex avg_mutex;
-                        {
-                            std::lock_guard<std::mutex> lock(avg_mutex);
-                            global_averages[feature] = global_avg;
-                        }
+                        global_averages[feature] = global_avg;
                     }
                 }
 
@@ -109,8 +107,9 @@ void KNNImputer::run() {
         }
     } else if (type == i) {
         std::unordered_map<int, int> global_averages;  // stores global averages for each feature
+        std::mutex global_averages_mutex;
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         // for each node in graph if feature is missing take the average of this feature among the
         // neighbourhood with depth k
         for (int node = 0; node < num_nodes; node++) {
@@ -131,18 +130,16 @@ void KNNImputer::run() {
                 if (count > 0) {
                     graph.set_int_feature(node, feature, to_int((double)sum / (double)count));
                 } else {  // if no neighbours have the feature, use global average
+                    std::lock_guard<std::mutex> lock(global_averages_mutex);
                     auto it = global_averages.find(feature);
-                    if (it != global_averages.end()) {
+
+                    if (it != global_averages.end()) {  // already calculated
                         graph.set_int_feature(node, feature, it->second);
                     } else {
                         double global_avg = compute_global_average_int(graph, feature);
                         graph.set_int_feature(node, feature, global_avg);
 
-                        std::mutex avg_mutex;
-                        {
-                            std::lock_guard<std::mutex> lock(avg_mutex);
-                            global_averages[feature] = global_avg;
-                        }
+                        global_averages[feature] = global_avg;
                     }
                 }
 

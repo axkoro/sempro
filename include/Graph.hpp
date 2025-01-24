@@ -192,11 +192,3 @@ int parse_node_count(std::string features_path);
  * @throws std::runtime_error If file errors occur or parsing fails.
  */
 int parse_feature_count(std::string features_path);
-
-/**
- * @brief Removes duplicate integers from a vector.
- *
- * @param arr Input vector.
- * @return Vector with duplicates removed.
- */
-std::vector<int> remove_duplicates(const std::vector<int>& arr);

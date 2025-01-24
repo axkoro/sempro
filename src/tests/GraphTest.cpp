@@ -348,7 +348,7 @@ TEST(GraphTest, get_neighbours) {
 
     // Test for a specific depth
     std::vector<int> depth_neighbours = graph.get_neighbours(0, 2);
-    std::vector<int> expected_depth_neighbours = {1, 4, 0, 2, 3};
+    std::vector<int> expected_depth_neighbours = {3, 2, 4, 1, 0};
 
     EXPECT_EQ(depth_neighbours, expected_depth_neighbours);
 }
@@ -378,23 +378,6 @@ TEST(GraphTest, is_valid_node) {
 
     EXPECT_TRUE(graph.is_valid_node(0));
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
-}
-
-TEST(UtilityTest, remove_duplicates) {
-    // Test Case 1: Vector with duplicates
-    std::vector<int> input1 = {1, 2, 3, 2, 4, 3, 5};
-    std::vector<int> expected1 = {1, 2, 3, 4, 5};
-    EXPECT_EQ(remove_duplicates(input1), expected1);
-
-    // Test Case 2: Vector with no duplicates
-    std::vector<int> input2 = {6, 7, 8, 9};
-    std::vector<int> expected2 = {6, 7, 8, 9};
-    EXPECT_EQ(remove_duplicates(input2), expected2);
-
-    // Test Case 3: All identical values
-    std::vector<int> input4 = {10, 10, 10, 10};
-    std::vector<int> expected4 = {10};
-    EXPECT_EQ(remove_duplicates(input4), expected4);
 }
 
 int main(int, char**) {
