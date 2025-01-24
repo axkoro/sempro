@@ -9,6 +9,7 @@ cpp_unit_tests:
     - ninja
     - ./GraphTest
     - ./KNNImputerTest
+    - ./LouvainTest
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:
@@ -17,6 +18,6 @@ python_build:
     - set -e
     - python3 -m venv pyenv && . pyenv/bin/activate
     - pip3 install --upgrade pip
-    - pip install -e .
+    - pip install .
     # - coverage run -m unittest discover -v semproject/testing
     # - coverage report -m

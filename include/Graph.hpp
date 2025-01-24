@@ -35,10 +35,16 @@ class Graph {
      */
     Graph(std::string edges_path, std::string features_path) {};
 
+    /**
+     * @brief Debugging/testing constructor for creating a Graph without features.
+     */
+    Graph(std::vector<int> offsets, std::vector<int> edges);
+
     // Getters
 
     int get_num_nodes() const;
     int get_num_features() const;
+    int get_num_edges() const;
 
     virtual bool get_bool_feature(int node, int feature) const {
         throw GraphException("Can't get bool feature (Graph has other type)");
