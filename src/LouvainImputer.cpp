@@ -1,14 +1,17 @@
 #include "LouvainImputer.hpp"
-
-#include <iostream>
-#include <numeric>
-
 #include "KNNImputer.hpp"
-#include "Louvain.hpp"
+#include <numeric>
+#include <iostream>
 
-// Constructor: Initializes the feature imputation class
-LouvainImputer::LouvainImputer(Graph& graph, const std::vector<int>& communities)
-    : graph(graph), communities(communities) {}
+// Constructors: Initialize the feature imputation class
+LouvainImputer::LouvainImputer(GraphBool& graph, const std::vector<int>& communities)
+    : graph(graph), communities(communities), type(b) {}
+
+LouvainImputer::LouvainImputer(GraphDouble& graph, const std::vector<int>& communities)
+    : graph(graph), communities(communities), type(d) {}
+
+LouvainImputer::LouvainImputer(GraphInt& graph, const std::vector<int>& communities)
+    : graph(graph), communities(communities), type(i) {}
 
 // Compute mean feature values for each community
 std::unordered_map<int, std::vector<double>> LouvainImputer::compute_community_average() {
@@ -24,18 +27,29 @@ std::unordered_map<int, std::vector<double>> LouvainImputer::compute_community_a
         }
         for (int feature = 0; feature < graph.get_num_features(); ++feature) {
             if (!graph.is_missing(node, feature)) {
-                community_sums[community][feature] += graph.get_feature(node, feature);
+                if (type == b) {
+                    community_sums[community][feature] += graph.get_bool_feature(node, feature);
+                } else if (type == d) {
+                    community_sums[community][feature] += graph.get_double_feature(node, feature);
+                } else if (type == i) {
+                    community_sums[community][feature] += graph.get_int_feature(node, feature);
+                }
                 community_counts[community][feature]++;
             }
         }
     }
+
     // Calculate means
-    // Check weither the feature is missing for all nodes in the community
-    // If so, use global average from KNN imputer
     for (auto& [community, sums] : community_sums) {
         for (int feature = 0; feature < sums.size(); ++feature) {
             if (community_counts[community][feature] == 0) {
-                sums[feature] = compute_global_average(graph, feature);
+                if (type == b) {
+                    sums[feature] = compute_global_average_bool(graph, feature);
+                } else if (type == d) {
+                    sums[feature] = compute_global_average_double(graph, feature);
+                } else if (type == i) {
+                    sums[feature] = compute_global_average_int(graph, feature);
+                }
             } else {
                 sums[feature] /= community_counts[community][feature];
             }
@@ -55,8 +69,14 @@ void LouvainImputer::run() {
 
         for (int feature = 0; feature < graph.get_num_features(); ++feature) {
             if (graph.is_missing(node, feature)) {
-                graph.set_feature(node, feature, community_means[community][feature]);
-                graph.set_missing(node, feature, false);  // Mark as imputed
+                if (type == b) {
+                    graph.set_bool_feature(node, feature, (community_means[community][feature]));
+                } else if (type == d) {
+                    graph.set_double_feature(node, feature, community_means[community][feature]);
+                } else if (type == i) {
+                    graph.set_int_feature(node, feature, (community_means[community][feature]));
+                }
+                graph.set_missing(node, feature, false); // Mark as imputed
             }
         }
     }

@@ -1,8 +1,9 @@
 import semproject._strats as strats_module
 import semproject.graph as graph_module
 
-edges_file = "data/test/louvain/edges_example.txt"
-features_file = "data/test/louvain/features2_example.txt"
+edges_file = "/Users/bshar/OneDrive/Desktop/Semester-Project/sempro/sempro/data/test/louvain/edges_example.txt"
+features_file = "/Users/bshar/OneDrive/Desktop/Semester-Project/sempro/sempro/data/test/louvain/features2_example.txt"
+
 
 graph = graph_module.GraphDouble(edges_file, features_file)
 print("Graph created successfully!")

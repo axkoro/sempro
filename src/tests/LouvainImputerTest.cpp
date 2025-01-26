@@ -1,12 +1,8 @@
+#include "LouvainImputer.hpp"
+#include "KNNImputer.hpp"
 #include <gtest/gtest.h>
 
-#include <fstream>
-#include <string>
-
-#include "GraphDouble.hpp"
-#include "LouvainImputer.hpp"
-
-TEST(LouvainImputerTest, TestFeatureImputation) {
+TEST(LouvainImputerTest, TestFeatureImputationDouble) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
     std::string features_path = "../data/test/louvain/features2_example.txt";
     GraphDouble graph(edges_path, features_path);
@@ -26,43 +22,71 @@ TEST(LouvainImputerTest, TestFeatureImputation) {
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature],
-                        1e-2)
+            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature], 1e-2)
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
 
-    // graph.print_features();
+    graph.print_features();
 }
 
-TEST(LouvainImputerTest, TestFeatureImputationwithGlobalAverage) {
+TEST(LouvainImputerTest, TestFeatureImputationBool) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
-    std::string features_path = "../data/test/louvain/features3_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    std::string features_path = "../data/test/louvain/features_example.txt";
+    GraphBool graph(edges_path, features_path);
 
+    // Assigning nodes to two communities for testing purposes
     std::vector<int> communities = {0, 0, 0, 1, 1};
-
-    std::vector<std::vector<double>> expected_output = {{1, 0, 2.5, 0, 0, 0},
-                                                        {0, 1, 2.5, 0, 0, 0},
-                                                        {0, 0, 2.5, 1, 0, 0},
-                                                        {0, 0, 2, 0, 1, 0},
-                                                        {0, 0, 3, 0, 0, 1}};
 
     LouvainImputer imputer(graph, communities);
     imputer.run();
 
+    std::vector<std::vector<bool>> expected_output = {{true, false, true, true, false, true},
+                                                      {false, false, true, false, false, false},
+                                                      {true, false, true, true, false, true},
+                                                      {false, true, false, false, true, false},
+                                                      {false, true, true, false, false, true}};
+
+    // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature],
-                        1e-2)
+            EXPECT_EQ(graph.get_bool_feature(node, feature), expected_output[node][feature])
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
 
-    // graph.print_features();
+    graph.print_features();
 }
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+TEST(LouvainImputerTest, TestFeatureImputationInt) {
+    std::string edges_path = "../data/test/louvain/edges_example.txt";
+    std::string features_path = "../data/test/louvain/features2_example.txt";
+    GraphInt graph(edges_path, features_path);
+
+    // Assigning nodes to two communities for testing purposes
+    std::vector<int> communities = {0, 0, 0, 1, 1};
+
+    LouvainImputer imputer(graph, communities);
+    imputer.run();
+
+    std::vector<std::vector<int>> expected_output = {{4, 3, 2, 1, 3, 2},
+                                                     {0, 2, 1, 2, 4, 4},
+                                                     {3, 1, 1, 2, 3, 1},
+                                                     {4, 2, 4, 1, 3, 4},
+                                                     {4, 0, 4, 2, 2, 2}};
+
+    // Verify the output
+    for (int node = 0; node < graph.get_num_nodes(); ++node) {
+        for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
+            EXPECT_EQ(graph.get_int_feature(node, feature), expected_output[node][feature])
+                << "Node " << node << " Feature " << feature << " is incorrect.";
+        }
+    }
+
+    graph.print_features();
+}
+int main(int, char**) {
+    ::testing::InitGoogleTest();
+
     return RUN_ALL_TESTS();
 }

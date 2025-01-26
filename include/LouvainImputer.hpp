@@ -4,12 +4,18 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Graph.hpp"
+#include "GraphBool.hpp"
+#include "GraphDouble.hpp"
+#include "GraphInt.hpp"
 
 class LouvainImputer {
    public:
-    // Constructor
-    LouvainImputer(Graph& graph, const std::vector<int>& communities);
+    enum feature_type { b, d, i };  // bool, double, int
+
+    // Constructors
+    LouvainImputer(GraphBool& graph, const std::vector<int>& communities);
+    LouvainImputer(GraphDouble& graph, const std::vector<int>& communities);
+    LouvainImputer(GraphInt& graph, const std::vector<int>& communities);
 
     // Perform feature imputation
     void run();
@@ -20,6 +26,7 @@ class LouvainImputer {
    private:
     Graph& graph;                        // Reference to the graph
     const std::vector<int> communities;  // Community assignments for each node
+    feature_type type;
 };
 
 #endif
