@@ -22,6 +22,5 @@ PYBIND11_MODULE(_strats, m) {
         .def(py::init<GraphBool&, const std::vector<int>&>(), py::keep_alive<1, 2>())
         .def(py::init<GraphDouble&, const std::vector<int>&>(), py::keep_alive<1, 2>())
         .def(py::init<GraphInt&, const std::vector<int>&>(), py::keep_alive<1, 2>())
-        .def("compute_community_average", &LouvainImputer::compute_community_average)
         .def("run", &LouvainImputer::run);
 }
