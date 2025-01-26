@@ -26,8 +26,6 @@ TEST(LouvainImputerTest, TestFeatureImputationDouble) {
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
-
-    graph.print_features();
 }
 
 TEST(LouvainImputerTest, TestFeatureImputationBool) {
@@ -54,8 +52,6 @@ TEST(LouvainImputerTest, TestFeatureImputationBool) {
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
-
-    graph.print_features();
 }
 
 TEST(LouvainImputerTest, TestFeatureImputationInt) {
@@ -82,8 +78,6 @@ TEST(LouvainImputerTest, TestFeatureImputationInt) {
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
-
-    graph.print_features();
 }
 int main(int, char**) {
     ::testing::InitGoogleTest();
