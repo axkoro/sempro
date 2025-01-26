@@ -1,7 +1,9 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h> 
 
 #include "Imputer.hpp"
 #include "KNNImputer.hpp"
+#include "LouvainImputer.hpp"
 
 namespace py = pybind11;
 
@@ -16,12 +18,9 @@ PYBIND11_MODULE(_strats, m) {
         .def("set_depth", &KNNImputer::set_depth, py::arg("k"))
         .def("get_depth", &KNNImputer::get_depth);
 
-    m.def("compute_global_average_bool", &compute_global_average_bool, py::arg("graph"),
-          py::arg("feature"));
-    m.def("compute_global_average_double", &compute_global_average_double, py::arg("graph"),
-          py::arg("feature"));
-    m.def("compute_global_average_int", &compute_global_average_int, py::arg("graph"),
-          py::arg("feature"));
-    m.def("to_bool", &to_bool, py::arg("value"));
-    m.def("to_int", &to_int, py::arg("value"));
+    py::class_<LouvainImputer>(m, "LouvainImputer")
+        .def(py::init<GraphBool&, const std::vector<int>&>(), py::keep_alive<1, 2>())
+        .def(py::init<GraphDouble&, const std::vector<int>&>(), py::keep_alive<1, 2>())
+        .def(py::init<GraphInt&, const std::vector<int>&>(), py::keep_alive<1, 2>())
+        .def("run", &LouvainImputer::run);
 }
