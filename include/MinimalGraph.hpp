@@ -1,29 +1,26 @@
 #pragma once
+
 #include <vector>
 
-#include "Graph.hpp"
-
+/**
+ * @class MinimalGraph
+ * @brief A representation of a weighted graph, but without node attributes.
+ *
+ * This class provides an abstract interface for a graph structure. It is minimal in the sense that
+ * it does not store any feature information about the nodes, only the basic structure of the graph.
+ */
 class MinimalGraph {
-   private:
-    std::vector<std::vector<std::pair<int, int>>> edges;
-    int num_edges;
-
    public:
-    MinimalGraph(int n);
+    // MinimalGraph(int n);
+    // MinimalGraph(const Graph& g);
 
-    MinimalGraph(const Graph& g);
+    virtual int get_num_nodes() const = 0;
+    virtual int get_num_edges() const = 0;
 
-    int get_num_nodes() const;
-
-    int get_num_edges() const;
+    // Return sum of weights of edges from node "u"  (the "weighted degree")
+    virtual int get_degree(int u) const = 0;
 
     // Return adjacency list for node "u"
     // Each entry is (neighbor, weight)
-    const std::vector<std::pair<int, int>>& get_neighbours(int u) const;
-
-    // Return sum of weights of edges from node "u"  (the "weighted degree")
-    int get_degree(int u) const;
-
-    // Add an edge with a given weight in an undirected manner
-    void add_edge(int u, int v, int w);
+    virtual const std::vector<std::pair<int, int>>& get_neighbours(int u) const = 0;
 };
