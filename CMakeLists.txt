@@ -56,4 +56,10 @@ else() # Build Python bindings as libraries
 	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
+
+	pybind11_add_module(_louvain src/MinimalGraph.cpp src/py11_louvain.cpp)
+	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
+	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
+
 endif()
