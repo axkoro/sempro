@@ -4,6 +4,7 @@
 
 class EdgeWeightCalculator {
    private:
+    Graph& graph;
     double fusion_coefficient;
 
    public:
