@@ -95,7 +95,7 @@ def louvain_benchmark(data_set):
     folder_path = f"./data/input/{data_set}/"
     edges_path = f"./data/input/{data_set}/{data_set}_edges.txt"
     features_path = f"./data/input/{data_set}/{data_set}_features.txt"
-    output_path = f"./data/output/knn/{data_set}_features.txt"
+    output_path = f"./data/output/louvain/{data_set}_features.txt"
 
     try:
         subprocess.run(["unzip", zip_path, "-d", folder_path], stdout=subprocess.DEVNULL, check=True)
