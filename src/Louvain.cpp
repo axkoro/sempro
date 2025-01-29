@@ -6,6 +6,7 @@
 #include <random>
 #include <unordered_set>
 
+
 #include "MinimalGraph.hpp"
 
 Louvain::Louvain(const Graph& g) : current_graph(g) {
