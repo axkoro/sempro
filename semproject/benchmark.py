@@ -112,13 +112,19 @@ def louvain_benchmark(data_set):
         # print(f"Deleted the unzipped {data_set} folder successfully.")
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
-
-    start_time = time.time()
+    start_total_time = time.time()
+    start_time1 = time.time()
     communities = louvain.execute()
+    end_time1 = time.time()
+    print(f"Louvain {data_set} communities detection completed in {end_time1 - start_time1:.4f} seconds")
+    start_time2 =time.time()
     louvainImputer = strats_module.LouvainImputer(graph,communities)
     louvainImputer.run()
-    end_time = time.time()
-    print(f"Louvain {data_set} benchmark completed in {end_time - start_time:.4f} seconds")
+    end_time2 = time.time()
+    end_total_time = time.time()
+    print(f"Louvain {data_set} Imputer completed in {end_time2 - start_time2:.4f} seconds")
+    print(f"Louvain {data_set} benchmark completed in {end_total_time - start_total_time:.4f} seconds")
+    
 
     graph.print_features_to_file(output_path)
 
