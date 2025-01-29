@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <cstdint>
+
 #include "Graph.hpp"
 #include "MinimalGraph.hpp"
 
@@ -12,8 +13,7 @@ class Louvain {
     std::vector<int> execute();
 
     double get_modularity() const;
-    static uint64_t encode_community_pair(int comm1, int comm2);
-    static std::pair<int, int> decode_community_pair(uint64_t comm_pair);
+
    private:
     bool executed = false;
     int max_iterations = 50;
@@ -42,5 +42,6 @@ class Louvain {
     double calculate_modularity_gain(int node, int target_comm);
     void move_node(int node, int old_comm, int new_comm);
     void update_community_connection(int comm1, int comm2, int weight_delta);
-
+    static uint64_t encode_community_pair(int comm1, int comm2);
+    static std::pair<int, int> decode_community_pair(uint64_t comm_pair);
 };
