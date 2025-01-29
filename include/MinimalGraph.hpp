@@ -19,8 +19,4 @@ class MinimalGraph {
 
     // Return sum of weights of edges from node "u"  (the "weighted degree")
     virtual int get_degree(int u) const = 0;
-
-    // Return adjacency list for node "u"
-    // Each entry is (neighbor, weight)
-    virtual const std::vector<std::pair<int, int>>& get_neighbours(int u) const = 0;
 };
