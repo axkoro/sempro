@@ -21,3 +21,14 @@ python_build:
     - pip install .
     # - coverage run -m unittest discover -v semproject/testing
     # - coverage report -m
+  artifacts:
+    paths:
+      - pyenv/
+
+evaluate:
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  needs:
+    - python_build
+  script:
+    - . pyenv/bin/activate
+    - evaluate --all
