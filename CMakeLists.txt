@@ -14,6 +14,7 @@ add_library(GraphLib
     src/GraphInt.cpp
     src/GraphBool.cpp
 )
+
 target_include_directories(GraphLib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
 
@@ -56,4 +57,10 @@ else() # Build Python bindings as libraries
 	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
+
+	pybind11_add_module(_louvain src/Louvain.cpp src/DynamicMinimalGraph.cpp src/py11_louvain.cpp)
+	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
+	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
+
 endif()
