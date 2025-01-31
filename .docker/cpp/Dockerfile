@@ -1,5 +1,5 @@
 # Start with a base image that includes CMake
-FROM debian:bullseye-slim
+FROM --platform=linux/amd64 debian:bullseye-slim
 
 # Install essential build tools and CMake
 RUN export DEBIAN_FRONTEND=noninteractive && \
