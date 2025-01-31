@@ -6,8 +6,7 @@
 #include <random>
 #include <unordered_set>
 
-
-#include "MinimalGraph.hpp"
+#include "DynamicMinimalGraph.hpp"
 
 Louvain::Louvain(const Graph& g) : current_graph(g) {
     total_edge_weight = g.get_num_edges();
@@ -185,7 +184,7 @@ void Louvain::aggregate_communities() {
         community_connections = std::move(new_community_connections);
     }
 
-    MinimalGraph new_graph(next_community_id);
+    DynamicMinimalGraph new_graph(next_community_id);
 
     for (auto& pair : community_connections) {
         uint64_t key = pair.first;

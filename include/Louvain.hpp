@@ -3,8 +3,8 @@
 #include <vector>
 #include <cstdint>
 
+#include "DynamicMinimalGraph.hpp"
 #include "Graph.hpp"
-#include "MinimalGraph.hpp"
 
 class Louvain {
    public:
@@ -18,7 +18,7 @@ class Louvain {
     bool executed = false;
     int max_iterations = 50;
 
-    MinimalGraph current_graph;
+    DynamicMinimalGraph current_graph;
 
     // maps each node to a community
     std::vector<int> total_node_to_community;  // maps nodes from the ORIGINAL graph to communities

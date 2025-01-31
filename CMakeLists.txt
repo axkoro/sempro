@@ -14,6 +14,7 @@ add_library(GraphLib
     src/GraphInt.cpp
     src/GraphBool.cpp
 )
+
 target_include_directories(GraphLib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
 
@@ -33,7 +34,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
 
-	add_executable(LouvainTest src/tests/LouvainTest.cpp src/Louvain.cpp src/MinimalGraph.cpp)
+	add_executable(LouvainTest src/tests/LouvainTest.cpp src/Louvain.cpp src/DynamicMinimalGraph.cpp)
 	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainTest PRIVATE -coverage)
@@ -57,7 +58,7 @@ else() # Build Python bindings as libraries
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
 
-	pybind11_add_module(_louvain src/MinimalGraph.cpp src/Louvain.cpp src/py11_louvain.cpp)
+	pybind11_add_module(_louvain src/Louvain.cpp src/DynamicMinimalGraph.cpp src/py11_louvain.cpp)
 	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
