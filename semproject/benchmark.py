@@ -27,15 +27,19 @@ def graph_benchmark():
     except Exception as e:
         print(f"An error occurred while deleting the folder: {e}")
 
-    print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
+    print(f"Graph operations completed in {end_time - start_time:.1f} seconds")
 
 def strat_benchmark(strategy, data_set, knn_depth=3):
+    strategy = strategy.lower()
+    data_set_case = data_set # for printing
+    data_set = data_set.lower()
     if strategy == "knn":
-        print(f"Running {strategy} imputation on '{data_set}' with depth {knn_depth}...")
+        print(f"Running kNN imputation on '{data_set_case}' with depth {knn_depth}...")
     elif strategy == "louvain":
-        print(f"Running {strategy} imputation on '{data_set}' ...")
+        print(f"Running Louvain imputation on '{data_set_case}' ...")
     elif strategy == "deepwalk":
-        print(f"Running {strategy} imputation on '{data_set}' ...")
+        print("DeepWalk is not implemented, yet.")
+        # print(f"Running DeepWalk imputation on '{data_set_case}' ...")
 
 
     graph_class_map = {
@@ -48,7 +52,7 @@ def strat_benchmark(strategy, data_set, knn_depth=3):
     }
     graph_class = graph_class_map.get(data_set)
     if not graph_class:
-        print(f"No graph class found for {data_set}, exiting...")
+        print(f"No graph class found for {data_set_case}, exiting...")
         return
 
     input_zip_path = f"./data/input/{data_set}.zip"
@@ -75,13 +79,15 @@ def strat_benchmark(strategy, data_set, knn_depth=3):
         start_time2 = time.time()
         communities = louvain.execute()
         end_time2 = time.time()
-        print(f"louvain community detection on '{data_set}' completed in {end_time2 - start_time2:.4f} seconds")
+        print(f"Louvain community detection on '{data_set_case}' completed in {end_time2 - start_time2:.1f} seconds")
 
         louvain_imputer = strats_module.LouvainImputer(graph, communities)
         louvain_imputer.run()
+    elif strategy == "deepwalk":
+        return
     end_time = time.time()
     
-    print(f"{strategy} benchmark on '{data_set}' benchmark completed in {end_time - start_time:.4f} seconds")
+    print(f"{strategy} benchmark on '{data_set_case}' benchmark completed in {end_time - start_time:.1f} seconds")
 
     graph.print_features_to_file(output_path)
 
@@ -104,15 +110,15 @@ def main():
         graph_benchmark()
     elif args.strat == "knn":
         if args.input:
-            strat_benchmark("knn", args.input, knn_depth=3)
+            strat_benchmark(args.strat, args.input, knn_depth=3)
     elif args.strat == "louvain":
         if args.input:
-            strat_benchmark("louvain", args.input)
+            strat_benchmark(args.strat, args.input)
     elif args.strat == "deepwalk":
         print("Not implemented yet. Exiting...")
         return
         if args.input:
-            strat_benchmark("deepwalk", args.input)
+            strat_benchmark(args.strat, args.input)
     else:
         print("Invalid arguments. Exiting...")
         return
