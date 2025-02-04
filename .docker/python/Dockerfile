@@ -12,5 +12,5 @@ unzip \
 && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies of evaluation submodule
-COPY ./extlibs/evaluation/requirements.txt ./extlibs/evaluation/
-RUN pip install -r ./extlibs/evaluation/requirements.txt
+COPY ./extlibs/evaluation/requirements_full.txt ./extlibs/evaluation/
+RUN pip install -r ./extlibs/evaluation/requirements_full.txt

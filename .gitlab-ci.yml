@@ -19,7 +19,7 @@ cpp_unit_tests:
 
 python_build:
   stage: build
-  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python-no-torch
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
     - python3 -m venv pyenv && . pyenv/bin/activate
     - pip3 install --upgrade pip build
