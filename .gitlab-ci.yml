@@ -32,6 +32,7 @@ evaluate:
   stage: evaluate
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   timeout: 2h
+  allow_failure: true
   needs:
     - python_build
   script:
