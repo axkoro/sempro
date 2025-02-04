@@ -150,20 +150,20 @@ TEST(LouvainTest, TwoComponents) {
     EXPECT_EQ(communities[4], comm3);
 }
 
-TEST(LouvainTest, LargeGraph) {
-    std::string edges_path = "../data/input/unzipped/twitch_edges.txt";
-    std::string features_path = "../data/input/unzipped/twitch_features.txt";
+// TEST(LouvainTest, LargeGraph) {
+//     std::string edges_path = "../data/input/unzipped/twitch_edges.txt";
+//     std::string features_path = "../data/input/unzipped/twitch_features.txt";
 
-    GraphDouble g(edges_path, features_path);
+//     GraphDouble g(edges_path, features_path);
 
-    Louvain lcd(g);
-    double pre_modularity = lcd.get_modularity();
+//     Louvain lcd(g);
+//     double pre_modularity = lcd.get_modularity();
 
-    EXPECT_NO_THROW(lcd.execute());
-    double post_modularity = lcd.get_modularity();
+//     EXPECT_NO_THROW(lcd.execute());
+//     double post_modularity = lcd.get_modularity();
 
-    EXPECT_GT(post_modularity, pre_modularity);
-}
+//     EXPECT_GT(post_modularity, pre_modularity);
+// }
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

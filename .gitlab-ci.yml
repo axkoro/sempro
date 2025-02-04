@@ -1,7 +1,12 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
+stages:
+  - build
+  - evaluate
+
 cpp_unit_tests:
+  stage: build
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:cpp
   script:
     - mkdir build && cd build
@@ -13,11 +18,23 @@ cpp_unit_tests:
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:
+  stage: build
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
-    - set -e
     - python3 -m venv pyenv && . pyenv/bin/activate
-    - pip3 install --upgrade pip
-    - pip install .
-    # - coverage run -m unittest discover -v semproject/testing
-    # - coverage report -m
+    - pip3 install --upgrade pip build
+    - python -m build --wheel
+  artifacts:
+    paths:
+      - dist/*.whl
+
+evaluate:
+  stage: evaluate
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  timeout: 2h
+  needs:
+    - python_build
+  script:
+    - python3 -m venv pyenv && . pyenv/bin/activate
+    - pip install dist/*.whl
+    - evaluate --all
