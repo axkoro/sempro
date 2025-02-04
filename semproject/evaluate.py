@@ -28,20 +28,21 @@ def main():
             all_strats = ["knn", "louvain", "deepwalk"]
             all_sets = ["twitch", "amazon", "corafull", "genius", "amazon_fraud", "github"]
             for s in all_strats:
+                print(f"*** RUNNING STRATEGY: {s.upper()} ***")
                 for ds in all_sets:
                     if ds == "amazon_fraud":
-                        print(f"{ds} can't be evaluated at the moment.\nUse 'benchmark' script instead.\n")
+                        print(f"{ds} can't be evaluated at the moment.\nIf you want to run the strategy without evaluation, use the 'benchmark' script instead.")
                         continue
-                    print("="*50)
+                    print("="*50, flush=True)
                     run_one_strategy(s, ds, False, force_rerun=True)
-                    print("="*50)
-                    print("")
+                print("="*50, flush=True)
+                print("")
         else:
             if not args.strat or not args.input:
                 print("Error: Must provide --strat and --input, or use --all.")
                 sys.exit(1)
             if args.input == "amazon_fraud":
-                print(f"{args.input} can't be evaluated at the moment.\nUse 'benchmark' script instead.")
+                print(f"{args.input} can't be evaluated at the moment.\nIf you want to run the strategy without evaluation, use the 'benchmark' script instead.")
                 return
             # default train_choice to False
             run_one_strategy(args.strat, args.input, False)
