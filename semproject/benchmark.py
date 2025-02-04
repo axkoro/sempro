@@ -29,7 +29,7 @@ def graph_benchmark():
 
     print(f"Graph operations completed in {end_time - start_time:.4f} seconds")
 
-def strat_benchmark(data_set, strategy, knn_depth=3):
+def strat_benchmark(strategy, data_set, knn_depth=3):
     if strategy == "knn":
         print(f"Running {strategy} imputation on '{data_set}' with depth {knn_depth}...")
     elif strategy == "louvain":
@@ -104,15 +104,15 @@ def main():
         graph_benchmark()
     elif args.strat == "knn":
         if args.input:
-            strat_benchmark(args.input, "knn", knn_depth=3)
+            strat_benchmark("knn", args.input, knn_depth=3)
     elif args.strat == "louvain":
         if args.input:
-            strat_benchmark(args.input, "louvain")
+            strat_benchmark("louvain", args.input)
     elif args.strat == "deepwalk":
         print("Not implemented yet. Exiting...")
         return
         if args.input:
-            strat_benchmark(args.input, "deepwalk")
+            strat_benchmark("deepwalk", args.input)
     else:
         print("Invalid arguments. Exiting...")
         return
