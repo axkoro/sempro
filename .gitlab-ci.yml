@@ -31,6 +31,7 @@ python_build:
 evaluate:
   stage: evaluate
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  timeout: 2h
   needs:
     - python_build
   script:
