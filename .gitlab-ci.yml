@@ -41,6 +41,8 @@ evaluate:
 plot:
   stage: evaluate
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  timeout: 2h
+  when: manual
   needs:
     - python_build
   script:
