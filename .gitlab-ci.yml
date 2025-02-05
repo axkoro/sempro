@@ -21,8 +21,6 @@ python_build:
   stage: build
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
-    - python3 -m venv pyenv && . pyenv/bin/activate
-    - pip3 install --upgrade pip build
     - python -m build --wheel
   artifacts:
     paths:
@@ -36,7 +34,6 @@ evaluate:
   needs:
     - python_build
   script:
-    - python3 -m venv pyenv && . pyenv/bin/activate
     - pip install dist/*.whl
     - evaluate --all
 
@@ -46,7 +43,6 @@ plot:
   needs:
     - python_build
   script:
-    - python3 -m venv pyenv && . pyenv/bin/activate
     - pip install dist/*.whl
     - python -I -m semproject.evaluation_plots
   artifacts:
