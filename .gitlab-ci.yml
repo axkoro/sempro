@@ -22,7 +22,7 @@ python_build:
   stage: build
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
-    - python -m build --wheel /app
+    - python -m build --wheel .
   artifacts:
     paths:
       - dist/*.whl
