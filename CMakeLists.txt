@@ -53,7 +53,7 @@ else() # Build Python bindings as libraries
 	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
 	
-	pybind11_add_module(_strats src/KNNImputer.cpp src/LouvainImputer.cpp src/py11_strats.cpp)
+	pybind11_add_module(_strats src/Imputer.cpp src/KNNImputer.cpp src/LouvainImputer.cpp src/py11_strats.cpp)
 	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)

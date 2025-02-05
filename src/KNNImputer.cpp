@@ -10,10 +10,6 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "GraphBool.hpp"
-#include "GraphDouble.hpp"
-#include "GraphInt.hpp"
-
 void KNNImputer::set_depth(int k) { this->k = k; }
 int KNNImputer::get_depth() { return k; }
 
