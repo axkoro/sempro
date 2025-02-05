@@ -13,3 +13,10 @@ class Imputer {
 
     virtual ~Imputer() = default;
 };
+
+double compute_global_average_bool(Graph& graph, int feature);
+double compute_global_average_double(Graph& graph, int feature);
+double compute_global_average_int(Graph& graph, int feature);
+
+bool to_bool(double value);
+int to_int(double value);
