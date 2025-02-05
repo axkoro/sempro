@@ -11,9 +11,10 @@ cmake \
 unzip \
 && rm -rf /var/lib/apt/lists/*
 
+RUN pip install \
+build \
+matplotlib
+
 # Install dependencies of evaluation submodule
 COPY ./extlibs/evaluation/requirements_full.txt ./extlibs/evaluation/
 RUN pip install -r ./extlibs/evaluation/requirements_full.txt
-
-# I know this is ugly
-RUN pip install matplotlib
