@@ -28,7 +28,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
-	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/KNNImputer.cpp)
+	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/Imputer.cpp src/KNNImputer.cpp)
 	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
@@ -40,7 +40,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(LouvainTest PRIVATE -coverage)
 	target_link_options(LouvainTest PRIVATE -coverage)
 
-	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/KNNImputer.cpp)
+	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/Imputer.cpp)
 	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)

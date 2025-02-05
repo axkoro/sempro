@@ -8,15 +8,14 @@
 #include "GraphInt.hpp"
 
 class LouvainImputer {
-   public:
+   private:
     enum feature_type { b, d, i };  // bool, double, int
 
-    // Constructors
+   public:
     LouvainImputer(GraphBool& graph, const std::vector<int>& communities);
     LouvainImputer(GraphDouble& graph, const std::vector<int>& communities);
     LouvainImputer(GraphInt& graph, const std::vector<int>& communities);
 
-    // Perform feature imputation
     void run();
 
    private:

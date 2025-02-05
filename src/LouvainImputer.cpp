@@ -1,10 +1,12 @@
 #include "LouvainImputer.hpp"
-#include "KNNImputer.hpp"
-#include <numeric>
-#include <iostream>
+
 #include <omp.h>
 
-// Constructors: Initialize the feature imputation class
+#include <iostream>
+#include <numeric>
+
+#include "KNNImputer.hpp"
+
 LouvainImputer::LouvainImputer(GraphBool& graph, const std::vector<int>& communities)
     : graph(graph), communities(communities), type(b) {}
 
@@ -16,8 +18,8 @@ LouvainImputer::LouvainImputer(GraphInt& graph, const std::vector<int>& communit
 
 // Compute mean feature values for each community
 void LouvainImputer::run() {
-    // Impute missing features with community means
-    #pragma omp parallel for schedule(dynamic)
+// Impute missing features with community means
+#pragma omp parallel for schedule(dynamic)
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         int community = communities[node];
 
@@ -25,8 +27,8 @@ void LouvainImputer::run() {
             if (graph.is_missing(node, feature)) {
                 double average = compute_community_average(node, feature);
 
-                // Set the imputed value
-                #pragma omp critical
+// Set the imputed value
+#pragma omp critical
                 {
                     if (type == b) {
                         graph.set_bool_feature(node, feature, average);
@@ -35,7 +37,7 @@ void LouvainImputer::run() {
                     } else if (type == i) {
                         graph.set_int_feature(node, feature, average);
                     }
-                    graph.set_missing(node, feature, false); // Mark as imputed
+                    graph.set_missing(node, feature, false);  // Mark as imputed
                 }
             }
         }
@@ -48,8 +50,8 @@ double LouvainImputer::compute_community_average(int node, int feature) {
     double sum = 0.0;
     int count = 0;
 
-    // Calculate community average on demand
-    #pragma omp parallel for reduction(+:sum, count)
+// Calculate community average on demand
+#pragma omp parallel for reduction(+ : sum, count)
     for (int other_node = 0; other_node < graph.get_num_nodes(); ++other_node) {
         if (communities[other_node] == community && !graph.is_missing(other_node, feature)) {
             if (type == b) {
