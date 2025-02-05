@@ -39,3 +39,16 @@ evaluate:
     - python3 -m venv pyenv && . pyenv/bin/activate
     - pip install dist/*.whl
     - evaluate --all
+
+plot:
+  stage: evaluate
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  needs:
+    - python_build
+  script:
+    - python3 -m venv pyenv && . pyenv/bin/activate
+    - pip install dist/*.whl
+    - python -I -m semproject.evaluation_plots
+  artifacts:
+    paths:
+      - *.png
