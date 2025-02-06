@@ -10,8 +10,7 @@ def main():
     parser.add_argument("--input", type=str, help="Data set to run the strategy on")
     args = parser.parse_args()
 
-    # if no args provided, fall back to interactive
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 1: # no args -> interactive logic
         strat_choice = get_user_choice_strategy()
         print("")
         data_set_choice = get_user_choice_data_set()
@@ -22,18 +21,17 @@ def main():
         train_choice = get_user_choice_train()
         print("")
         run_one_strategy(strat_choice, data_set_choice, train_choice)
-    else:
-        # Non-interactive logic
+    else: # non-interactive logic
         if args.all:
             all_strats = ["knn", "louvain", "deepwalk"]
             all_sets = ["twitch", "amazon", "corafull", "genius", "amazon_fraud", "github"]
             for s in all_strats:
                 print(f"*** RUNNING STRATEGY: {s.upper()} ***")
                 for ds in all_sets:
+                    print("="*50, flush=True)
                     if ds == "amazon_fraud":
                         print(f"{ds} can't be evaluated at the moment.\nIf you want to run the strategy without evaluation, use the 'benchmark' script instead.")
                         continue
-                    print("="*50, flush=True)
                     run_one_strategy(s, ds, False, force_rerun=True)
                 print("="*50, flush=True)
                 print("")

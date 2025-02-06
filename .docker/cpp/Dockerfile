@@ -12,6 +12,3 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     gcovr \
     git \
     && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
