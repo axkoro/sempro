@@ -13,8 +13,7 @@ class StaticMinimalGraph : public MinimalGraph {
     std::vector<Edge> edges;
 
    public:
-    StaticMinimalGraph::StaticMinimalGraph(const std::vector<int>& offsets,
-                                           const std::vector<Edge>& edges)
+    StaticMinimalGraph(const std::vector<int>& offsets, const std::vector<Edge>& edges)
         : offsets(offsets), edges(edges) {};
 
     virtual int get_num_nodes() const override;
