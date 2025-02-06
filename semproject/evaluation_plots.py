@@ -5,7 +5,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-DATA_SETS = ["twitch", "amazon", "genius", "github"]  # "corafull" excluded due to memory issues
+DATA_SETS = ["twitch", "amazon", "genius", "github", "corafull"]
 STRATEGIES = ["knn", "louvain"]
 METRICS = ["overlap_total", "overlap_missing", "error_max", "error_avg", "r2"]
 
@@ -14,7 +14,7 @@ DATA_SET_COLORS = {
     "amazon": "orange",
     "amazon_fraud": "red",
     "corafull": "blue",
-    "genius": "yellow",
+    "genius": "brown",
     "github": "green"
 }
 
@@ -49,9 +49,9 @@ def plot_strategy_comparison():
     for idx, metric in enumerate(chart_metrics):
         ax = axs[idx]
         for i, strat in enumerate(STRATEGIES):
-            # Get the metric value for each data set for the current strategy
+            # Compute offset for grouped bar chart
+            offset = (i - (len(STRATEGIES) - 1) / 2) * bar_width
             values = [metrics[metric][ds][strat] for ds in DATA_SETS]
-            offset = (i - 0.5) * bar_width
             ax.bar(x + offset, values, bar_width, label=strat)
         ax.set_title(metric)
         ax.set_xticks(x)
@@ -93,21 +93,22 @@ def plot_knn_depth():
     fig.suptitle("kNN - Depth", fontsize=16)
     plt.subplots_adjust(hspace=0.5, wspace=0.5)
 
-    # Set common x-axis properties
+    bar_width = 0.15  # Width for each bar in the grouped chart
+    x = np.arange(len(depths))  # positions for the depth groups
+
+    # Set common x-axis properties for each subplot
     for ax in axs:
         ax.set_xlabel("Depth")
-        ax.set_xticks(depths)
+        ax.set_xticks(x)
+        ax.set_xticklabels(depths)
 
-    # Plot each metric
+    # Plot each metric with grouped bars for each data set
     for ax, (metric, ylabel) in zip(axs, line_metrics.items()):
-        for data_set in DATA_SETS:
-            ax.plot(
-                depths,
-                results[data_set][metric],
-                marker="o",
-                color=DATA_SET_COLORS.get(data_set, "black"),
-                label=data_set
-            )
+        for i, data_set in enumerate(DATA_SETS):
+            offset = (i - (len(DATA_SETS) - 1) / 2) * bar_width
+            ax.bar(x + offset, results[data_set][metric], bar_width,
+                   color=DATA_SET_COLORS.get(data_set, "black"),
+                   label=data_set)
         ax.set_ylabel(ylabel)
         ax.legend(loc="upper right")
 
@@ -166,6 +167,5 @@ def parse_evaluation_output(output: str):
 
 
 if __name__ == "__main__":
-    # Example usage
     plot_strategy_comparison()
     plot_knn_depth()

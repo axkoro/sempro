@@ -148,5 +148,5 @@ setup(
             'benchmark=semproject.benchmark:main',
         ],
     },
-    install_requires=load_submodule_requirements()
+    install_requires=["numpy", "matplotlib"].append(load_submodule_requirements())
 )

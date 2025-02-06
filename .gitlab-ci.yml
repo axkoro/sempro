@@ -1,5 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 0
 
 stages:
   - build
@@ -21,9 +22,7 @@ python_build:
   stage: build
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
   script:
-    - python3 -m venv pyenv && . pyenv/bin/activate
-    - pip3 install --upgrade pip build
-    - python -m build --wheel
+    - python -m build --wheel .
   artifacts:
     paths:
       - dist/*.whl
@@ -36,6 +35,19 @@ evaluate:
   needs:
     - python_build
   script:
-    - python3 -m venv pyenv && . pyenv/bin/activate
     - pip install dist/*.whl
     - evaluate --all
+
+plot:
+  stage: evaluate
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  timeout: 2h
+  when: manual
+  needs:
+    - python_build
+  script:
+    - pip install dist/*.whl
+    - python -I -m semproject.evaluation_plots
+  artifacts:
+    paths:
+      - "*.png"
