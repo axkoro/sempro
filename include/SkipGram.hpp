@@ -9,8 +9,8 @@ class SkipGram {
 
    public:
     struct TrainingPair {
-        int in;
-        int out;
+        int center;
+        int context;
     };
 
     SkipGram(int embedding_size);
@@ -35,8 +35,8 @@ class SkipGram {
      * @param window_size The number of nodes on each side of the center node to include in the
      * context.
      * @return std::vector<TrainingPair> A vector of training pairs, where each pair contains:
-     *         - `in`: the center node from the random walk.
-     *         - `out`: a context node within the specified window (excluding the center node).
+     *         - `center`: the center node from the random walk.
+     *         - `context`: a context node within the specified window (excluding the center node).
      */
     static std::vector<TrainingPair> generate_pairs(const std::vector<int>& random_walk,
                                                     int window_size);

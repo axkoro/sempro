@@ -119,18 +119,18 @@ TEST_F(SkipGramTest, generate_pairs) {
     // 1 (first element) + 2 + 2 + 2 + 1 (last element) = 8 pairs.
     ASSERT_EQ(pairs.size(), 8);
 
-    EXPECT_EQ(pairs[0].in, 1);
-    EXPECT_EQ(pairs[0].out, 2);
+    EXPECT_EQ(pairs[0].center, 1);
+    EXPECT_EQ(pairs[0].context, 2);
 
-    EXPECT_EQ(pairs[1].in, 2);
-    EXPECT_EQ(pairs[1].out, 1);
+    EXPECT_EQ(pairs[1].center, 2);
+    EXPECT_EQ(pairs[1].context, 1);
 
-    EXPECT_EQ(pairs[2].in, 2);
-    EXPECT_EQ(pairs[2].out, 3);
+    EXPECT_EQ(pairs[2].center, 2);
+    EXPECT_EQ(pairs[2].context, 3);
 
     int last = pairs.size() - 1;
-    EXPECT_EQ(pairs[last].in, 5);
-    EXPECT_EQ(pairs[last].out, 4);
+    EXPECT_EQ(pairs[last].center, 5);
+    EXPECT_EQ(pairs[last].context, 4);
 }
 
 // TEST(DeepWalkImputerTest, test_name) {}

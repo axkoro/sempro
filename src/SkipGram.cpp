@@ -19,8 +19,8 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
         int right_end = std::min(center_idx + window_size, walk_length - 1);
         for (int target_idx = left_end; target_idx <= right_end; target_idx++) {
             if (target_idx == center_idx) continue;  // make no pair for the center node
-            pairs[insert_idx].in = random_walk[center_idx];
-            pairs[insert_idx].out = random_walk[target_idx];
+            pairs[insert_idx].center = random_walk[center_idx];
+            pairs[insert_idx].context = random_walk[target_idx];
             insert_idx++;
         }
     }
