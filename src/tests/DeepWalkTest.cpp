@@ -106,7 +106,7 @@
 
 class SkipGramTest : public ::testing::Test {
    protected:
-    SkipGram skipgram{10};
+    SkipGram skipgram{10, 10};
 };
 
 TEST_F(SkipGramTest, generate_pairs) {

@@ -13,14 +13,22 @@ class SkipGram {
         int context;
     };
 
-    SkipGram(int embedding_size);
+    SkipGram(int num_nodes, int embedding_size);
 
     void train(const std::vector<std::vector<int>>& walks, int context_window);
 
     std::vector<std::vector<double>> get_embeddings();
 
    private:
+    int num_nodes;
     int embedding_size;
+
+    Matrix
+        W1_T;  // storing W1 transposed because matrix data structure uses row-major storage, thus
+    // get_row is more efficient then get_column, which we would have to use if we
+    // didn't store W1 transposed
+    // TODO: idea: handle this in the matrix data structure? (via a "transposed" flag e.g.)
+    Matrix W2;
 
     /**
      * @brief Generates training pairs from a random walk for the SkipGram model.
@@ -40,4 +48,8 @@ class SkipGram {
      */
     static std::vector<TrainingPair> generate_pairs(const std::vector<int>& random_walk,
                                                     int window_size);
+
+    static double sigmoid(double val);
+
+    std::vector<int> sample_negative_nodes(int center_node, int num_samples);
 };
