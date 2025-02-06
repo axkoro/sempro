@@ -45,6 +45,12 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_link_libraries(LouvainImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
 	target_link_options(LouvainImputerTest PRIVATE -coverage)
+
+	# add_executable(RandomWalkTest src/tests/RandomWalkTest.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp)
+	# target_include_directories(RandomWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	# target_link_libraries(RandomWalkTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	# target_compile_options(RandomWalkTest PRIVATE -coverage)
+	# target_link_options(RandomWalkTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
