@@ -1,10 +1,11 @@
-#include "LouvainImputer.hpp"
-#include "KNNImputer.hpp"
 #include <gtest/gtest.h>
+
+#include "KNNImputer.hpp"
+#include "LouvainImputer.hpp"
 
 TEST(LouvainImputerTest, TestFeatureImputationDouble) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
-    std::string features_path = "../data/test/louvain/features2_example.txt";
+    std::string features_path = "../data/test/louvain/double_features_example.txt";
     GraphDouble graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
@@ -22,7 +23,8 @@ TEST(LouvainImputerTest, TestFeatureImputationDouble) {
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature], 1e-2)
+            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature],
+                        1e-2)
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
@@ -30,7 +32,7 @@ TEST(LouvainImputerTest, TestFeatureImputationDouble) {
 
 TEST(LouvainImputerTest, TestFeatureImputationBool) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
-    std::string features_path = "../data/test/louvain/features_example.txt";
+    std::string features_path = "../data/test/louvain/bool_features_example.txt";
     GraphBool graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
@@ -56,7 +58,7 @@ TEST(LouvainImputerTest, TestFeatureImputationBool) {
 
 TEST(LouvainImputerTest, TestFeatureImputationInt) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
-    std::string features_path = "../data/test/louvain/features2_example.txt";
+    std::string features_path = "../data/test/louvain/int_features_example.txt";
     GraphInt graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
@@ -65,11 +67,11 @@ TEST(LouvainImputerTest, TestFeatureImputationInt) {
     LouvainImputer imputer(graph, communities);
     imputer.run();
 
-    std::vector<std::vector<int>> expected_output = {{4, 3, 2, 1, 3, 2},
-                                                     {0, 2, 1, 2, 4, 4},
-                                                     {3, 1, 1, 2, 3, 1},
-                                                     {4, 2, 4, 1, 3, 4},
-                                                     {4, 0, 4, 2, 2, 2}};
+    std::vector<std::vector<int>> expected_output = {{1, 0, 3, 0, 0, 0},
+                                                     {0, 1, 3, 0, 0, 0},
+                                                     {1, 0, 3, 1, 0, 0},
+                                                     {0, 0, 2, 0, 1, 0},
+                                                     {0, 0, 3, 0, 0, 1}};
 
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {

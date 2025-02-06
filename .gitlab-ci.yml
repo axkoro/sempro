@@ -17,6 +17,8 @@ cpp_unit_tests:
     - ./GraphTest
     - ./KNNImputerTest
     - ./LouvainTest
+    - ./LouvainImputerTest
+    - ./DeepWalkTest
     - gcovr -r ../  -e '.*/extlibs/.*'
 
 python_build:
