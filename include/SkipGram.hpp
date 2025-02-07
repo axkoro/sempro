@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "Matrix.hpp"
+
 class SkipGram {
     FRIEND_TEST(SkipGramTest, generate_pairs);
 
@@ -23,11 +25,11 @@ class SkipGram {
     int num_nodes;
     int embedding_size;
 
-    Matrix
-        W1_T;  // storing W1 transposed because matrix data structure uses row-major storage, thus
+    // storing W1 transposed because matrix data structure uses row-major storage, thus
     // get_row is more efficient then get_column, which we would have to use if we
     // didn't store W1 transposed
     // TODO: idea: handle this in the matrix data structure? (via a "transposed" flag e.g.)
+    Matrix W1_T;
     Matrix W2;
 
     /**
