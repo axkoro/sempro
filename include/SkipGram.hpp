@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Matrix.hpp"
+#include "Vector.hpp"
 
 class SkipGram {
     FRIEND_TEST(SkipGramTest, generate_pairs);

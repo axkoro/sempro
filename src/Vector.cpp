@@ -6,11 +6,11 @@ Vector::Vector(size_t size, double value) : elements(size, value) {}
 
 Vector::Vector(std::vector<double> vec) : elements(vec) {}
 
-inline size_t Vector::size() const { return elements.size(); }
+size_t Vector::size() const { return elements.size(); }
 
-inline double& Vector::operator[](size_t idx) { return elements[idx]; }
+double& Vector::operator[](size_t idx) { return elements[idx]; }
 
-inline const double& Vector::operator[](size_t idx) const { return elements[idx]; }
+const double& Vector::operator[](size_t idx) const { return elements[idx]; }
 
 Vector& Vector::operator+=(const Vector& other) {
     size_t size = elements.size();
