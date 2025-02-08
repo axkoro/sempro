@@ -32,11 +32,13 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
     std::vector<int> walk(walk_length);
     walk[0] = start_node;
     int current_node = start_node;
+    const auto& neighbors = graph.get_neighbours(current_node);
     
+    if (neighbors.empty()) return walk;  // Early exit if start node has no neighbors
+
     for (int i = 1; i < walk_length; ++i) {
         const auto& neighbors = graph.get_neighbours(current_node);
-        if (neighbors.empty()) break;
-        
+
         // Compute cumulative sum of weights for weighted random selection
         std::vector<double> cumulative_weights(neighbors.size());
         cumulative_weights[0] = neighbors[0].weight;
