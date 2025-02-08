@@ -19,50 +19,50 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
         for (auto&& walk : walks) {
             std::vector<TrainingPair> pairs = generate_pairs(walk, context_window);
 
-            for (auto&& pair : pairs) {
+            for (auto&& pair : pairs) {  // see repo wiki for thorough explanation
                 std::vector<int> negatives =
                     sample_negative_nodes(pair.center, num_negative_samples);
 
                 // forward pass
-                std::vector<double> v_o = W1_T.get_row(pair.center);
+                std::vector<double> v_c = W1_T.get_row(pair.center);
 
-                int pos_idx = pair.context;
-                std::vector<double> v_c = W2.get_row(pos_idx);
-                double pos_score = sigmoid(v_c * v_o);
+                std::vector<double> v_o = W2.get_row(pair.context);
+                double pos_score = sigmoid(v_o * v_c);
 
                 std::vector<double> neg_scores(num_negative_samples);
-                std::vector<std::vector<double>> v_ns(num_negative_samples,
-                                                      std::vector<double>(embedding_size));
-                for (int idx : negatives) {
-                    std::vector<double> v_n = W2.get_row(idx);
-                    double score = sigmoid(v_n * v_o);
-                    neg_scores.push_back(score);
-                    v_ns.push_back(v_n);
+                std::vector<std::vector<double>> v_n_list(num_negative_samples,
+                                                          std::vector<double>(embedding_size));
+                for (int i = 0; i < num_negative_samples; i++) {
+                    int neg_index = negatives[i];
+                    std::vector<double> v_n = W2.get_row(neg_index);
+                    double score = sigmoid(v_n * v_c);
+                    neg_scores[i] = score;
+                    v_n_list[i] = v_n;
                 }
 
                 // backpropagation
                 // updates to W2
-                std::vector<double> v_c_gradient = (1 - pos_score) * v_c;
-                W2.add_to_row(learning_rate * v_c_gradient, pos_idx);
+                std::vector<double> gradient_v_o = (1 - pos_score) * v_c;
+                W2.add_to_row(learning_rate * gradient_v_o, pair.context);
 
                 for (int i = 0; i < num_negative_samples; i++) {
-                    std::vector<double> v_n_gradient = -neg_scores[i] * v_c;
-                    W2.add_to_row(learning_rate * v_n_gradient, negatives[i]);
+                    std::vector<double> gradient_v_n = -neg_scores[i] * v_c;
+                    W2.add_to_row(learning_rate * gradient_v_n, negatives[i]);
                 }
 
                 // update to W1
-                double neg_sum = 0;
+                std::vector<double> neg_sum(embedding_size, 0.0);
                 for (int i = 0; i < num_negative_samples; i++) {
-                    neg_sum += neg_scores[i] * v_ns[i];
+                    neg_sum += neg_scores[i] * v_n_list[i];
                 }
 
-                std::vector<double> v_o_gradient = (1 - pos_score) * v_o - neg_sum;
-                W1.add_to_row(learning_rate * v_o_gradient, pos_idx);
+                std::vector<double> gradient_v_c = (1 - pos_score) * v_o - neg_sum;
+                W1.add_to_row(learning_rate * gradient_v_c, pair.center);
             }
         }
     }
 }
-
+== ;
 std::vector<std::vector<double>> SkipGram::get_embeddings() {
     // potential optimization: return using move semantics (benchmark this before changing!!)
     return std::vector<std::vector<double>>();
