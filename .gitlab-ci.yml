@@ -19,6 +19,7 @@ cpp_unit_tests:
     - ./LouvainTest
     - ./LouvainImputerTest
     - ./LinearAlgebraTest
+    - ./NodeDistributionTest
     - ./DeepWalkTest
     - gcovr -r ../  -e '.*/extlibs/.*'
 

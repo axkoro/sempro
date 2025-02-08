@@ -2,9 +2,6 @@
 
 #include <cmath>
 
-#include "Matrix.hpp"
-#include "Vector.hpp"
-
 SkipGram::SkipGram(int num_nodes, int embedding_size)
     : num_nodes(num_nodes),
       embedding_size(embedding_size),
@@ -12,19 +9,23 @@ SkipGram::SkipGram(int num_nodes, int embedding_size)
       W2(num_nodes, embedding_size) {}
 
 void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_window) {
+    // TODO: configurable parameters
     int num_negative_samples = 10;
     int num_epochs = 5;
     double learning_rate = 0.025;  // TODO: add decaying learning rate (see word2vec paper)
+    double smoothing_exponent = 0.75;
+
+    NegativeSampler sampler(walks, num_nodes, smoothing_exponent);
 
     for (int epoch = 0; epoch < num_epochs; epoch++) {
         // TODO: shuffle walks
 
-        for (auto&& walk : walks) {
+        for (const auto& walk : walks) {
             std::vector<TrainingPair> pairs = generate_pairs(walk, context_window);
 
             for (auto&& pair : pairs) {  // see repo wiki for thorough explanation
                 std::vector<int> negatives =
-                    sample_negative_nodes(pair.center, num_negative_samples);
+                    sampler.sample_negative_nodes(pair.center, num_negative_samples);
 
                 // forward pass
                 Vector v_c = W1_T.get_row(pair.center);
