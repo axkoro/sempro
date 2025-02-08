@@ -1,18 +1,21 @@
+#pragma once
+
 #include <vector>
+
+#include "Vector.hpp"
 
 // Simple implementation of a matrix stored in row-major format
 class Matrix {
    public:
-    Matrix(size_t rows, size_t cols);
+    Matrix(size_t rows, size_t cols, double value = 0.0);
+
+    size_t num_rows() const;
+    size_t num_cols() const;
 
     double& operator()(size_t row, size_t col);
     const double& operator()(size_t row, size_t col) const;
 
-    std::vector<double> get_row(size_t row_index) const;
+    Vector get_row(size_t row_index) const;
 
-    // Matrix-vector multiplication
-    std::vector<double> operator*(const std::vector<double>& vec) const;
-
-    // Compute dot product between a vector and a specified row
-    double dot_with_row(const std::vector<double>& vec, size_t row_index) const;
+    void add_to_row(const Vector& vec, size_t row_idx);
 };
