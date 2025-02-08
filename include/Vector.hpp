@@ -5,7 +5,7 @@
 class Vector {
    public:
     Vector(size_t size, double value = 0.0);
-    Vector(std::vector<double>);
+    Vector(std::vector<double> vec);
 
     size_t size() const;
 
@@ -23,10 +23,9 @@ class Vector {
     friend Vector operator+(const Vector& a, const Vector& b);
     friend Vector operator-(const Vector& a, const Vector& b);
 
-    // In-place addition
     Vector& operator+=(const Vector& other);
+    Vector& operator-=(const Vector& other);
 
    private:
-    size_t size;
     std::vector<double> elements;
 };
