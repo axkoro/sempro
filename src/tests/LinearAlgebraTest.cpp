@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "Matrix.hpp"
 #include "Vector.hpp"
 
 TEST(VectorTest, ConstructorWithSize) {
@@ -104,6 +105,73 @@ TEST(VectorTest, VectorSubtraction) {
     for (size_t i = 0; i < expected.size(); ++i) {
         EXPECT_DOUBLE_EQ(result[i], expected[i]);
     }
+}
+
+TEST(MatrixTest, ConstructorAndDefaultValue) {
+    size_t rows = 3;
+    size_t cols = 4;
+    double defaultValue = 5.0;
+    Matrix m(rows, cols, defaultValue);
+    EXPECT_EQ(m.num_rows(), rows);
+    EXPECT_EQ(m.num_cols(), cols);
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j) EXPECT_DOUBLE_EQ(m(i, j), defaultValue);
+}
+
+TEST(MatrixTest, ElementAccessAndModification) {
+    Matrix m(2, 3, 0.0);
+    m(0, 0) = 1.0;
+    m(0, 1) = 2.0;
+    m(0, 2) = 3.0;
+    m(1, 0) = 4.0;
+    m(1, 1) = 5.0;
+    m(1, 2) = 6.0;
+
+    EXPECT_DOUBLE_EQ(m(0, 0), 1.0);
+    EXPECT_DOUBLE_EQ(m(0, 1), 2.0);
+    EXPECT_DOUBLE_EQ(m(0, 2), 3.0);
+    EXPECT_DOUBLE_EQ(m(1, 0), 4.0);
+    EXPECT_DOUBLE_EQ(m(1, 1), 5.0);
+    EXPECT_DOUBLE_EQ(m(1, 2), 6.0);
+}
+
+TEST(MatrixTest, GetRow) {
+    Matrix m(3, 3, 0.0);
+    // Fill matrix with values:
+    // row0: 1, 2, 3
+    // row1: 4, 5, 6
+    // row2: 7, 8, 9
+    double counter = 1.0;
+    for (size_t i = 0; i < m.num_rows(); ++i) {
+        for (size_t j = 0; j < m.num_cols(); ++j) {
+            m(i, j) = counter++;
+        }
+    }
+    Vector row1 = m.get_row(1);
+    EXPECT_EQ(row1.size(), m.num_cols());
+    EXPECT_DOUBLE_EQ(row1[0], 4.0);
+    EXPECT_DOUBLE_EQ(row1[1], 5.0);
+    EXPECT_DOUBLE_EQ(row1[2], 6.0);
+}
+
+TEST(MatrixTest, AddToRow) {
+    // Initialize a 2x3 matrix filled with 1's.
+    Matrix m(2, 3, 1.0);
+    // Create a vector with values to add.
+    Vector addVec({2.0, 3.0, 4.0});
+    m.add_to_row(addVec, 0);
+
+    // After adding, row0 should become: 1+2, 1+3, 1+4 => 3, 4, 5.
+    Vector row0 = m.get_row(0);
+    EXPECT_DOUBLE_EQ(row0[0], 3.0);
+    EXPECT_DOUBLE_EQ(row0[1], 4.0);
+    EXPECT_DOUBLE_EQ(row0[2], 5.0);
+
+    // Row1 should remain unchanged.
+    Vector row1 = m.get_row(1);
+    EXPECT_DOUBLE_EQ(row1[0], 1.0);
+    EXPECT_DOUBLE_EQ(row1[1], 1.0);
+    EXPECT_DOUBLE_EQ(row1[2], 1.0);
 }
 
 int main(int argc, char **argv) {
