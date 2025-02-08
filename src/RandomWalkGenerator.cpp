@@ -18,6 +18,21 @@ void RandomWalkGenerator::set_seed(int seed) {
     rng.seed(seed);
 }
 
+int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>& neighbors, std::mt19937& rng) {
+    std::vector<double> cumulative_weights(neighbors.size());
+    cumulative_weights[0] = neighbors[0].weight;
+    
+    for (size_t j = 1; j < neighbors.size(); ++j) {
+        cumulative_weights[j] = cumulative_weights[j - 1] + neighbors[j].weight;
+    }
+
+    std::uniform_real_distribution<> distrib(0, cumulative_weights.back());
+    double random_value = distrib(rng);
+
+    auto it = std::upper_bound(cumulative_weights.begin(), cumulative_weights.end(), random_value);
+    return std::distance(cumulative_weights.begin(), it);
+}
+
 std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
     std::vector<std::vector<int>> walks;
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
@@ -33,26 +48,13 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
     walk[0] = start_node;
     int current_node = start_node;
     const auto& neighbors = graph.get_neighbours(current_node);
-    
+
     if (neighbors.empty()) return walk;  // Early exit if start node has no neighbors
 
     for (int i = 1; i < walk_length; ++i) {
         const auto& neighbors = graph.get_neighbours(current_node);
 
-        // Compute cumulative sum of weights for weighted random selection
-        std::vector<double> cumulative_weights(neighbors.size());
-        cumulative_weights[0] = neighbors[0].weight;
-        for (size_t j = 1; j < neighbors.size(); ++j) {
-            cumulative_weights[j] = cumulative_weights[j - 1] + neighbors[j].weight;
-        }
-        
-        // Generate a random number in the range [0, total weight]
-        std::uniform_real_distribution<> distrib(0, cumulative_weights.back());
-        double random_value = distrib(rng);
-        
-        // Select the neighbor using binary search
-        auto it = std::upper_bound(cumulative_weights.begin(), cumulative_weights.end(), random_value);
-        int index = std::distance(cumulative_weights.begin(), it);
+        int index = select_weighted_random_neighbor(neighbors, rng);
         
         current_node = neighbors[index].target;
         walk[i] = current_node;
