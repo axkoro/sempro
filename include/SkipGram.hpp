@@ -54,7 +54,4 @@ class SkipGram {
                                                     int window_size);
 
     static double sigmoid(double val);
-
-    std::vector<int> sample_negative_nodes(NodeDistribution distribution, int center_node,
-                                           int num_samples);
 };
