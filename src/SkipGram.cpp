@@ -14,7 +14,7 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
     int num_epochs = 5;
     double learning_rate = 0.025;  // TODO: add decaying learning rate (see word2vec paper)
 
-    NodeDistribution distribution(walks);
+    NodeDistribution distribution(walks, num_nodes);
 
     for (int epoch = 0; epoch < num_epochs; epoch++) {
         // TODO: shuffle walks
