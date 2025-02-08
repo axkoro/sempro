@@ -118,7 +118,6 @@ TEST(RandomWalkGeneratorTest, same_seed_ensures_reproducibility) {
         {0, 0.3}, {1, 0.2}
     };
     StaticMinimalGraph graph(offsets, edges);
-    std::cout << "Graph created" << std::endl;
     
     RandomWalkGenerator generator1(graph, 4, 5, 42);
     auto walks1 = generator1.generate_walks();
