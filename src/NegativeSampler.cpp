@@ -4,7 +4,7 @@
 
 NegativeSampler::NegativeSampler(const std::vector<std::vector<int>> &random_walks, int num_nodes,
                                  double smoothing_exponent, int seed)
-    : int_dist(0, num_nodes - 1), real_dist(0.0, 1.0) {
+    : index_distribution(0, num_nodes - 1), probability_distribution(0.0, 1.0) {
     if (seed == -1) {
         std::random_device rd;
         rng.seed(rd());
@@ -35,8 +35,8 @@ NegativeSampler::NegativeSampler(const std::vector<std::vector<int>> &random_wal
 }
 
 int NegativeSampler::draw_sample() {
-    int selected_index = int_dist(rng);
-    double random_prob = real_dist(rng);
+    int selected_index = index_distribution(rng);
+    double random_prob = probability_distribution(rng);
 
     if (random_prob < alias_table.probabilities[selected_index]) return selected_index;
     return alias_table.aliases[selected_index];
