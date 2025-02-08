@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "Matrix.hpp"
-#include "NodeDistribution.hpp"
 #include "Vector.hpp"
 
 class SkipGram {

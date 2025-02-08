@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include "NegativeSampler.hpp"
+
 SkipGram::SkipGram(int num_nodes, int embedding_size)
     : num_nodes(num_nodes),
       embedding_size(embedding_size),
