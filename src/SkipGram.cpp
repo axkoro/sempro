@@ -1,5 +1,7 @@
 #include "SkipGram.hpp"
 
+#include <cmath>
+
 #include "Matrix.hpp"
 #include "Vector.hpp"
 
@@ -88,3 +90,5 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
 
     return pairs;
 }
+
+double SkipGram::sigmoid(double val) { return 1 / (1 + exp(-val)); }
