@@ -25,12 +25,12 @@ std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
             walks.push_back(perform_walk(node));
         }
     }
-    return walks;
+    return walks; // TODO: benchmark if returning with move semantics is quicker
 }
 
 std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
-    std::vector<int> walk;
-    walk.push_back(start_node);
+    std::vector<int> walk(walk_length);
+    walk[0] = start_node;
     int current_node = start_node;
     
     for (int i = 1; i < walk_length; ++i) {
@@ -53,7 +53,7 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
         int index = std::distance(cumulative_weights.begin(), it);
         
         current_node = neighbors[index].target;
-        walk.push_back(current_node);
+        walk[i] = current_node;
     }
     return walk;
 }
