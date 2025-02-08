@@ -59,5 +59,5 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
         current_node = neighbors[index].target;
         walk[i] = current_node;
     }
-    return walk;
+    return walk; // TODO: benchmark if using move semantics is quicker
 }
