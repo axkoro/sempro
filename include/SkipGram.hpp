@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Matrix.hpp"
+#include "NodeDistribution.hpp"
 #include "Vector.hpp"
 
 class SkipGram {
@@ -54,5 +55,6 @@ class SkipGram {
 
     static double sigmoid(double val);
 
-    std::vector<int> sample_negative_nodes(int center_node, int num_samples);
+    std::vector<int> sample_negative_nodes(NodeDistribution distribution, int center_node,
+                                           int num_samples);
 };

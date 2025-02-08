@@ -2,9 +2,6 @@
 
 #include <cmath>
 
-#include "Matrix.hpp"
-#include "Vector.hpp"
-
 SkipGram::SkipGram(int num_nodes, int embedding_size)
     : num_nodes(num_nodes),
       embedding_size(embedding_size),
@@ -12,9 +9,12 @@ SkipGram::SkipGram(int num_nodes, int embedding_size)
       W2(num_nodes, embedding_size) {}
 
 void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_window) {
+    // TODO: configurable parameters
     int num_negative_samples = 10;
     int num_epochs = 5;
     double learning_rate = 0.025;  // TODO: add decaying learning rate (see word2vec paper)
+
+    NodeDistribution distribution(walks);
 
     for (int epoch = 0; epoch < num_epochs; epoch++) {
         // TODO: shuffle walks
@@ -24,7 +24,7 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
 
             for (auto&& pair : pairs) {  // see repo wiki for thorough explanation
                 std::vector<int> negatives =
-                    sample_negative_nodes(pair.center, num_negative_samples);
+                    sample_negative_nodes(distribution, pair.center, num_negative_samples);
 
                 // forward pass
                 Vector v_c = W1_T.get_row(pair.center);
@@ -92,3 +92,18 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
 }
 
 double SkipGram::sigmoid(double val) { return 1 / (1 + exp(-val)); }
+
+std::vector<int> SkipGram::sample_negative_nodes(NodeDistribution distribution, int center_node,
+                                                 int num_samples) {
+    std::vector<int> samples(num_samples);
+
+    int samples_taken = 0;
+    while (samples_taken < num_samples) {
+        int sample = distribution.draw_sample();
+        if (sample == center_node) continue;
+        samples[samples_taken] = sample;
+        samples_taken++;
+    }
+
+    return samples;
+}
