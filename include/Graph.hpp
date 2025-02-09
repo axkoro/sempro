@@ -4,12 +4,19 @@
 #include <string>
 #include <vector>
 
+// forward declarations
+class WeightedGraph;
+class WeightedEdgeIterator;
+
 class GraphException : public std::runtime_error {
    public:
     explicit GraphException(const std::string& message);
 };
 
 class Graph {
+    friend class WeightedGraph;
+    friend class WeightedEdgeIterator;
+
    protected:
     int num_nodes = -1;
     int num_features = -1;
@@ -166,6 +173,7 @@ class Graph {
      * the features vector as a member variable.
      */
     virtual void print_features() const = 0;
+
     /**
      * @brief Prints features using print_features to a file with the given path.
      * @param output_path Path to the file to write the features to.
