@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <numeric>
+
 #include "EdgeWeightCalculator.hpp"
 #include "GraphDouble.hpp"
 #include "RandomWalkGenerator.hpp"
@@ -104,15 +106,68 @@
 //     EXPECT_NE(walks1, walks2);  // Expect different results in different runs
 // }
 
+TEST(SkipGramConfigTest, ValidConfig) {
+    SkipGram::SkipGramConfig config;
+    EXPECT_TRUE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidEmbeddingSize) {
+    SkipGram::SkipGramConfig config;
+    config.embedding_size = 0;
+    EXPECT_FALSE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidContextWindow) {
+    SkipGram::SkipGramConfig config;
+    config.context_window = 0;
+    EXPECT_FALSE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidNumNegativeSamples) {
+    SkipGram::SkipGramConfig config;
+    config.num_negative_samples = -1;
+    EXPECT_FALSE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidSmoothingExponent) {
+    SkipGram::SkipGramConfig config;
+    config.smoothing_exponent = 0;
+    EXPECT_FALSE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidNumEpochs) {
+    SkipGram::SkipGramConfig config;
+    config.num_epochs = 0;
+    EXPECT_FALSE(config.validate());
+}
+
+TEST(SkipGramConfigTest, InvalidLearningRate) {
+    SkipGram::SkipGramConfig config;
+    config.learning_rate = 0;
+    EXPECT_FALSE(config.validate());
+}
+
 class SkipGramTest : public ::testing::Test {
    protected:
-    SkipGram skipgram{10, 10};
+    int num_nodes = 10;
+    SkipGram::SkipGramConfig config;
+    SkipGram* model;
+
+    void SetUp() override {
+        // Use a smaller embedding size for testing.
+        config.embedding_size = 16;
+        config.num_epochs = 1;
+        // Default context_window is 10, so valid walks must have length ≥ 2*10+1 = 21.
+        model = new SkipGram(num_nodes, config);
+    }
+
+    void TearDown() override { delete model; }
 };
 
-TEST_F(SkipGramTest, generate_pairs) {
+TEST_F(SkipGramTest, GenerateValidPairs) {
     std::vector<int> walk = {1, 2, 3, 4, 5};
     int window_size = 1;
-    auto pairs = skipgram.generate_pairs(walk, window_size);
+    auto pairs = model->generate_pairs(walk, window_size);
 
     // For each center element, all elements in its window are paired (except the center node
     // itself). For window_size 1 and a walk of 5, you expect:
@@ -131,6 +186,39 @@ TEST_F(SkipGramTest, generate_pairs) {
     int last = pairs.size() - 1;
     EXPECT_EQ(pairs[last].center, 5);
     EXPECT_EQ(pairs[last].context, 4);
+}
+
+TEST_F(SkipGramTest, ConstructorSetsEmbeddingDimensions) {
+    // We assume get_embeddings returns a matrix with dimensions: num_rows == num_nodes and
+    // num_cols == config.embedding_size.
+    Matrix embeddings = model->get_embeddings();
+    EXPECT_EQ(embeddings.num_rows(), num_nodes);
+    EXPECT_EQ(embeddings.num_cols(), config.embedding_size);
+}
+
+TEST_F(SkipGramTest, TrainWithEmptyWalksDoesNotThrow) {
+    std::vector<std::vector<int>> walks;
+    EXPECT_NO_THROW(model->train(walks));
+}
+
+TEST_F(SkipGramTest, TrainWithValidWalksUpdatesEmbeddingsDimensions) {
+    // Ensure each walk is long enough: length >= 2 * context_window + 1.
+    int min_length = 2 * config.context_window + 1;
+    std::vector<std::vector<int>> walks;
+    for (int w = 0; w < 2; ++w) {
+        std::vector<int> walk;
+        for (int i = 0; i < min_length; ++i) {
+            // Cycle through valid node indices [0, num_nodes-1].
+            walk.push_back(i % num_nodes);
+        }
+        walks.push_back(walk);
+    }
+
+    EXPECT_NO_THROW(model->train(walks));
+
+    Matrix embeddings = model->get_embeddings();
+    EXPECT_EQ(embeddings.num_rows(), num_nodes);
+    EXPECT_EQ(embeddings.num_cols(), config.embedding_size);
 }
 
 // TEST(DeepWalkImputerTest, test_name) {}
