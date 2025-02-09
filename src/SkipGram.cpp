@@ -3,11 +3,16 @@
 #include <algorithm>
 #include <cmath>
 
-SkipGram::SkipGram(int num_nodes, SkipGramConfig config)
-    : num_nodes(num_nodes),
-      config(config),
-      W1_T(num_nodes, config.embedding_size),
-      W2(num_nodes, config.embedding_size) {}
+SkipGram::SkipGram(int num_nodes, SkipGramConfig config, int seed)
+    : num_nodes(num_nodes), config(config) {
+    std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
+    double limit = 0.5 / config.embedding_size;
+    std::uniform_real_distribution<double> noise_dist(-limit, limit);
+    auto distribution = [&rng, &noise_dist]() { return noise_dist(rng); };
+
+    W1_T = Matrix(num_nodes, config.embedding_size, distribution);
+    W2 = Matrix(num_nodes, config.embedding_size, 0.0);
+}
 
 void SkipGram::train(const std::vector<std::vector<int>>& walks) {
     if (walks.empty()) throw std::logic_error("Cannot train using empty walks");

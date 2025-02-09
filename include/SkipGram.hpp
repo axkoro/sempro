@@ -41,7 +41,7 @@ class SkipGram {
         int context;
     };
 
-    SkipGram(int num_nodes, SkipGramConfig config);
+    SkipGram(int num_nodes, SkipGramConfig config, int seed = -1);
 
     void train(const std::vector<std::vector<int>>& walks);
 
