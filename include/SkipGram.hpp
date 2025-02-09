@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Matrix.hpp"
+#include "NegativeSampler.hpp"
 #include "Vector.hpp"
 
 class SkipGram {
@@ -57,13 +58,16 @@ class SkipGram {
     Matrix W1_T;
     Matrix W2;
 
+    void process_pair(TrainingPair pair, double learning_rate, NegativeSampler& sampler);
+
     /**
      * @brief Generates training pairs from a random walk for the SkipGram model.
      *
      * Given a random walk (a sequence of node IDs) and a specified context window size,
      * this function creates training pairs for use in a SkipGram model. For each node in the
-     * random walk, it pairs the node (as the center) with every node within its window, excluding
-     * the center node itself. The resulting pairs can then be used to train embeddings.
+     * random walk, it pairs the node (as the center) with every node within its window,
+     * excluding the center node itself. The resulting pairs can then be used to train
+     * embeddings.
      *
      * @param random_walk A vector of integers representing the sequence of nodes from a random
      * walk.
@@ -71,10 +75,15 @@ class SkipGram {
      * context.
      * @return std::vector<TrainingPair> A vector of training pairs, where each pair contains:
      *         - `center`: the center node from the random walk.
-     *         - `context`: a context node within the specified window (excluding the center node).
+     *         - `context`: a context node within the specified window (excluding the center
+     * node).
      */
     static std::vector<TrainingPair> generate_pairs(const std::vector<int>& random_walk,
                                                     int window_size);
 
     static double sigmoid(double val);
+
+    // calculates linear decrease for each training pair (see word2vec paper)
+    static double calculate_learning_rate_decrease(double learning_rate, int context_window,
+                                                   int walk_length, int total_num_walks);
 };
