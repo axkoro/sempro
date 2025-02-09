@@ -13,9 +13,9 @@ void DeepWalkImputer::run() {
 
     SkipGram skip_gram(graph.get_num_nodes(), config.embedding_size);
     skip_gram.train(walks, config.context_window);
-    std::vector<std::vector<double>> embeddings = skip_gram.get_embeddings();
+    Matrix embeddings = skip_gram.get_embeddings();
 
     impute_features(embeddings);
 }
 
-void DeepWalkImputer::impute_features(const std::vector<std::vector<double>>& embeddings) {}
+void DeepWalkImputer::impute_features(const Matrix& embeddings) {}

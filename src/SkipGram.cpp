@@ -68,7 +68,7 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
     }
 }
 
-std::vector<std::vector<double>> SkipGram::get_embeddings() {
+Matrix SkipGram::get_embeddings() {
     // potential optimization: return using move semantics (benchmark this before changing!!)
     return std::vector<std::vector<double>>();
 }

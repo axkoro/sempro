@@ -20,7 +20,7 @@ class SkipGram {
 
     void train(const std::vector<std::vector<int>>& walks, int context_window);
 
-    std::vector<std::vector<double>> get_embeddings();
+    Matrix get_embeddings();
 
    private:
     int num_nodes;

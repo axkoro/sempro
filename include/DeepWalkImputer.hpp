@@ -26,5 +26,5 @@ class DeepWalkImputer : public Imputer {
     void run();
 
    private:
-    void impute_features(const std::vector<std::vector<double>>& embeddings);
+    void impute_features(const Matrix& embeddings);
 };
