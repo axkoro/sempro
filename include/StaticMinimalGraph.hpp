@@ -20,5 +20,5 @@ class StaticMinimalGraph : public MinimalGraph {
     virtual int get_num_edges() const override;
 
     virtual int get_degree(int u) const override;
-    const std::vector<Edge>& get_neighbours(int u) const;
+    const std::vector<Edge> get_neighbours(int u) const;
 };

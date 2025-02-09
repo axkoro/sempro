@@ -16,11 +16,12 @@ int StaticMinimalGraph::get_degree(int u) const {
     return offsets[u + 1] - offsets[u];
 }
 
-const std::vector<Edge>& StaticMinimalGraph::get_neighbours(int u) const {
+const std::vector<Edge> StaticMinimalGraph::get_neighbours(int u) const {
     if (u < 0 || u >= get_num_nodes()) {
         throw std::logic_error("Node does not exist");
     }
-    int start = offsets[u];
-    int end = offsets[u + 1];
-    return {edges.begin() + start, edges.begin() + end};
+    std::vector<Edge> neighbours(offsets[u + 1] - offsets[u]);
+    std::copy(edges.begin() + offsets[u], edges.begin() + offsets[u + 1], neighbours.begin());
+
+    return neighbours;
 }
