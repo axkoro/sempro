@@ -76,15 +76,6 @@ TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
     RandomWalkGenerator generator(graph, 5, 3);  // 5 steps, 3 walks per node
     auto walks = generator.generate_walks();
 
-    std::cout << "Walks: " << std::endl;
-    for (const auto& walk : walks) {
-        for (int node : walk) {
-            std::cout << node << " ";
-        }
-        std::cout << std::endl;
-    }
-
-
     for (const auto& walk : walks) {
         EXPECT_EQ(walk.size(), 5);  // Each walk should have 5 steps
         for (int i = 0; i < 5; ++i) {
