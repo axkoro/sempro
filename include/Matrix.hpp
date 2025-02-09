@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include <vector>
 
 #include "Vector.hpp"
@@ -12,6 +13,8 @@
  */
 class Matrix {
    public:
+    Matrix() = default;
+
     /**
      * @brief Constructs a matrix with a specified number of rows and columns.
      * @param num_rows Number of rows.
@@ -19,6 +22,26 @@ class Matrix {
      * @param value Initial value for each element (default 0.0).
      */
     Matrix(size_t num_rows, size_t num_cols, double value = 0.0);
+
+    /**
+     * @brief Constructs a Matrix with elements initialized by a given distribution.
+     *
+     * This constructor creates a matrix of size @p num_rows by @p num_cols. Each element is
+     * initialized by invoking the provided distribution callable.
+     *
+     * @tparam Distribution A callable type that takes no arguments and returns a double (or a type
+     *                      convertible to double).
+     * @param num_rows The number of rows in the matrix.
+     * @param num_cols The number of columns in the matrix.
+     * @param dist A callable used to generate initial values for the matrix elements.
+     */
+    template <typename Distribution>
+    Matrix(size_t num_rows, size_t num_cols, Distribution dist)
+        : num_rows_(num_rows), num_cols_(num_cols), data(num_rows * num_cols) {
+        for (auto& val : data) {
+            val = dist();
+        }
+    }
 
     /**
      * @brief Returns the number of rows.
