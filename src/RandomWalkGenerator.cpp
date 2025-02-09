@@ -1,10 +1,11 @@
 #include "RandomWalkGenerator.hpp"
+
+#include <algorithm>  // For std::upper_bound
 #include <iostream>
 #include <random>
-#include <numeric> // For std::partial_sum
-#include <algorithm> // For std::upper_bound
 
-RandomWalkGenerator::RandomWalkGenerator(const StaticMinimalGraph& graph, int walk_length, int num_walks, int seed)
+RandomWalkGenerator::RandomWalkGenerator(const StaticMinimalGraph& graph, int walk_length,
+                                         int num_walks, int seed)
     : graph(graph), walk_length(walk_length), num_walks(num_walks) {
     if (seed == -1) {
         std::random_device rd;
@@ -14,11 +15,10 @@ RandomWalkGenerator::RandomWalkGenerator(const StaticMinimalGraph& graph, int wa
     }
 }
 
-void RandomWalkGenerator::set_seed(int seed) {
-    rng.seed(seed);
-}
+void RandomWalkGenerator::set_seed(int seed) { rng.seed(seed); }
 
-int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>& neighbors, std::mt19937& rng) {
+int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>& neighbors,
+                                                         std::mt19937& rng) {
     std::vector<double> cumulative_weights(neighbors.size());
     cumulative_weights[0] = neighbors[0].weight;
 
@@ -36,13 +36,16 @@ int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>
 }
 
 std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
-    std::vector<std::vector<int>> walks;
-    for (int node = 0; node < graph.get_num_nodes(); ++node) {
+    int num_nodes = graph.get_num_nodes();
+    std::vector<std::vector<int>> walks(num_nodes * num_walks, std::vector<int>(walk_length));
+    int next_walk_idx = 0;
+    for (int node = 0; node < num_nodes; ++node) {
         for (int i = 0; i < num_walks; ++i) {
-            walks.push_back(perform_walk(node));
+            walks[next_walk_idx] = perform_walk(node);
+            next_walk_idx++;
         }
     }
-    return walks; // TODO: benchmark if returning with move semantics is quicker
+    return walks;  // TODO: benchmark if returning with move semantics is quicker
 }
 
 std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
@@ -58,5 +61,5 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
         current_node = select_weighted_random_neighbor(neighbors, rng);
         walk[i] = current_node;
     }
-    return walk; // TODO: benchmark if using move semantics is quicker
+    return walk;  // TODO: benchmark if using move semantics is quicker
 }
