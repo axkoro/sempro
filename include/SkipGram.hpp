@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "DeepWalkImputer.hpp"
 #include "Matrix.hpp"
 #include "NegativeSampler.hpp"
 #include "Vector.hpp"
@@ -12,36 +13,12 @@ class SkipGram {
     FRIEND_TEST(SkipGramTest, GenerateValidPairs);
 
    public:
-    // TODO: add documentation for how to use default config (and only change specific paramters)
-    struct SkipGramConfig {  // TODO: research best initial parameters
-        int embedding_size = 128;
-
-        int context_window = 10;
-
-        int num_negative_samples = 10;
-        double smoothing_exponent = 0.75;
-
-        int num_epochs = 5;
-        double learning_rate = 0.025;
-
-        bool validate() {
-            if (embedding_size <= 0) return false;
-            if (context_window <= 0) return false;
-            if (num_negative_samples < 0) return false;
-            if (smoothing_exponent <= 0) return false;
-            if (num_epochs <= 0) return false;
-            if (learning_rate <= 0) return false;
-            // if (walk_length < (2 * context_window + 1)) return false;
-            return true;
-        }
-    };
-
     struct TrainingPair {
         int center;
         int context;
     };
 
-    SkipGram(int num_nodes, SkipGramConfig config, int seed = -1);
+    SkipGram(int num_nodes, DeepWalkImputer::DeepWalkConfig& config, int seed = -1);
 
     void train(const std::vector<std::vector<int>>& walks);
 
@@ -49,7 +26,7 @@ class SkipGram {
 
    private:
     int num_nodes;
-    SkipGramConfig config;
+    DeepWalkImputer::DeepWalkConfig config;
 
     // storing W1 transposed because matrix data structure uses row-major storage, thus
     // get_row is more efficient then get_column, which we would have to use if we

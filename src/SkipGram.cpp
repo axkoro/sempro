@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-SkipGram::SkipGram(int num_nodes, SkipGramConfig config, int seed)
+SkipGram::SkipGram(int num_nodes, DeepWalkImputer::DeepWalkConfig& config, int seed)
     : num_nodes(num_nodes), config(config) {
     std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
     double limit = 0.5 / config.embedding_size;

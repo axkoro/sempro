@@ -106,51 +106,10 @@
 //     EXPECT_NE(walks1, walks2);  // Expect different results in different runs
 // }
 
-TEST(SkipGramConfigTest, ValidConfig) {
-    SkipGram::SkipGramConfig config;
-    EXPECT_TRUE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidEmbeddingSize) {
-    SkipGram::SkipGramConfig config;
-    config.embedding_size = 0;
-    EXPECT_FALSE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidContextWindow) {
-    SkipGram::SkipGramConfig config;
-    config.context_window = 0;
-    EXPECT_FALSE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidNumNegativeSamples) {
-    SkipGram::SkipGramConfig config;
-    config.num_negative_samples = -1;
-    EXPECT_FALSE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidSmoothingExponent) {
-    SkipGram::SkipGramConfig config;
-    config.smoothing_exponent = 0;
-    EXPECT_FALSE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidNumEpochs) {
-    SkipGram::SkipGramConfig config;
-    config.num_epochs = 0;
-    EXPECT_FALSE(config.validate());
-}
-
-TEST(SkipGramConfigTest, InvalidLearningRate) {
-    SkipGram::SkipGramConfig config;
-    config.learning_rate = 0;
-    EXPECT_FALSE(config.validate());
-}
-
 class SkipGramTest : public ::testing::Test {
    protected:
     int num_nodes = 10;
-    SkipGram::SkipGramConfig config;
+    DeepWalkImputer::DeepWalkConfig config;
     SkipGram* model;
 
     void SetUp() override {
