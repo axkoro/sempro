@@ -1,5 +1,6 @@
 #include "SkipGram.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 #include "NegativeSampler.hpp"
@@ -13,9 +14,19 @@ SkipGram::SkipGram(int num_nodes, SkipGramConfig config)
 void SkipGram::train(const std::vector<std::vector<int>>& walks) {
     NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent);
 
+    std::random_device rd;
+    std::mt19937 rng(rd());
+
     for (int epoch = 0; epoch < config.num_epochs; epoch++) {
-        for (const auto& walk : walks) {
+        std::vector<size_t> walk_indices(walks.size());
+        std::iota(walk_indices.begin(), walk_indices.end(), 0);
+        std::shuffle(walk_indices.begin(), walk_indices.end(), rng);
+
+        for (size_t idx : walk_indices) {
+            const auto& walk = walks[idx];
+
             std::vector<TrainingPair> pairs = generate_pairs(walk, config.context_window);
+            std::shuffle(pairs.begin(), pairs.end(), rng);
 
             for (auto&& pair : pairs) {  // see repo wiki for thorough explanation
                 std::vector<int> negatives =
@@ -69,6 +80,8 @@ Matrix SkipGram::get_embeddings() {
 std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<int>& random_walk,
                                                              int window_size) {
     int walk_length = random_walk.size();
+    if (walk_length < (2 * window_size + 1))
+        throw std::logic_error("Random walks are not long enough for given context window size");
     int num_pairs = window_size * (2 * walk_length - window_size - 1);
     std::vector<TrainingPair> pairs(num_pairs);
 

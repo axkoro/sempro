@@ -8,7 +8,7 @@
 #include "Vector.hpp"
 
 class SkipGram {
-    FRIEND_TEST(SkipGramTest, generate_pairs);
+    FRIEND_TEST(SkipGramTest, GenerateValidPairs);
 
    public:
     // TODO: add documentation for how to use default config (and only change specific paramters)
@@ -30,6 +30,7 @@ class SkipGram {
             if (smoothing_exponent <= 0) return false;
             if (num_epochs <= 0) return false;
             if (learning_rate <= 0) return false;
+            // if (walk_length < (2 * context_window + 1)) return false;
             return true;
         }
     };
