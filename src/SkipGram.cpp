@@ -12,6 +12,16 @@ SkipGram::SkipGram(int num_nodes, SkipGramConfig config)
       W2(num_nodes, config.embedding_size) {}
 
 void SkipGram::train(const std::vector<std::vector<int>>& walks) {
+    if (walks.empty()) throw std::logic_error("Cannot train using empty walks");
+
+    int walk_length = walks[0].size();
+    int total_num_training_pairs =
+        walks.size() * (config.context_window * (2 * walk_length - config.context_window - 1));
+    double learning_rate_decrease =
+        config.learning_rate /
+        total_num_training_pairs;  // for linear decrease per training pair (see word2vec paper)
+    double learning_rate = config.learning_rate;
+
     NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent);
 
     std::random_device rd;
@@ -52,11 +62,11 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks) {
                 // backpropagation
                 // updates to W2
                 Vector gradient_v_o = (1 - pos_score) * v_c;
-                W2.add_to_row(config.learning_rate * gradient_v_o, pair.context);
+                W2.add_to_row(learning_rate * gradient_v_o, pair.context);
 
                 for (int i = 0; i < config.num_negative_samples; i++) {
                     Vector gradient_v_n = -neg_scores[i] * v_c;
-                    W2.add_to_row(config.learning_rate * gradient_v_n, negatives[i]);
+                    W2.add_to_row(learning_rate * gradient_v_n, negatives[i]);
                 }
 
                 // update to W1
@@ -66,7 +76,9 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks) {
                 }
 
                 Vector gradient_v_c = (1 - pos_score) * v_o - neg_sum;
-                W1_T.add_to_row(config.learning_rate * gradient_v_c, pair.center);
+                W1_T.add_to_row(learning_rate * gradient_v_c, pair.center);
+
+                learning_rate -= learning_rate_decrease;
             }
         }
     }

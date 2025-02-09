@@ -198,14 +198,13 @@ TEST_F(SkipGramTest, ConstructorSetsEmbeddingDimensions) {
 
 TEST_F(SkipGramTest, TrainWithEmptyWalksDoesNotThrow) {
     std::vector<std::vector<int>> walks;
-    EXPECT_NO_THROW(model->train(walks));
+    EXPECT_THROW(model->train(walks), std::logic_error);
 }
 
 TEST_F(SkipGramTest, TrainWithValidWalksUpdatesEmbeddingsDimensions) {
-    // Ensure each walk is long enough: length >= 2 * context_window + 1.
     int min_length = 2 * config.context_window + 1;
     std::vector<std::vector<int>> walks;
-    for (int w = 0; w < 2; ++w) {
+    for (int w = 0; w < 10; ++w) {
         std::vector<int> walk;
         for (int i = 0; i < min_length; ++i) {
             // Cycle through valid node indices [0, num_nodes-1].
