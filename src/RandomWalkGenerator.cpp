@@ -21,7 +21,7 @@ void RandomWalkGenerator::set_seed(int seed) {
 int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>& neighbors, std::mt19937& rng) {
     std::vector<double> cumulative_weights(neighbors.size());
     cumulative_weights[0] = neighbors[0].weight;
-    
+
     for (size_t j = 1; j < neighbors.size(); ++j) {
         cumulative_weights[j] = cumulative_weights[j - 1] + neighbors[j].weight;
     }
@@ -30,7 +30,9 @@ int RandomWalkGenerator::select_weighted_random_neighbor(const std::vector<Edge>
     double random_value = distrib(rng);
 
     auto it = std::upper_bound(cumulative_weights.begin(), cumulative_weights.end(), random_value);
-    return std::distance(cumulative_weights.begin(), it);
+    int index = std::distance(cumulative_weights.begin(), it);
+
+    return neighbors[index].target;
 }
 
 std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
@@ -53,10 +55,7 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
 
     for (int i = 1; i < walk_length; ++i) {
         const auto& neighbors = graph.get_neighbours(current_node);
-
-        int index = select_weighted_random_neighbor(neighbors, rng);
-        
-        current_node = neighbors[index].target;
+        current_node = select_weighted_random_neighbor(neighbors, rng);
         walk[i] = current_node;
     }
     return walk; // TODO: benchmark if using move semantics is quicker
