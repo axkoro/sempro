@@ -4,30 +4,22 @@
 
 #include "NegativeSampler.hpp"
 
-SkipGram::SkipGram(int num_nodes, int embedding_size)
+SkipGram::SkipGram(int num_nodes, SkipGramConfig config)
     : num_nodes(num_nodes),
-      embedding_size(embedding_size),
-      W1_T(num_nodes, embedding_size),
-      W2(num_nodes, embedding_size) {}
+      config(config),
+      W1_T(num_nodes, config.embedding_size),
+      W2(num_nodes, config.embedding_size) {}
 
-void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_window) {
-    // TODO: configurable parameters
-    int num_negative_samples = 10;
-    int num_epochs = 5;
-    double learning_rate = 0.025;  // TODO: add decaying learning rate (see word2vec paper)
-    double smoothing_exponent = 0.75;
+void SkipGram::train(const std::vector<std::vector<int>>& walks) {
+    NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent);
 
-    NegativeSampler sampler(walks, num_nodes, smoothing_exponent);
-
-    for (int epoch = 0; epoch < num_epochs; epoch++) {
-        // TODO: shuffle walks
-
+    for (int epoch = 0; epoch < config.num_epochs; epoch++) {
         for (const auto& walk : walks) {
-            std::vector<TrainingPair> pairs = generate_pairs(walk, context_window);
+            std::vector<TrainingPair> pairs = generate_pairs(walk, config.context_window);
 
             for (auto&& pair : pairs) {  // see repo wiki for thorough explanation
                 std::vector<int> negatives =
-                    sampler.sample_negative_nodes(pair.center, num_negative_samples);
+                    sampler.sample_negative_nodes(pair.center, config.num_negative_samples);
 
                 // forward pass
                 Vector v_c = W1_T.get_row(pair.center);
@@ -35,9 +27,10 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
                 Vector v_o = W2.get_row(pair.context);
                 double pos_score = sigmoid(v_o * v_c);
 
-                std::vector<double> neg_scores(num_negative_samples);
-                std::vector<Vector> v_n_list(num_negative_samples, Vector(embedding_size));
-                for (int i = 0; i < num_negative_samples; i++) {
+                std::vector<double> neg_scores(config.num_negative_samples);
+                std::vector<Vector> v_n_list(config.num_negative_samples,
+                                             Vector(config.embedding_size));
+                for (int i = 0; i < config.num_negative_samples; i++) {
                     int neg_index = negatives[i];
                     Vector v_n = W2.get_row(neg_index);
                     double score = sigmoid(v_n * v_c);
@@ -48,21 +41,21 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
                 // backpropagation
                 // updates to W2
                 Vector gradient_v_o = (1 - pos_score) * v_c;
-                W2.add_to_row(learning_rate * gradient_v_o, pair.context);
+                W2.add_to_row(config.learning_rate * gradient_v_o, pair.context);
 
-                for (int i = 0; i < num_negative_samples; i++) {
+                for (int i = 0; i < config.num_negative_samples; i++) {
                     Vector gradient_v_n = -neg_scores[i] * v_c;
-                    W2.add_to_row(learning_rate * gradient_v_n, negatives[i]);
+                    W2.add_to_row(config.learning_rate * gradient_v_n, negatives[i]);
                 }
 
                 // update to W1
-                Vector neg_sum(embedding_size, 0.0);
-                for (int i = 0; i < num_negative_samples; i++) {
+                Vector neg_sum(config.embedding_size, 0.0);
+                for (int i = 0; i < config.num_negative_samples; i++) {
                     neg_sum += neg_scores[i] * v_n_list[i];
                 }
 
                 Vector gradient_v_c = (1 - pos_score) * v_o - neg_sum;
-                W1_T.add_to_row(learning_rate * gradient_v_c, pair.center);
+                W1_T.add_to_row(config.learning_rate * gradient_v_c, pair.center);
             }
         }
     }
@@ -70,7 +63,7 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks, int context_win
 
 Matrix SkipGram::get_embeddings() {
     // potential optimization: return using move semantics (benchmark this before changing!!)
-    return std::vector<std::vector<double>>();
+    return W1_T;
 }
 
 std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<int>& random_walk,

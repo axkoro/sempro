@@ -11,20 +11,43 @@ class SkipGram {
     FRIEND_TEST(SkipGramTest, generate_pairs);
 
    public:
+    // TODO: add documentation for how to use default config (and only change specific paramters)
+    struct SkipGramConfig {  // TODO: research best initial parameters
+        int embedding_size = 128;
+
+        int context_window = 10;
+
+        int num_negative_samples = 10;
+        double smoothing_exponent = 0.75;
+
+        int num_epochs = 5;
+        double learning_rate = 0.025;
+
+        bool validate() {
+            if (embedding_size <= 0) return false;
+            if (context_window <= 0) return false;
+            if (num_negative_samples < 0) return false;
+            if (smoothing_exponent <= 0) return false;
+            if (num_epochs <= 0) return false;
+            if (learning_rate <= 0) return false;
+            return true;
+        }
+    };
+
     struct TrainingPair {
         int center;
         int context;
     };
 
-    SkipGram(int num_nodes, int embedding_size);
+    SkipGram(int num_nodes, SkipGramConfig config);
 
-    void train(const std::vector<std::vector<int>>& walks, int context_window);
+    void train(const std::vector<std::vector<int>>& walks);
 
     Matrix get_embeddings();
 
    private:
     int num_nodes;
-    int embedding_size;
+    SkipGramConfig config;
 
     // storing W1 transposed because matrix data structure uses row-major storage, thus
     // get_row is more efficient then get_column, which we would have to use if we
