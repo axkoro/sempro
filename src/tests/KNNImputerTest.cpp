@@ -90,8 +90,8 @@ TEST(KNNTest, testGlobalAverage) {
     EXPECT_NEAR(average1, 1.08, 1e-5);
     EXPECT_EQ(average2, 2);
 }
-int main(int, char**) {
-    ::testing::InitGoogleTest();
 
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

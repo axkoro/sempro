@@ -380,8 +380,7 @@ TEST(GraphTest, is_valid_node) {
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
 }
 
-int main(int, char**) {
-    ::testing::InitGoogleTest();
-
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
