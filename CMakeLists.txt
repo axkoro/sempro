@@ -46,7 +46,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
 	target_link_options(LouvainImputerTest PRIVATE -coverage)
 
-	add_executable(DeepWalkTest src/tests/DeepWalkTest.cpp src/SkipGram.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp)
+	add_executable(DeepWalkTest src/tests/DeepWalkTest.cpp src/SkipGram.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp src/EdgeWeightCalculator.cpp src/WeightedGraph.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(DeepWalkTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)
