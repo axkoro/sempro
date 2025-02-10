@@ -1,72 +1,75 @@
 #include <gtest/gtest.h>
 
+#include <unordered_set>
+
 #include "EdgeWeightCalculator.hpp"
 #include "GraphDouble.hpp"
 #include "RandomWalkGenerator.hpp"
 #include "SkipGram.hpp"
-#include <unordered_set>
-// TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
-//     // Assumptions (adjust the test if any of this changes during implementation):
-//     // - fusion coefficient of 0.6
-//     // - cover depth of 2
-//     // - nodes themselves are not included in their covers
-//     // - MFS = overlap / num_features
-//     // - no tolerance for overlap in feature similarity calculation
-//     // - see Wiki for how I manually calculated the the correct weights
-//     double fusion_coefficient = 0.6;
 
-//     std::string edges_path = "../data/test/deepwalk/test_edges.txt";
-//     std::string features_path = "../data/test/deepwalk/test_features.txt";
-//     GraphDouble original_graph(edges_path, features_path);
+TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
+    // Assumptions (adjust the test if any of this changes during implementation):
+    // - fusion coefficient of 0.6
+    // - cover depth of 2
+    // - nodes themselves are not included in their covers
+    // - MFS = overlap / num_features
+    // - no tolerance for overlap in feature similarity calculation
+    // - see Wiki for how I manually calculated the the correct weights
+    double fusion_coefficient = 0.6;
 
-//     EdgeWeightCalculator ewc(original_graph, fusion_coefficient);
-//     StaticMinimalGraph weighted_graph = ewc.generate_weighted_graph();
+    std::string edges_path = "../data/test/deepwalk/test_edges.txt";
+    std::string features_path = "../data/test/deepwalk/test_features.txt";
+    GraphDouble original_graph(edges_path, features_path);
 
-//     ASSERT_EQ(weighted_graph.get_num_nodes(), original_graph.get_num_nodes());
-//     ASSERT_EQ(weighted_graph.get_num_edges(), original_graph.get_num_edges());
+    EdgeWeightCalculator ewc(original_graph, fusion_coefficient);
+    WeightedGraph weighted_graph = ewc.generate_weighted_graph();
 
-//     // edges are only stored once (descending: 0<->1 is stored in 1's list)
-//     std::vector<std::unordered_map<int, double>> correct_edges = {
-//         {},                                          // 0
-//         {{0, 0.1714285714}},                         // 1
-//         {{1, 0.4685714286}},                         // 2
-//         {{2, 0.34}},                                 // 3
-//         {{3, 0.4685714286}},                         // 4
-//         {{1, 0.415}, {2, 0.415}, {4, 0.455}},        // 5
-//         {{2, 0.34}, {4, 0.5885714286}, {5, 0.415}},  // 6
-//         {{4, 0.2971428571}}                          // 7
-//     };
+    ASSERT_EQ(weighted_graph.get_num_nodes(), original_graph.get_num_nodes());
+    ASSERT_EQ(weighted_graph.get_num_edges(), original_graph.get_num_edges());
 
-//     int num_nodes = original_graph.get_num_nodes();
-//     for (int node = 0; node < num_nodes; node++) {
-//         int count_desc_edges = 0;
-//         for (Edge computed_edge : weighted_graph.get_neighbours(node)) {
-//             int neighbour = computed_edge.target;
+    // edges are only stored once (descending: 0<->1 is stored in 1's list)
+    std::vector<std::unordered_map<int, double>> correct_edges = {
+        {},                                          // 0
+        {{0, 0.1714285714}},                         // 1
+        {{1, 0.4685714286}},                         // 2
+        {{2, 0.34}},                                 // 3
+        {{3, 0.4685714286}},                         // 4
+        {{1, 0.415}, {2, 0.415}, {4, 0.455}},        // 5
+        {{2, 0.34}, {4, 0.5885714286}, {5, 0.415}},  // 6
+        {{4, 0.2971428571}}                          // 7
+    };
 
-//             int higher = std::max(node, neighbour);
-//             int lower = std::min(node, neighbour);
-//             if (neighbour == lower) {
-//                 count_desc_edges++;
-//             }
+    int num_nodes = original_graph.get_num_nodes();
+    for (int node = 0; node < num_nodes; node++) {
+        int count_desc_edges = 0;
+        for (auto edge : weighted_graph.get_edges(node)) {
+            int neighbour = edge.target;
 
-//             auto it = correct_edges[node].find(neighbour);
-//             bool edge_not_found = it == correct_edges[node].end();
-//             ASSERT_FALSE(edge_not_found);
+            int higher = std::max(node, neighbour);
+            int lower = std::min(node, neighbour);
+            if (neighbour == lower) {
+                count_desc_edges++;
+            }
 
-//             double computed_weight = computed_edge.weight;
-//             double correct_weight = it->second;
-//             ASSERT_NEAR(computed_weight, correct_weight, 1e-4);
-//         }
+            auto it = correct_edges[higher].find(lower);
+            bool edge_not_found = it == correct_edges[higher].end();
+            ASSERT_FALSE(edge_not_found);
 
-//         ASSERT_EQ(count_desc_edges, correct_edges[node].size());
-//     }
-// }
+            double computed_weight = edge.weight;
+            double correct_weight = it->second;
+            ASSERT_NEAR(computed_weight, correct_weight, 1e-4);
+        }
+
+        ASSERT_EQ(count_desc_edges, correct_edges[node].size());
+    }
+}
+
 TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     // Create a simple graph for testing
-  
+
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
-    GraphDouble graph(edges_path,features_path);
+    GraphDouble graph(edges_path, features_path);
     EdgeWeightCalculator ewc(graph, 0.5);
     WeightedGraph wgraph(graph);
 
@@ -141,20 +144,16 @@ TEST(RandomWalkGeneratorTest, transitions_vary_between_runs) {
 
 TEST(RandomWalkGeneratorTest, same_seed_ensures_reproducibility) {
     std::vector<int> offsets = {0, 2, 4, 6};
-    std::vector<Edge> edges = {
-        {1, 0.2}, {2, 0.5},
-        {0, 0.5}, {2, 0.3},
-        {0, 0.3}, {1, 0.2}
-    };
+    std::vector<Edge> edges = {{1, 0.2}, {2, 0.5}, {0, 0.5}, {2, 0.3}, {0, 0.3}, {1, 0.2}};
     StaticMinimalGraph graph(offsets, edges);
-    
+
     RandomWalkGenerator generator1(graph, 4, 5, 42);
     auto walks1 = generator1.generate_walks();
 
     RandomWalkGenerator generator2(graph, 4, 5, 42);
     auto walks2 = generator2.generate_walks();
-    
-    EXPECT_EQ(walks1, walks2); // Walks should be identical if the seed is the same
+
+    EXPECT_EQ(walks1, walks2);  // Walks should be identical if the seed is the same
 }
 
 class SkipGramTest : public ::testing::Test {
