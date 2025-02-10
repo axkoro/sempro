@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Graph.hpp"
-#include "StaticMinimalGraph.hpp"
+#include "WeightedGraph.hpp"
 
 class EdgeWeightCalculator {
    private:
@@ -9,9 +9,9 @@ class EdgeWeightCalculator {
     double fusion_coefficient;
 
    public:
-    EdgeWeightCalculator(const Graph& g, double fusion_coefficient);
+    EdgeWeightCalculator(Graph& g, double fusion_coefficient);
 
-    StaticMinimalGraph generate_weighted_graph();
+    WeightedGraph generate_weighted_graph();
 
    private:
     double compute_weight(int u, int v);
