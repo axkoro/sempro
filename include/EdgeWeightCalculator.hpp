@@ -17,4 +17,5 @@ class EdgeWeightCalculator {
     double compute_weight(int u, int v);
     double compute_feature_similarity(int u, int v);
     double compute_structural_similarity(int u, int v);
+    std::vector<std::vector<int>> compute_covers(WeightedGraph& wgraph)
 };
