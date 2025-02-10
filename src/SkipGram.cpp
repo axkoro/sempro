@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
-SkipGram::SkipGram(int num_nodes, DeepWalkImputer::DeepWalkConfig& config, int seed)
-    : num_nodes(num_nodes), config(config) {
+SkipGram::SkipGram(int num_nodes, Config& config, int seed)
+    : num_nodes(num_nodes), config(config), seed(seed) {
     std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
     double limit = 0.5 / config.embedding_size;
     std::uniform_real_distribution<double> noise_dist(-limit, limit);
@@ -22,9 +22,8 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks) {
         learning_rate, config.context_window, walks[0].size(),
         walks.size());  // for linear decrease per training pair (see word2vec paper)
 
-    NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent);
-    std::random_device rd;
-    std::mt19937 rng(rd());
+    NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent, seed);
+    std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
 
     for (int epoch = 0; epoch < config.num_epochs; epoch++) {
         std::vector<size_t> walk_indices(walks.size());
@@ -83,8 +82,9 @@ void SkipGram::process_pair(TrainingPair pair, double learning_rate, NegativeSam
     W1_T.add_to_row(learning_rate * gradient_v_c, pair.center);
 }
 
-Matrix SkipGram::get_embeddings() {
+Matrix SkipGram::get_embeddings() const {
     // potential optimization: return using move semantics (benchmark this before changing!!)
+    // would "destroy" this SkipGram object, but could save a lot of copying
     return W1_T;
 }
 

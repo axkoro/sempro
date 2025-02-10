@@ -18,15 +18,45 @@ class SkipGram {
         int context;
     };
 
-    SkipGram(int num_nodes, DeepWalkImputer::DeepWalkConfig& config, int seed = -1);
+    struct Config {  // TODO: research optimal default values
+        int embedding_size = 128;
+        int context_window = 10;
+        int num_negative_samples = 10;
+        double smoothing_exponent = 0.75;
+
+        int num_epochs = 5;
+        double learning_rate = 0.025;
+
+        Config(DeepWalkImputer::Config& c)
+            : embedding_size(c.embedding_size),
+              context_window(c.context_window),
+              num_negative_samples(c.num_negative_samples),
+              smoothing_exponent(c.smoothing_exponent),
+              num_epochs(c.num_epochs),
+              learning_rate(c.learning_rate) {}
+
+        bool validate() {
+            if (embedding_size <= 0) return false;
+            if (context_window <= 0) return false;
+            if (num_negative_samples < 0) return false;
+            if (smoothing_exponent <= 0) return false;
+            if (num_epochs <= 0) return false;
+            if (learning_rate <= 0) return false;
+            // if (walk_length < (2 * context_window + 1)) return false;
+            return true;
+        }
+    };
+
+    SkipGram(int num_nodes, Config& config, int seed = -1);
 
     void train(const std::vector<std::vector<int>>& walks);
 
-    Matrix get_embeddings();
+    Matrix get_embeddings() const;
 
    private:
     int num_nodes;
-    DeepWalkImputer::DeepWalkConfig config;
+    int seed;
+    Config config;
 
     // storing W1 transposed because matrix data structure uses row-major storage, thus
     // get_row is more efficient then get_column, which we would have to use if we

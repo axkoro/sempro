@@ -109,7 +109,7 @@
 class SkipGramTest : public ::testing::Test {
    protected:
     int num_nodes = 10;
-    DeepWalkImputer::DeepWalkConfig config;
+    DeepWalkImputer::Config config;
     SkipGram* model;
 
     void SetUp() override {
