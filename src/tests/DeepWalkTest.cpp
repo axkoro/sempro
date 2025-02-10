@@ -4,7 +4,7 @@
 #include "GraphDouble.hpp"
 #include "RandomWalkGenerator.hpp"
 #include "SkipGram.hpp"
-
+#include <unordered_set>
 // TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
 //     // Assumptions (adjust the test if any of this changes during implementation):
 //     // - fusion coefficient of 0.6
@@ -61,6 +61,35 @@
 //         ASSERT_EQ(count_desc_edges, correct_edges[node].size());
 //     }
 // }
+TEST(EdgeWeightCalculatorTest, ComputeCovers) {
+    // Create a simple graph for testing
+  
+    std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
+    std::string features_path = "../data/test/deepwalk/test_features_2.txt";
+    GraphDouble graph(edges_path,features_path);
+    EdgeWeightCalculator ewc(graph, 0.5);
+    WeightedGraph wgraph(graph);
+
+    // Compute covers
+    std::vector<std::vector<int>> covers = ewc.compute_covers(wgraph);
+
+    // Expected covers
+    std::vector<std::vector<int>> expected_covers = {
+        {1, 2, 3, 4},  // Cover of node 0
+        {0, 2, 3, 4},  // Cover of node 1
+        {0, 1, 3, 4},  // Cover of node 2
+        {0, 1, 2, 4},  // Cover of node 3
+        {0, 1, 2, 3}   // Cover of node 4
+    };
+
+    // Check if the computed covers match the expected covers
+    ASSERT_EQ(covers.size(), expected_covers.size());
+    for (size_t i = 0; i < covers.size(); ++i) {
+        std::unordered_set<int> computed_set(covers[i].begin(), covers[i].end());
+        std::unordered_set<int> expected_set(expected_covers[i].begin(), expected_covers[i].end());
+        ASSERT_EQ(computed_set, expected_set);
+    }
+}
 
 TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
     std::vector<int> offsets = {0, 2, 4, 6, 8, 10};
