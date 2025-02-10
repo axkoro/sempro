@@ -48,6 +48,9 @@ class SkipGram {
         int num_epochs = 5;            ///< Number of training epochs.
         double learning_rate = 0.025;  ///< Initial learning rate.
 
+        /// @brief Default constructor that uses the default member initializers.
+        Config() = default;
+
         /**
          * @brief Constructs a Config from a DeepWalkImputer configuration.
          * @param c A reference to a DeepWalkImputer::Config instance.
