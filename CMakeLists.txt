@@ -22,7 +22,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	add_subdirectory(extlibs/gtest)
 	set(CMAKE_BUILD_TYPE Debug)
 	
-	add_executable(GraphTest src/tests/GraphTest.cpp)
+	add_executable(GraphTest src/tests/GraphTest.cpp src/WeightedGraph.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(GraphTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(GraphTest PRIVATE -coverage)
