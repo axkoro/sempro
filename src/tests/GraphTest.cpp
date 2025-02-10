@@ -536,8 +536,7 @@ TEST(WeightedGraphEdgesTest, ModifyWeightsViaIterator) {
     }
 }
 
-int main(int, char**) {
-    ::testing::InitGoogleTest();
-
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

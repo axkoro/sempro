@@ -1,43 +1,177 @@
 #pragma once
 
+/**
+ * @brief Macro to allow friend tests.
+ *
+ * This macro declares a friend test class for a given test case and test name.
+ */
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
 
 #include <vector>
 
+#include "DeepWalkImputer.hpp"
+#include "Matrix.hpp"
+#include "NegativeSampler.hpp"
+#include "Vector.hpp"
+
+/**
+ * @brief Implements the SkipGram model for learning node embeddings.
+ *
+ * The SkipGram model generates training pairs from random walks and updates embedding matrices
+ * using negative sampling.
+ */
 class SkipGram {
-    FRIEND_TEST(SkipGramTest, generate_pairs);
+    FRIEND_TEST(SkipGramTest, GenerateValidPairs);
 
    public:
+    /**
+     * @brief Represents a pair of training nodes.
+     *
+     * A training pair consists of a center node and a context node.
+     */
     struct TrainingPair {
-        int in;
-        int out;
+        int center;   ///< Index of the center node.
+        int context;  ///< Index of the context node.
     };
 
-    SkipGram(int embedding_size);
+    /**
+     * @brief Configuration parameters for the SkipGram model.
+     *
+     * TODO: research optimal default values.
+     */
+    struct Config {
+        int embedding_size = 128;       ///< Dimensionality of the embeddings.
+        int context_window = 10;        ///< Size of the context window.
+        int num_negative_samples = 10;  ///< Number of negative samples per training pair.
+        double smoothing_exponent =
+            0.75;  ///< Exponent for smoothing the sampling distribution (for the negative samples).
+        int num_epochs = 5;            ///< Number of training epochs.
+        double learning_rate = 0.025;  ///< Initial learning rate.
 
-    void train(const std::vector<std::vector<int>>& walks, int context_window);
+        /// @brief Default constructor that uses the default member initializers.
+        Config() = default;
 
-    std::vector<std::vector<double>> get_embeddings();
+        /**
+         * @brief Constructs a Config from a DeepWalkImputer configuration.
+         * @param c A reference to a DeepWalkImputer::Config instance.
+         */
+        Config(DeepWalkImputer::Config& c)
+            : embedding_size(c.embedding_size),
+              context_window(c.context_window),
+              num_negative_samples(c.num_negative_samples),
+              smoothing_exponent(c.smoothing_exponent),
+              num_epochs(c.num_epochs),
+              learning_rate(c.learning_rate) {}
 
-   private:
-    int embedding_size;
+        /**
+         * @brief Validates the configuration parameters.
+         * @return true if all parameters are valid, false otherwise.
+         */
+        bool validate() {
+            if (embedding_size <= 0) return false;
+            if (context_window <= 0) return false;
+            if (num_negative_samples < 0) return false;
+            if (smoothing_exponent <= 0) return false;
+            if (num_epochs <= 0) return false;
+            if (learning_rate <= 0) return false;
+            // if (walk_length < (2 * context_window + 1)) return false;
+            return true;
+        }
+    };
 
     /**
-     * @brief Generates training pairs from a random walk for the SkipGram model.
+     * @brief Constructs a SkipGram model.
      *
-     * Given a random walk (a sequence of node IDs) and a specified context window size,
-     * this function creates training pairs for use in a SkipGram model. For each node in the
-     * random walk, it pairs the node (as the center) with every node within its window, excluding
-     * the center node itself. The resulting pairs can then be used to train embeddings.
+     * @param num_nodes Total number of nodes.
+     * @param config Configuration parameters for training.
+     * @param seed Random seed for reproducibility; if -1, a non-deterministic seed is used.
+     */
+    SkipGram(int num_nodes, Config& config, int seed = -1);
+
+    /**
+     * @brief Trains the SkipGram model using provided random walks.
      *
-     * @param random_walk A vector of integers representing the sequence of nodes from a random
-     * walk.
-     * @param window_size The number of nodes on each side of the center node to include in the
-     * context.
-     * @return std::vector<TrainingPair> A vector of training pairs, where each pair contains:
-     *         - `in`: the center node from the random walk.
-     *         - `out`: a context node within the specified window (excluding the center node).
+     * @note All random walks must be of the same length; otherwise, the behavior is undefined.
+     *
+     * @param walks A vector of random walks, each represented as a vector of node IDs.
+     *
+     * @throws std::logic_error if walks is empty.
+     */
+    void train(const std::vector<std::vector<int>>& walks);
+
+    /**
+     * @brief Retrieves the learned node embeddings.
+     *
+     * @note Each row (!) of the returned Matrix corresponds to an embedding vector
+     *       (which is atypical compared to the conventional column-based representation).
+     *
+     * @return Matrix containing the node embeddings.
+     */
+    Matrix get_embeddings() const;
+
+   private:
+    int num_nodes;  ///< Total number of nodes.
+    int seed;       ///< Seed for random number generation.
+    Config config;  ///< Training configuration parameters.
+
+    /**
+     * @brief Embedding matrix for input nodes (stored transposed).
+     *
+     * Storing W1 transposed is more efficient for row-based access.
+     * TODO: idea: handle this in the matrix data structure? (using a "transposed" flag e.g.)
+     */
+    Matrix W1_T;
+
+    Matrix W2;  ///< Embedding matrix for output nodes.
+
+    /**
+     * @brief Processes a single training pair and updates embeddings.
+     *
+     * Performs forward and backward passes using negative sampling.
+     *
+     * @param pair The training pair to process.
+     * @param learning_rate The current learning rate.
+     * @param sampler Reference to a NegativeSampler for sampling negative nodes.
+     */
+    void process_pair(TrainingPair pair, double learning_rate, NegativeSampler& sampler);
+
+    /**
+     * @brief Generates training pairs from a random walk.
+     *
+     * For each node in the random walk, the function pairs it with every node within the
+     * specified context window, excluding the pair where the center node is paired with itself
+     * at the center position.
+     *
+     * @note Only the immediate self-pair is excluded. If the same node appears at a different
+     *       position within the context window, the pair (center, context) with center == context
+     *       is still generated.
+     *
+     * @param random_walk A vector of node IDs representing a random walk.
+     * @param window_size The size of the context window on each side of the center node.
+     * @return std::vector<TrainingPair> A vector of generated training pairs.
      */
     static std::vector<TrainingPair> generate_pairs(const std::vector<int>& random_walk,
                                                     int window_size);
+
+    /**
+     * @brief Computes the sigmoid function.
+     *
+     * @param val Input value.
+     * @return double Result of sigmoid(val).
+     */
+    static double sigmoid(double val);
+
+    /**
+     * @brief Calculates the linear decrease in learning rate per training pair.
+     *
+     * Based on the word2vec paper, the learning rate decreases linearly over training pairs.
+     *
+     * @param learning_rate The initial learning rate.
+     * @param context_window The context window size.
+     * @param walk_length The length of each random walk.
+     * @param total_num_walks Total number of random walks.
+     * @return double The decrease in learning rate per training pair.
+     */
+    static double calculate_learning_rate_decrease(double learning_rate, int context_window,
+                                                   int walk_length, int total_num_walks);
 };

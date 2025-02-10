@@ -46,11 +46,23 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
 	target_link_options(LouvainImputerTest PRIVATE -coverage)
 
-	add_executable(DeepWalkTest src/tests/DeepWalkTest.cpp src/SkipGram.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp)
+	add_executable(DeepWalkTest src/tests/DeepWalkTest.cpp src/SkipGram.cpp src/NegativeSampler.cpp src/Matrix.cpp src/Vector.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(DeepWalkTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)
 	target_link_options(DeepWalkTest PRIVATE -coverage)
+
+	add_executable(LinearAlgebraTest src/tests/LinearAlgebraTest.cpp src/Vector.cpp src/Matrix.cpp)
+	target_include_directories(LinearAlgebraTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LinearAlgebraTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(LinearAlgebraTest PRIVATE -coverage)
+	target_link_options(LinearAlgebraTest PRIVATE -coverage)
+	
+	add_executable(NegativeSamplerTest src/tests/NegativeSamplerTest.cpp src/NegativeSampler.cpp)
+	target_include_directories(NegativeSamplerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(NegativeSamplerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(NegativeSamplerTest PRIVATE -coverage)
+	target_link_options(NegativeSamplerTest PRIVATE -coverage)
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
@@ -68,5 +80,4 @@ else() # Build Python bindings as libraries
 	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
-
 endif()
