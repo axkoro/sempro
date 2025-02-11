@@ -91,7 +91,23 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     ASSERT_EQ(covers, expected_covers);
     
 }
+TEST(EdgeWeightCalculatorTest, cover_union_intersection){
 
+    std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
+    std::string features_path = "../data/test/deepwalk/test_features_2.txt";
+    GraphDouble graph(edges_path, features_path);
+    EdgeWeightCalculator ewc(graph, 0.5);
+    WeightedGraph wgraph(graph);
+
+    std::vector<std::unordered_set<int>> input_covers = {
+        {1,2,3},
+        {2,3,5},
+        {1,8,5}
+    };
+    double mss = ewc.compute_structural_similarity(0,1,input_covers);
+    //since cover union of 0 and 0 is 4 and intersection is 2 mss should be 2/4 = 2
+    ASSERT_EQ(mss,0.5);
+}
 TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
     std::vector<int> offsets = {0, 2, 4, 6, 8, 10};
     std::vector<Edge> edges = {
