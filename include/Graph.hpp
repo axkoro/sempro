@@ -5,7 +5,10 @@
 #include <vector>
 
 // forward declarations for friend classes
+template <typename T>
 class WeightedGraph;
+
+template <typename T>
 class WeightedEdgeIterator;
 
 class GraphException : public std::runtime_error {  // TODO: do we need this?
@@ -15,8 +18,8 @@ class GraphException : public std::runtime_error {  // TODO: do we need this?
 
 template <typename T>  // TODO: restrict to numeric types (or something similar)
 class Graph {
-    friend class WeightedGraph;
-    friend class WeightedEdgeIterator;
+    friend class WeightedGraph<T>;
+    friend class WeightedEdgeIterator<T>;
 
    protected:
     int num_nodes;

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Graph.hpp"
+
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
 
-class WeightedEdgeIterator;  // Forward declaration
+template <typename T>
+class WeightedEdgeIterator;
 
 /**
  * @class WeightedGraph
@@ -32,8 +34,9 @@ class WeightedEdgeIterator;  // Forward declaration
  *   }
  * @endcode
  */
+template <typename T>
 class WeightedGraph {
-    friend class WeightedEdgeIterator;
+    friend class WeightedEdgeIterator<T>;
     FRIEND_TEST(WeightedGraphEdgesTest, DefaultWeights);
     FRIEND_TEST(WeightedGraphEdgesTest, ModifyWeightsViaIterator);
 
@@ -43,11 +46,11 @@ class WeightedGraph {
         double weight;
     };
 
-    WeightedGraph(Graph& graph);
+    WeightedGraph(Graph<T>& graph);
 
     // Iterator support
-    WeightedEdgeIterator begin();
-    WeightedEdgeIterator end();
+    WeightedEdgeIterator<T> begin();
+    WeightedEdgeIterator<T> end();
 
     // Edge functionality
     std::vector<Edge> get_edges(int node) const;
@@ -58,18 +61,14 @@ class WeightedGraph {
     int get_num_features() const;
     int get_num_edges() const;
 
-    bool get_bool_feature(int node, int feature) const;
-    double get_double_feature(int node, int feature) const;
-    int get_int_feature(int node, int feature) const;
+    T get_feature(int node, int feature) const;
 
     int get_label(int node) const;
     std::vector<int> get_missing_features(int node) const;
     int get_degree(int node) const;
 
     // Setters
-    virtual void set_bool_feature(int node, int feature, bool value);
-    virtual void set_double_feature(int node, int feature, double value);
-    virtual void set_int_feature(int node, int feature, int value);
+    void set_feature(int node, int feature, T val);
     void set_missing(int node, int feature, bool value);
 
     // Queries
@@ -78,19 +77,20 @@ class WeightedGraph {
     bool is_valid_node(int node) const;
 
    private:
-    Graph& graph;
+    Graph<T>& graph;
     std::vector<double> edge_weights;
 };
 
+template <typename T>
 class WeightedEdgeIterator {
-    friend class WeightedGraph;
+    friend class WeightedGraph<T>;
 
-    WeightedGraph* weighted_graph;
+    WeightedGraph<T>* weighted_graph;
     size_t index;
     size_t current_node;  // current source node
 
    public:
-    WeightedEdgeIterator(WeightedGraph* wg, size_t idx);
+    WeightedEdgeIterator(WeightedGraph<T>* wg, size_t idx);
 
     WeightedEdgeIterator& operator++();
     bool operator!=(const WeightedEdgeIterator& other) const;
@@ -99,3 +99,5 @@ class WeightedEdgeIterator {
     // Returns the current edge as a (source, target) pair.
     std::pair<int, int> get_edge() const;
 };
+
+#include "WeightedGraph.tpp"
