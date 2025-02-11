@@ -34,8 +34,21 @@ double EdgeWeightCalculator::compute_feature_similarity(int u, int v) {
 
 double EdgeWeightCalculator::compute_structural_similarity(int u, int v,std::vector<std::unordered_set<int>> covers) {
     //Calculate MAS 
+   std::unordered_set<int> cover_u = covers[u];
+   std::unordered_set<int> cover_v = covers[v];
+   //compute union and intersection
+    int intersection_size = 0;
+    for (const auto& elem : cover_u) {
+        if (cover_v.count(elem)) {
+            intersection_size++;
+        }
+    }
+    int union_size = cover_u.size() + cover_v.size() - intersection_size;
+    //calculate MSS
+
+    double mss = static_cast<double>(intersection_size) / static_cast<double>(union_size);
     
-    return 1.0;
+    return mss;
 }
 std::vector<std::unordered_set<int>> EdgeWeightCalculator::compute_covers(WeightedGraph& wgraph){
 
@@ -51,6 +64,6 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator::compute_covers(Weight
             }
         }
     }
-    
+
   return covers;
 }
