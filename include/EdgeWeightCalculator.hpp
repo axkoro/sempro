@@ -6,6 +6,7 @@
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
 class EdgeWeightCalculator {
     FRIEND_TEST(EdgeWeightCalculatorTest, ComputeCovers);
+    FRIEND_TEST(EdgeWeightCalculatorTest, cover_union_intersection);
    private:
     Graph& graph;
     double fusion_coefficient;
