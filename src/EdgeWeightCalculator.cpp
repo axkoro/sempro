@@ -51,12 +51,6 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator::compute_covers(Weight
             }
         }
     }
-    for (const auto& cover : covers) {
-        std::cout << "{ ";
-        for (const auto& elem : cover) {
-            std::cout << elem << " ";
-        }
-        std::cout << "}" << std::endl;
-    }
-    return covers;
+    
+  return covers;
 }
