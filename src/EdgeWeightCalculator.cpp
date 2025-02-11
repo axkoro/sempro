@@ -2,6 +2,7 @@
 #include "WeightedGraph.hpp"
 #include <unordered_set>
 #include <queue>
+#include <iostream>
 
 EdgeWeightCalculator::EdgeWeightCalculator(Graph& graph, double fusion_coefficient)
     : graph(graph), fusion_coefficient(fusion_coefficient){}
@@ -9,7 +10,7 @@ EdgeWeightCalculator::EdgeWeightCalculator(Graph& graph, double fusion_coefficie
 
 WeightedGraph EdgeWeightCalculator::generate_weighted_graph() {
     WeightedGraph wgraph(graph);
-    std::vector<std::vector<int>> covers = compute_covers(wgraph);
+    std::vector<std::unordered_set<int>> covers = compute_covers(wgraph);
 
 
     for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
@@ -19,7 +20,7 @@ WeightedGraph EdgeWeightCalculator::generate_weighted_graph() {
     return wgraph;
 }
 
-double EdgeWeightCalculator::compute_weight(int u, int v,std::vector<std::vector<int>> covers) {
+double EdgeWeightCalculator::compute_weight(int u, int v,std::vector<std::unordered_set<int>> covers) {
     double factor = fusion_coefficient;
     double struct_sim = compute_structural_similarity(u, v,covers);
     double feature_sim = compute_feature_similarity(u, v);
@@ -31,23 +32,31 @@ double EdgeWeightCalculator::compute_feature_similarity(int u, int v) {
     return 1.0;
 }
 
-double EdgeWeightCalculator::compute_structural_similarity(int u, int v,std::vector<std::vector<int>> covers) {
-
+double EdgeWeightCalculator::compute_structural_similarity(int u, int v,std::vector<std::unordered_set<int>> covers) {
+    //Calculate MAS 
+    
     return 1.0;
 }
-std::vector<std::vector<int>> EdgeWeightCalculator::compute_covers(WeightedGraph& wgraph){
+std::vector<std::unordered_set<int>> EdgeWeightCalculator::compute_covers(WeightedGraph& wgraph){
 
     int num_nodes = wgraph.get_num_nodes();
-    std::vector<std::vector<int>> covers(num_nodes);
+    std::vector<std::unordered_set<int>> covers(num_nodes);
 
     for (int node = 0; node < num_nodes; ++node) {
         std::vector<WeightedGraph::Edge> edges = wgraph.get_edges(node, 2);
         for (const auto& edge : edges) {
             int neighbor = edge.target;
             if (neighbor != node) {
-                covers[node].push_back(neighbor);
+                covers[node].insert(neighbor);
             }
         }
+    }
+    for (const auto& cover : covers) {
+        std::cout << "{ ";
+        for (const auto& elem : cover) {
+            std::cout << elem << " ";
+        }
+        std::cout << "}" << std::endl;
     }
     return covers;
 }

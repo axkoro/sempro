@@ -74,10 +74,10 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     WeightedGraph wgraph(graph);
 
     // Compute covers
-    std::vector<std::vector<int>> covers = ewc.compute_covers(wgraph);
+    std::vector<std::unordered_set<int>> covers = ewc.compute_covers(wgraph);
 
     // Expected covers
-    std::vector<std::vector<int>> expected_covers = {
+    std::vector<std::unordered_set<int>> expected_covers = {
         {1, 2, 3, 4},  // Cover of node 0
         {0, 2, 3, 4},  // Cover of node 1
         {0, 1, 3, 4},  // Cover of node 2
@@ -87,11 +87,9 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
 
     // Check if the computed covers match the expected covers
     ASSERT_EQ(covers.size(), expected_covers.size());
-    for (size_t i = 0; i < covers.size(); ++i) {
-        std::unordered_set<int> computed_set(covers[i].begin(), covers[i].end());
-        std::unordered_set<int> expected_set(expected_covers[i].begin(), expected_covers[i].end());
-        ASSERT_EQ(computed_set, expected_set);
-    }
+    
+    ASSERT_EQ(covers, expected_covers);
+    
 }
 
 TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
