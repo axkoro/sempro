@@ -4,31 +4,30 @@
 #include <string>
 #include <vector>
 
-// forward declarations
+// forward declarations for friend classes
 class WeightedGraph;
 class WeightedEdgeIterator;
 
-class GraphException : public std::runtime_error {
+class GraphException : public std::runtime_error {  // TODO: do we need this?
    public:
-    explicit GraphException(const std::string& message);
+    explicit GraphException(const std::string& message) : std::runtime_error(message) {};
 };
 
+template <typename T>  // TODO: restrict to numeric types (or something similar)
 class Graph {
     friend class WeightedGraph;
     friend class WeightedEdgeIterator;
 
    protected:
-    int num_nodes = -1;
-    int num_features = -1;
+    int num_nodes;
+    int num_features;
     std::vector<int> offsets;
     std::vector<int> edges;
     std::vector<int> labels;
     std::vector<std::vector<bool>> missing;
-    // std::vector<std::vector<Feature>> features;
+    std::vector<std::vector<T>> features;
 
    public:
-    // Constructors
-
     /**
      * @brief Default constructor. Creates an empty graph.
      */
@@ -40,12 +39,12 @@ class Graph {
      * @param edges_path Path to the file containing edges.
      * @param features_path Path to the file containing features.
      */
-    Graph(std::string edges_path, std::string features_path) {};
+    Graph(std::string edges_path, std::string features_path);
 
     /**
      * @brief Debugging/testing constructor for creating a Graph without features.
      */
-    Graph(std::vector<int> offsets, std::vector<int> edges);
+    Graph(std::vector<int> offsets, std::vector<int> edges);  // TODO: remove
 
     // Getters
 
@@ -53,15 +52,7 @@ class Graph {
     int get_num_features() const;
     int get_num_edges() const;
 
-    virtual bool get_bool_feature(int node, int feature) const {
-        throw GraphException("Can't get bool feature (Graph has other type)");
-    };
-    virtual double get_double_feature(int node, int feature) const {
-        throw GraphException("Can't get double feature (Graph has other type)");
-    };
-    virtual int get_int_feature(int node, int feature) const {
-        throw GraphException("Can't get int feature (Graph has other type)");
-    };
+    T get_feature(int node, int feature) const;
 
     int get_label(int node) const;
 
@@ -70,7 +61,7 @@ class Graph {
      * @param node The node index to check for missing features
      * @return Vector containing indices of all missing features for the node
      */
-    std::vector<int> get_missing_features(int node) const;
+    std::vector<int> get_missing_features(int node) const;  // TODO: use iterator instead
 
     /**
      * @brief Gets the immediate neighbours of a node.
@@ -79,7 +70,7 @@ class Graph {
      * @return Vector of neighbour node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbours(int node) const;
+    std::vector<int> get_neighbours(int node) const;  // TODO: use iterator instead
 
     /**
      * @brief Gets the neighbours of a node up to a certain depth.
@@ -89,7 +80,7 @@ class Graph {
      * @return Vector of neighbour node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbours(int node, int depth) const;
+    std::vector<int> get_neighbours(int node, int depth) const;  // TODO: ? use iterator instead
 
     /**
      * @brief Gets the degree of a node.
@@ -102,15 +93,7 @@ class Graph {
 
     // Setters
 
-    virtual void set_bool_feature(int node, int feature, bool value) {
-        throw GraphException("Can't set bool feature (Graph has other type)");
-    };
-    virtual void set_double_feature(int node, int feature, double value) {
-        throw GraphException("Can't set double feature (Graph has other type)");
-    };
-    virtual void set_int_feature(int node, int feature, int value) {
-        throw GraphException("Can't set int feature (Graph has other type)");
-    };
+    void set_feature(int node, int feature, T value);
 
     void set_missing(int node, int feature, bool value);
 
@@ -158,7 +141,7 @@ class Graph {
      * @param features_path Path to the file containing features.
      * @throws std::runtime_error If file errors occur or parsing fails.
      */
-    virtual void read_features(std::string features_path) = 0;
+    void read_features(std::string features_path);
 
     // Debug/Display
 
@@ -172,13 +155,16 @@ class Graph {
      * @note Had to be implemented in the subclasses because the abstract Graph class doesn't have
      * the features vector as a member variable.
      */
-    virtual void print_features() const = 0;
+    void print_features() const;
 
     /**
      * @brief Prints features using print_features to a file with the given path.
      * @param output_path Path to the file to write the features to.
      */
     void print_features_to_file(std::string output_path) const;
+
+   private:
+    void parse_features_line(std::string& line);
 };
 
 // Utility functions
@@ -190,7 +176,7 @@ class Graph {
  * @return Total number of nodes.
  * @throws std::runtime_error If file errors occur or parsing fails.
  */
-int parse_node_count(std::string features_path);
+int parse_node_count(std::string features_path);  // TODO: make static private class members
 
 /**
  * @brief Parses the number of features from the features file.
@@ -200,3 +186,5 @@ int parse_node_count(std::string features_path);
  * @throws std::runtime_error If file errors occur or parsing fails.
  */
 int parse_feature_count(std::string features_path);
+
+#include "Graph.tpp"
