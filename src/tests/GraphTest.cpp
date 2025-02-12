@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Graph.hpp"
+#include "AttributedGraph.hpp"
 #include "WeightedGraph.hpp"
 
 class GraphTest : public testing::Test {};
@@ -29,16 +29,16 @@ TEST(GraphTest, file_not_open_throws_error) {
 }
 
 TEST(GraphTest, invalid_node_index_throws) {
-    Graph<double> graph("../data/test/graph/edges_example.txt",
-                        "../data/test/graph/features_example.txt");
+    AttributedGraph<double> graph("../data/test/graph/edges_example.txt",
+                                  "../data/test/graph/features_example.txt");
 
     // Node index out of range
     EXPECT_THROW(graph.get_feature(graph.get_num_nodes(), 0), GraphException);
 }
 
 TEST(GraphTest, invalid_feature_index_throws) {
-    Graph<double> graph("../data/test/graph/edges_example.txt",
-                        "../data/test/graph/features_example.txt");
+    AttributedGraph<double> graph("../data/test/graph/edges_example.txt",
+                                  "../data/test/graph/features_example.txt");
 
     // Feature index out of range
     EXPECT_THROW(graph.get_feature(0, graph.get_num_features()), GraphException);
@@ -65,7 +65,7 @@ TEST(GraphTest, parse_feature_count) {
 TEST(GraphTest, read_edges) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Create temporary file for output
     std::string temp_file_path = "temp_edges.txt";
@@ -104,7 +104,7 @@ TEST(GraphTest, read_edges) {
 TEST(GraphTest, print_edges) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -129,7 +129,7 @@ TEST(GraphTest, print_edges) {
 TEST(GraphTest, read_bool_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<bool> graph(edges_path, features_path);
+    AttributedGraph<bool> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<bool>> actual_features = {
@@ -172,7 +172,7 @@ TEST(GraphTest, read_bool_features) {
 TEST(GraphTest, read_int_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<int> graph(edges_path, features_path);
+    AttributedGraph<int> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<int>> actual_features = {
@@ -215,7 +215,7 @@ TEST(GraphTest, read_int_features) {
 TEST(GraphTest, read_double_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<double>> actual_features = {
@@ -258,7 +258,7 @@ TEST(GraphTest, read_double_features) {
 TEST(GraphTest, print_bool_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<bool> graph(edges_path, features_path);
+    AttributedGraph<bool> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -283,7 +283,7 @@ TEST(GraphTest, print_bool_features) {
 TEST(GraphTest, print_int_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<int> graph(edges_path, features_path);
+    AttributedGraph<int> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -308,7 +308,7 @@ TEST(GraphTest, print_int_features) {
 TEST(GraphTest, print_double_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -333,7 +333,7 @@ TEST(GraphTest, print_double_features) {
 TEST(GraphTest, get_neighbours) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     std::vector<int> neighbours = graph.get_neighbours(0);
     std::vector<int> expected_neighbours = {1, 4};
@@ -350,7 +350,7 @@ TEST(GraphTest, get_neighbours) {
 TEST(GraphTest, get_degree) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     int degree = graph.get_degree(0);
     EXPECT_GE(degree, 2);
@@ -359,7 +359,7 @@ TEST(GraphTest, get_degree) {
 TEST(GraphTest, has_edge) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.has_edge(0, 4));   // Assumes edge exists
     EXPECT_FALSE(graph.has_edge(0, 2));  // Assumes edge does not exist
@@ -368,7 +368,7 @@ TEST(GraphTest, has_edge) {
 TEST(GraphTest, is_valid_node) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    Graph<double> graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.is_valid_node(0));
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
@@ -377,7 +377,7 @@ TEST(GraphTest, is_valid_node) {
 // --- Weighted Graph Tests ---
 
 // A minimal concrete Graph implementation for testing (because the Graph class is abstract atm).
-class DummyGraph : public Graph<double> {
+class DummyGraph : public AttributedGraph<double> {
    public:
     DummyGraph(const std::vector<int>& offs, const std::vector<int>& edgs) {
         offsets = offs;
@@ -405,8 +405,7 @@ TEST(WeightedGraphEdgesTest, DefaultWeights) {
     DummyGraph dummy(offsets, edges);
     WeightedGraph wgraph(dummy);
 
-    EXPECT_EQ(wgraph.get_num_edges(), 3);
-    for (size_t i = 0; i < static_cast<size_t>(wgraph.get_num_edges()); ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
         EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 1.0);
     }
 }
@@ -508,7 +507,7 @@ TEST(WeightedGraphEdgesTest, ModifyWeightsViaIterator) {
     for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
         *it *= 2.0;
     }
-    for (size_t i = 0; i < static_cast<size_t>(wgraph.get_num_edges()); ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
         EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 2.0);
     }
 }

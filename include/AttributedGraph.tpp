@@ -10,12 +10,13 @@
 #include <type_traits>
 #include <unordered_set>
 
-#include "Graph.hpp"
+#include "AttributedGraph.hpp"  // because IntelliSense is stupid
 
 template <typename T>
-Graph<T>::Graph(std::string edges_path, std::string features_path) {
+AttributedGraph<T>::AttributedGraph(std::string edges_path, std::string features_path) {
     if constexpr (!std::is_arithmetic_v<T>) {
-        throw std::domain_error("Graph class does not support non-arithmetic types");
+        throw std::domain_error(
+            "AttributedGraph class does not support non-arithmetic node attribute types");
     }
 
     num_nodes = parse_node_count(features_path);
@@ -25,56 +26,39 @@ Graph<T>::Graph(std::string edges_path, std::string features_path) {
 }
 
 template <typename T>
-Graph<T>::Graph(std::vector<int> offsets, std::vector<int> edges) {
-    this->offsets = offsets;
-    this->edges = edges;
-    num_nodes = offsets.size() - 1;
-}
-
-template <typename T>
-int Graph<T>::get_num_nodes() const {
-    return num_nodes;
-}
-
-template <typename T>
-int Graph<T>::get_num_features() const {
+int AttributedGraph<T>::get_num_features() const {
     return num_features;
 }
 
 template <typename T>
-int Graph<T>::get_num_edges() const {
-    return edges.size() / 2;
-}
-
-template <typename T>
-T Graph<T>::get_feature(int node, int feature) const {
+T AttributedGraph<T>::get_feature(int node, int feature) const {
     if (!(is_valid_node(node))) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
     return features[node][feature];
 }
 
 template <typename T>
-int Graph<T>::get_label(int node) const {
+int AttributedGraph<T>::get_label(int node) const {
     if (!is_valid_node(node)) throw GraphException("Invalid node index.");
     return labels[node];
 }
 
 template <typename T>
-void Graph<T>::set_feature(int node, int feature, T value) {
+void AttributedGraph<T>::set_feature(int node, int feature, T value) {
     if (!is_valid_node(node)) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
     features[node][feature] = value;
 }
 
 template <typename T>
-void Graph<T>::set_missing(int node, int feature, bool value) {
+void AttributedGraph<T>::set_missing(int node, int feature, bool value) {
     if (!is_valid_node(node)) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
     missing[node][feature] = value;
 }
 
 template <typename T>
-std::vector<int> Graph<T>::get_missing_features(int node) const {
+std::vector<int> AttributedGraph<T>::get_missing_features(int node) const {
     if (!is_valid_node(node)) throw GraphException("Invalid node index.");
     std::vector<int> missing_features_list;
     for (int feature = 0; feature < num_features; feature++) {
@@ -85,110 +69,14 @@ std::vector<int> Graph<T>::get_missing_features(int node) const {
 }
 
 template <typename T>
-std::vector<int> Graph<T>::get_neighbours(int node) const {
-    if (!is_valid_node(node)) throw GraphException("Node does not exist");
-
-    std::vector<int> neighbours(offsets[node + 1] - offsets[node]);
-    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
-
-    return neighbours;
-}
-
-template <typename T>
-std::vector<int> Graph<T>::get_neighbours(int node, int depth) const {
-    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
-
-    std::unordered_set<int> visited;
-    std::queue<int> frontier;
-    frontier.push(node);
-    visited.insert(node);
-
-    for (int d = 0; d < depth; ++d) {
-        int frontierSize = frontier.size();
-        for (int i = 0; i < frontierSize; ++i) {
-            int curr = frontier.front();
-            frontier.pop();
-            for (auto&& nbr : get_neighbours(curr)) {
-                if (!visited.count(nbr)) {
-                    visited.insert(nbr);
-                    frontier.push(nbr);
-                }
-            }
-        }
-    }
-    std::vector<int> neighbours(visited.begin(), visited.end());
-
-    return neighbours;
-}
-
-template <typename T>
-int Graph<T>::get_degree(int node) const {
-    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
-    return offsets[node + 1] - offsets[node];
-}
-
-template <typename T>
-bool Graph<T>::has_edge(int source, int target) const {
-    if (!is_valid_node(source) || !is_valid_node(target))
-        throw GraphException("Invalid node index.");
-    // might be optimized by checking whether source's or target's adjacency list is smaller
-    for (int i = offsets[source]; i < offsets[source + 1]; i++) {
-        if (edges[i] == target) return true;
-    }
-    return false;
-}
-
-template <typename T>
-bool Graph<T>::is_valid_node(int node) const {
-    return node >= 0 && node < num_nodes;
-}
-
-template <typename T>
-bool Graph<T>::is_missing(int node, int feature) const {
+bool AttributedGraph<T>::is_missing(int node, int feature) const {
     if (!is_valid_node(node)) throw GraphException("Invalid node index.");
     if (feature < 0 || feature >= num_features) throw GraphException("Invalid feature index.");
     return missing[node][feature];
 }
 
 template <typename T>
-void Graph<T>::read_edges(std::string edges_path) {
-    std::ifstream file(edges_path);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file: " + edges_path);
-    }
-
-    std::vector<std::vector<int>> temp_edges(num_nodes);  // temporary adjecency list
-
-    int a, b;
-    while (file >> a >> b) {
-        if (!is_valid_node(a) || !is_valid_node(b)) {
-            throw std::out_of_range("Node index out of range");
-        }
-        temp_edges[a].push_back(b);
-        temp_edges[b].push_back(a);
-    }
-
-    if (file.bad()) {
-        throw std::runtime_error("Error reading file: " + edges_path);
-    }
-
-    // Flatten to CSR
-    offsets = std::vector<int>(num_nodes + 1);
-    for (int i = 1; i < offsets.size(); i++) {
-        offsets[i] = offsets[i - 1] + temp_edges[i - 1].size();
-    }
-
-    int num_edges = offsets[offsets.size() - 1];
-    edges = std::vector<int>(num_edges);
-    for (int i = 0; i < temp_edges.size(); i++) {
-        std::copy(temp_edges[i].begin(), temp_edges[i].end(), edges.begin() + offsets[i]);
-    }
-
-    file.close();
-}
-
-template <typename T>
-void Graph<T>::read_features(std::string features_path) {
+void AttributedGraph<T>::read_features(std::string features_path) {
     labels = std::vector<int>(num_nodes);
     features = std::vector<std::vector<T>>(num_nodes, std::vector<T>(num_features));
     missing = std::vector<std::vector<bool>>(num_nodes, std::vector<bool>(num_features));
@@ -204,19 +92,7 @@ void Graph<T>::read_features(std::string features_path) {
 }
 
 template <typename T>
-void Graph<T>::print_edges() const {
-    for (int i = 0; i < num_nodes; i++) {
-        for (int j = offsets[i]; j < offsets[i + 1]; j++) {
-            int neighbour = edges[j];
-            if (neighbour <= i) {  // to only print unique edges (in descending order)
-                std::cout << i << "\t" << neighbour << "\n";
-            }
-        }
-    }
-}
-
-template <typename T>
-void Graph<T>::print_features() const {
+void AttributedGraph<T>::print_features() const {
     std::cout << std::noboolalpha;  // print 1/0 instead of true/false
 
     for (int node = 0; node < num_nodes; node++) {
@@ -240,7 +116,7 @@ void Graph<T>::print_features() const {
 }
 
 template <typename T>
-void Graph<T>::print_features_to_file(std::string output_path) const {
+void AttributedGraph<T>::print_features_to_file(std::string output_path) const {
     std::ofstream file(output_path, std::ios::out | std::ios::trunc);
     if (!file.is_open()) throw std::runtime_error("Could not open file: " + output_path);
 
@@ -254,7 +130,7 @@ void Graph<T>::print_features_to_file(std::string output_path) const {
 }
 
 template <typename T>
-void Graph<T>::parse_features_line(std::string& line) {
+void AttributedGraph<T>::parse_features_line(std::string& line) {
     const char* ptr = line.c_str();
     char* endptr;
 
