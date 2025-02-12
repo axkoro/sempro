@@ -6,9 +6,12 @@
 
 #include "WeightedGraph.hpp"
 
-EdgeWeightCalculator::EdgeWeightCalculator(Graph& graph, double fusion_coefficient,
-                                           std::string type)
-    : graph(graph), fusion_coefficient(fusion_coefficient), type(type) {}
+EdgeWeightCalculator::EdgeWeightCalculator(GraphInt& graph, double fusion_coefficient)
+    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::i) {}
+EdgeWeightCalculator::EdgeWeightCalculator(GraphBool& graph, double fusion_coefficient)
+    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::b) {}
+EdgeWeightCalculator::EdgeWeightCalculator(GraphDouble& graph, double fusion_coefficient)
+    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::d) {}
 
 WeightedGraph EdgeWeightCalculator::generate_weighted_graph() {
     WeightedGraph wgraph(graph);
@@ -16,42 +19,41 @@ WeightedGraph EdgeWeightCalculator::generate_weighted_graph() {
 
     for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
         auto [source, target] = it.get_edge();
-        *it = compute_weight(source, target, covers, wgraph, type);
+        *it = compute_weight(source, target, covers, wgraph);
     }
     return wgraph;
 }
 
 double EdgeWeightCalculator::compute_weight(int u, int v,
                                             std::vector<std::unordered_set<int>> covers,
-                                            WeightedGraph& wgraph, std::string type) {
+                                            WeightedGraph& wgraph) {
     double factor = fusion_coefficient;
     double struct_sim = compute_structural_similarity(u, v, covers);
-    double feature_sim = compute_feature_similarity(u, v, wgraph, type);
+    double feature_sim = compute_feature_similarity(u, v, wgraph);
     double weight = struct_sim * factor + feature_sim * (1 - factor);
     return weight;
 }
 
-double EdgeWeightCalculator::compute_feature_similarity(int u, int v, WeightedGraph& wgraph,
-                                                        std::string type) {
+double EdgeWeightCalculator::compute_feature_similarity(int u, int v, WeightedGraph& wgraph) {
     int num_features = wgraph.get_num_features();
     int same_features = 0;
     const double epsilon = 0.0001;
 
-    if (type == "bool") {
+    if (type == Graph::feature_type::b) {
         for (int i = 0; i < num_features; i++) {
             if (wgraph.get_bool_feature(u, i) == wgraph.get_bool_feature(v, i)) {
                 same_features++;
             }
         }
     }
-    if (type == "int") {
+    if (type == Graph::feature_type::i) {
         for (int i = 0; i < num_features; i++) {
             if (wgraph.get_int_feature(u, i) == wgraph.get_int_feature(v, i)) {
                 same_features++;
             }
         }
     }
-    if (type == "double") {
+    if (type == Graph::feature_type::d) {
         for (int i = 0; i < num_features; i++) {
             if (wgraph.is_missing(u, i) || wgraph.is_missing(v, i)) {
                 continue;
@@ -59,7 +61,7 @@ double EdgeWeightCalculator::compute_feature_similarity(int u, int v, WeightedGr
 
             double feature_u = wgraph.get_double_feature(u, i);
             double feature_v = wgraph.get_double_feature(v, i);
-            if (std::fabs(feature_u - feature_v) < epsilon) {
+            if (std::abs(feature_u - feature_v) < epsilon) {
                 same_features++;
             }
         }
@@ -70,7 +72,6 @@ double EdgeWeightCalculator::compute_feature_similarity(int u, int v, WeightedGr
 
 double EdgeWeightCalculator::compute_structural_similarity(
     int u, int v, std::vector<std::unordered_set<int>> covers) {
-    // Calculate MAS
     std::unordered_set<int> cover_u = covers[u];
     std::unordered_set<int> cover_v = covers[v];
     // compute union and intersection

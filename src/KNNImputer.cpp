@@ -17,7 +17,7 @@ void KNNImputer::run() {
     int num_nodes = graph.get_num_nodes();
     int num_features = graph.get_num_features();
 
-    if (type == b) {
+    if (type == Graph::feature_type::b) {
         std::unordered_map<int, bool> global_averages;  // stores global averages for each feature
         std::mutex global_averages_mutex;
 
@@ -59,7 +59,7 @@ void KNNImputer::run() {
                 graph.set_missing(node, feature, false);
             }
         }
-    } else if (type == d) {
+    } else if (type == Graph::feature_type::d) {
         std::unordered_map<int, double> global_averages;  // stores global averages for each feature
         std::mutex global_averages_mutex;
 
@@ -101,7 +101,7 @@ void KNNImputer::run() {
                 graph.set_missing(node, feature, false);
             }
         }
-    } else if (type == i) {
+    } else if (type == Graph::feature_type::i) {
         std::unordered_map<int, int> global_averages;  // stores global averages for each feature
         std::mutex global_averages_mutex;
 

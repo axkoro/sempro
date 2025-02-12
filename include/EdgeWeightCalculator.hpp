@@ -3,8 +3,13 @@
 #include <unordered_set>
 
 #include "Graph.hpp"
+#include "GraphBool.hpp"
+#include "GraphDouble.hpp"
+#include "GraphInt.hpp"
 #include "WeightedGraph.hpp"
+
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
+
 class EdgeWeightCalculator {
     FRIEND_TEST(EdgeWeightCalculatorTest, ComputeCovers);
     FRIEND_TEST(EdgeWeightCalculatorTest, cover_union_intersection);
@@ -12,17 +17,19 @@ class EdgeWeightCalculator {
    private:
     Graph& graph;
     double fusion_coefficient;
+    Graph::feature_type type;
     std::vector<std::unordered_set<int>> covers;
-    std::string type;
 
    public:
-    EdgeWeightCalculator(Graph& g, double fusion_coefficient, std::string type);
+    EdgeWeightCalculator(GraphInt& g, double fusion_coefficient);
+    EdgeWeightCalculator(GraphBool& g, double fusion_coefficient);
+    EdgeWeightCalculator(GraphDouble& g, double fusion_coefficient);
     WeightedGraph generate_weighted_graph();
 
    private:
     double compute_weight(int u, int v, std::vector<std::unordered_set<int>> covers,
-                          WeightedGraph& wpgraph, std::string type);
-    double compute_feature_similarity(int u, int v, WeightedGraph& wgraph, std::string type);
+                          WeightedGraph& wpgraph);
+    double compute_feature_similarity(int u, int v, WeightedGraph& wgraph);
     double compute_structural_similarity(int u, int v, std::vector<std::unordered_set<int>> covers);
     std::vector<std::unordered_set<int>> compute_covers(WeightedGraph& wgraph);
 };

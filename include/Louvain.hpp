@@ -1,7 +1,7 @@
 #pragma once
+#include <cstdint>
 #include <unordered_map>
 #include <vector>
-#include <cstdint>
 
 #include "DynamicMinimalGraph.hpp"
 #include "Graph.hpp"

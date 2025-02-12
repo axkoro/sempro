@@ -21,7 +21,7 @@ TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
     std::string features_path = "../data/test/deepwalk/test_features.txt";
     GraphDouble original_graph(edges_path, features_path);
 
-    EdgeWeightCalculator ewc(original_graph, fusion_coefficient, "double");
+    EdgeWeightCalculator ewc(original_graph, fusion_coefficient);
     WeightedGraph weighted_graph = ewc.generate_weighted_graph();
 
     ASSERT_EQ(weighted_graph.get_num_nodes(), original_graph.get_num_nodes());
@@ -70,7 +70,7 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
     GraphDouble graph(edges_path, features_path);
-    EdgeWeightCalculator ewc(graph, 0.5, "double");
+    EdgeWeightCalculator ewc(graph, 0.5);
     WeightedGraph wgraph(graph);
 
     // Compute covers
@@ -94,7 +94,7 @@ TEST(EdgeWeightCalculatorTest, cover_union_intersection) {
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
     GraphDouble graph(edges_path, features_path);
-    EdgeWeightCalculator ewc(graph, 0.5, "double");
+    EdgeWeightCalculator ewc(graph, 0.5);
     WeightedGraph wgraph(graph);
 
     std::vector<std::unordered_set<int>> input_covers = {{1, 2, 3}, {2, 3, 5}, {1, 8, 5}};
