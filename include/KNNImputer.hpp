@@ -1,29 +1,20 @@
 #pragma once
 
-#include "GraphBool.hpp"
-#include "GraphDouble.hpp"
-#include "GraphInt.hpp"
 #include "Imputer.hpp"
 
-class KNNImputer : public Imputer {
-   public:
-    static constexpr int DEFAULT_K = 3;
-    enum feature_type { b, d, i };  // bool, double, int
+#define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
+
+template <typename T>
+class KNNImputer : public Imputer<T> {
+    FRIEND_TEST(KNNTest, testGlobalAverage);
 
    private:
-    int k = DEFAULT_K;
-    feature_type type;
+    int depth;
 
    public:
-    explicit KNNImputer(GraphBool& g) : Imputer(g), type(b) {}
-    explicit KNNImputer(GraphDouble& g) : Imputer(g), type(d) {}
-    explicit KNNImputer(GraphInt& g) : Imputer(g), type(i) {}
+    KNNImputer(AttributedGraph<T>& g, int depth = 2) : Imputer<T>(g), depth(depth) {}
 
-    void run();
-
-    // Configuration
-    void set_depth(int k);
-
-    // getter for k
-    int get_depth();
+    void run() override;
 };
+
+#include "KNNImputer.tpp"
