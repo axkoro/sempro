@@ -9,62 +9,106 @@ option(BUILD_TESTS "Build tests" ON)
 find_package(OpenMP REQUIRED)
 
 add_library(GraphLib
-    src/Graph.cpp
-    src/GraphDouble.cpp
-    src/GraphInt.cpp
-    src/GraphBool.cpp
-)
+	src/Graph.cpp
+	src/GraphDouble.cpp
+	src/GraphInt.cpp
+	src/GraphBool.cpp)
 
 target_include_directories(GraphLib PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
 
-if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
+if(BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
 	add_subdirectory(extlibs/gtest)
 	set(CMAKE_BUILD_TYPE Debug)
-	
+
 	add_executable(GraphTest src/tests/GraphTest.cpp src/WeightedGraph.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(GraphTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
-	add_executable(KNNImputerTest src/tests/KNNImputerTest.cpp src/Imputer.cpp src/KNNImputer.cpp)
+	add_executable(KNNImputerTest
+		src/tests/KNNImputerTest.cpp
+		src/Imputer.cpp
+		src/KNNImputer.cpp)
 	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
 
-	add_executable(LouvainTest src/tests/LouvainTest.cpp src/Louvain.cpp src/DynamicMinimalGraph.cpp)
+	add_executable(LouvainTest
+		src/tests/LouvainTest.cpp
+		src/Louvain.cpp
+		src/DynamicMinimalGraph.cpp)
 	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainTest PRIVATE -coverage)
 	target_link_options(LouvainTest PRIVATE -coverage)
 
-	add_executable(LouvainImputerTest src/tests/LouvainImputerTest.cpp src/LouvainImputer.cpp src/Imputer.cpp)
+	add_executable(LouvainImputerTest
+		src/tests/LouvainImputerTest.cpp
+		src/LouvainImputer.cpp
+		src/Imputer.cpp)
 	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainImputerTest PRIVATE -coverage)
 	target_link_options(LouvainImputerTest PRIVATE -coverage)
 
-	add_executable(DeepWalkTest src/tests/DeepWalkTest.cpp src/SkipGram.cpp src/RandomWalkGenerator.cpp src/StaticMinimalGraph.cpp src/EdgeWeightCalculator.cpp src/WeightedGraph.cpp)
+	add_executable(
+		DeepWalkTest
+		src/tests/DeepWalkTest.cpp
+		src/SkipGram.cpp
+		src/NegativeSampler.cpp
+		src/Matrix.cpp
+		src/Vector.cpp
+		src/RandomWalkGenerator.cpp
+		src/StaticMinimalGraph.cpp
+		src/EdgeWeightCalculator.cpp
+		src/WeightedGraph.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(DeepWalkTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)
 	target_link_options(DeepWalkTest PRIVATE -coverage)
+
+	add_executable(LinearAlgebraTest
+		src/tests/LinearAlgebraTest.cpp
+		src/Vector.cpp
+		src/Matrix.cpp)
+	target_include_directories(LinearAlgebraTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(LinearAlgebraTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(LinearAlgebraTest PRIVATE -coverage)
+	target_link_options(LinearAlgebraTest PRIVATE -coverage)
+
+	add_executable(NegativeSamplerTest
+		src/tests/NegativeSamplerTest.cpp
+		src/NegativeSampler.cpp)
+	target_include_directories(NegativeSamplerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(NegativeSamplerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(NegativeSamplerTest PRIVATE -coverage)
+	target_link_options(NegativeSamplerTest PRIVATE -coverage)
+
 else() # Build Python bindings as libraries
 	add_subdirectory(extlibs/pybind11)
 
-	pybind11_add_module(_graph src/py11_graph.cpp)
+	pybind11_add_module(_graph
+		src/py11_graph.cpp)
 	target_link_libraries(_graph PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
-	
-	pybind11_add_module(_strats src/Imputer.cpp src/KNNImputer.cpp src/LouvainImputer.cpp src/py11_strats.cpp)
+
+	pybind11_add_module(_strats
+		src/Imputer.cpp
+		src/KNNImputer.cpp
+		src/LouvainImputer.cpp
+		src/py11_strats.cpp)
 	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
 
-	pybind11_add_module(_louvain src/Louvain.cpp src/DynamicMinimalGraph.cpp src/py11_louvain.cpp)
+	pybind11_add_module(_louvain
+		src/Louvain.cpp
+		src/DynamicMinimalGraph.cpp
+		src/py11_louvain.cpp)
 	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
 	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
