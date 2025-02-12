@@ -17,7 +17,11 @@ class Graph {
     friend class WeightedGraph;
     friend class WeightedEdgeIterator;
 
+   public:
+    enum feature_type { b, d, i };  // bool, double, int
+
    protected:
+    feature_type type;
     int num_nodes = -1;
     int num_features = -1;
     std::vector<int> offsets;
@@ -52,6 +56,8 @@ class Graph {
     int get_num_nodes() const;
     int get_num_features() const;
     int get_num_edges() const;
+
+    feature_type get_type() const;
 
     virtual bool get_bool_feature(int node, int feature) const {
         throw GraphException("Can't get bool feature (Graph has other type)");

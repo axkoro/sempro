@@ -9,24 +9,21 @@
 #include "Imputer.hpp"
 
 class LouvainImputer : public Imputer {
-   private:
-    enum feature_type { b, d, i };  // bool, double, int
-
    public:
     explicit LouvainImputer(GraphBool& graph, const std::vector<int>& communities)
-        : Imputer(graph), communities(communities), type(b) {}
+        : Imputer(graph), communities(communities), type(Graph::feature_type::b) {}
 
     explicit LouvainImputer(GraphDouble& graph, const std::vector<int>& communities)
-        : Imputer(graph), communities(communities), type(d) {}
+        : Imputer(graph), communities(communities), type(Graph::feature_type::d) {}
 
     explicit LouvainImputer(GraphInt& graph, const std::vector<int>& communities)
-        : Imputer(graph), communities(communities), type(i) {}
+        : Imputer(graph), communities(communities), type(Graph::feature_type::i) {}
 
     void run();
 
    private:
     const std::vector<int> communities;                       // Community assignments for each node
-    feature_type type;                                        // Type of features in the graph
+    Graph::feature_type type;                                 // Type of features in the graph
     double compute_community_average(int node, int feature);  // Compute community average
 };
 

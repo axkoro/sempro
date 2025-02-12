@@ -8,16 +8,15 @@
 class KNNImputer : public Imputer {
    public:
     static constexpr int DEFAULT_K = 3;
-    enum feature_type { b, d, i };  // bool, double, int
 
    private:
     int k = DEFAULT_K;
-    feature_type type;
+    Graph::feature_type type;
 
    public:
-    explicit KNNImputer(GraphBool& g) : Imputer(g), type(b) {}
-    explicit KNNImputer(GraphDouble& g) : Imputer(g), type(d) {}
-    explicit KNNImputer(GraphInt& g) : Imputer(g), type(i) {}
+    explicit KNNImputer(GraphBool& g) : Imputer(g), type(Graph::feature_type::b) {}
+    explicit KNNImputer(GraphDouble& g) : Imputer(g), type(Graph::feature_type::d) {}
+    explicit KNNImputer(GraphInt& g) : Imputer(g), type(Graph::feature_type::i) {}
 
     void run();
 

@@ -22,6 +22,8 @@ int Graph::get_num_features() const { return num_features; }
 
 int Graph::get_num_edges() const { return edges.size() / 2; }
 
+Graph::feature_type Graph::get_type() const { return type; }
+
 int Graph::get_label(int node) const { return labels[node]; }
 
 void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }

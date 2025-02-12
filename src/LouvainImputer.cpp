@@ -46,11 +46,11 @@ void LouvainImputer::run() {
 
 #pragma omp critical
                 {
-                    if (type == b) {
+                    if (type == Graph::feature_type::b) {
                         graph.set_bool_feature(node, feature, to_bool(average));
-                    } else if (type == d) {
+                    } else if (type == Graph::feature_type::d) {
                         graph.set_double_feature(node, feature, average);
-                    } else if (type == i) {
+                    } else if (type == Graph::feature_type::i) {
                         graph.set_int_feature(node, feature, to_int(average));
                     }
 
@@ -69,11 +69,11 @@ double LouvainImputer::compute_community_average(int community, int feature) {
 #pragma omp parallel for reduction(+ : sum, count)
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         if (communities[node] == community && !graph.is_missing(node, feature)) {
-            if (type == b) {
+            if (type == Graph::feature_type::b) {
                 sum += graph.get_bool_feature(node, feature);
-            } else if (type == d) {
+            } else if (type == Graph::feature_type::d) {
                 sum += graph.get_double_feature(node, feature);
-            } else if (type == i) {
+            } else if (type == Graph::feature_type::i) {
                 sum += graph.get_int_feature(node, feature);
             }
             ++count;
@@ -82,11 +82,11 @@ double LouvainImputer::compute_community_average(int community, int feature) {
 
     bool feature_not_community = count == 0;
     if (feature_not_community) {
-        if (type == b) {
+        if (type == Graph::feature_type::b) {
             return compute_global_average_bool(graph, feature);
-        } else if (type == d) {
+        } else if (type == Graph::feature_type::d) {
             return compute_global_average_double(graph, feature);
-        } else if (type == i) {
+        } else if (type == Graph::feature_type::i) {
             return compute_global_average_int(graph, feature);
         }
     }
