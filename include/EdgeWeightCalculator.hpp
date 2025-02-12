@@ -27,9 +27,9 @@ class EdgeWeightCalculator {
     WeightedGraph generate_weighted_graph();
 
    private:
-    double compute_weight(int u, int v, std::vector<std::unordered_set<int>> covers,
-                          WeightedGraph& wpgraph);
-    double compute_feature_similarity(int u, int v, WeightedGraph& wgraph);
-    double compute_structural_similarity(int u, int v, std::vector<std::unordered_set<int>> covers);
-    std::vector<std::unordered_set<int>> compute_covers(WeightedGraph& wgraph);
+    double compute_weight(int u, int v, std::vector<std::unordered_set<int>>& covers);
+    double compute_feature_similarity(int u, int v);
+    double compute_structural_similarity(int u, int v,
+                                         std::vector<std::unordered_set<int>>& covers);
+    std::vector<std::unordered_set<int>> compute_covers(int depth = 2);
 };

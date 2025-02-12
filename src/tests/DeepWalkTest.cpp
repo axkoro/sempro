@@ -74,7 +74,7 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     WeightedGraph wgraph(graph);
 
     // Compute covers
-    std::vector<std::unordered_set<int>> covers = ewc.compute_covers(wgraph);
+    std::vector<std::unordered_set<int>> covers = ewc.compute_covers();
 
     // Expected covers
     std::vector<std::unordered_set<int>> expected_covers = {
