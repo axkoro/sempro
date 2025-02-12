@@ -5,6 +5,7 @@
 #include <iostream>
 
 GraphBool::GraphBool(std::string edges_path, std::string features_path) {
+    type = b;
     num_nodes = parse_node_count(features_path);
     num_features = parse_feature_count(features_path);
     read_edges(edges_path);

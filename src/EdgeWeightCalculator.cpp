@@ -6,12 +6,8 @@
 
 #include "WeightedGraph.hpp"
 
-EdgeWeightCalculator::EdgeWeightCalculator(GraphInt& graph, double fusion_coefficient)
-    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::i) {}
-EdgeWeightCalculator::EdgeWeightCalculator(GraphBool& graph, double fusion_coefficient)
-    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::b) {}
-EdgeWeightCalculator::EdgeWeightCalculator(GraphDouble& graph, double fusion_coefficient)
-    : graph(graph), fusion_coefficient(fusion_coefficient), type(Graph::feature_type::d) {}
+EdgeWeightCalculator::EdgeWeightCalculator(Graph& graph, double fusion_coefficient)
+    : graph(graph), fusion_coefficient(fusion_coefficient), type(graph.get_type()) {}
 
 WeightedGraph EdgeWeightCalculator::generate_weighted_graph() {
     WeightedGraph wgraph(graph);

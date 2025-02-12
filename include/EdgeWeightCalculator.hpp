@@ -21,9 +21,7 @@ class EdgeWeightCalculator {
     std::vector<std::unordered_set<int>> covers;
 
    public:
-    EdgeWeightCalculator(GraphInt& g, double fusion_coefficient);
-    EdgeWeightCalculator(GraphBool& g, double fusion_coefficient);
-    EdgeWeightCalculator(GraphDouble& g, double fusion_coefficient);
+    EdgeWeightCalculator(Graph& g, double fusion_coefficient);
     WeightedGraph generate_weighted_graph();
 
    private:

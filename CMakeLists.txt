@@ -62,7 +62,6 @@ if(BUILD_TESTS) # Instructions for building C++ library and googletest testing s
 		src/Matrix.cpp
 		src/Vector.cpp
 		src/RandomWalkGenerator.cpp
-		src/StaticMinimalGraph.cpp
 		src/EdgeWeightCalculator.cpp
 		src/WeightedGraph.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
