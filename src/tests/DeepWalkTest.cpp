@@ -21,7 +21,7 @@ TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
     std::string features_path = "../data/test/deepwalk/test_features.txt";
     GraphDouble original_graph(edges_path, features_path);
 
-    EdgeWeightCalculator ewc(original_graph, fusion_coefficient,"double");
+    EdgeWeightCalculator ewc(original_graph, fusion_coefficient, "double");
     WeightedGraph weighted_graph = ewc.generate_weighted_graph();
 
     ASSERT_EQ(weighted_graph.get_num_nodes(), original_graph.get_num_nodes());
@@ -70,7 +70,7 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
     GraphDouble graph(edges_path, features_path);
-    EdgeWeightCalculator ewc(graph, 0.5,"double");
+    EdgeWeightCalculator ewc(graph, 0.5, "double");
     WeightedGraph wgraph(graph);
 
     // Compute covers
@@ -87,26 +87,20 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
 
     // Check if the computed covers match the expected covers
     ASSERT_EQ(covers.size(), expected_covers.size());
-    
-    ASSERT_EQ(covers, expected_covers);
-    
-}
-TEST(EdgeWeightCalculatorTest, cover_union_intersection){
 
+    ASSERT_EQ(covers, expected_covers);
+}
+TEST(EdgeWeightCalculatorTest, cover_union_intersection) {
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
     GraphDouble graph(edges_path, features_path);
-    EdgeWeightCalculator ewc(graph, 0.5,"double");
+    EdgeWeightCalculator ewc(graph, 0.5, "double");
     WeightedGraph wgraph(graph);
 
-    std::vector<std::unordered_set<int>> input_covers = {
-        {1,2,3},
-        {2,3,5},
-        {1,8,5}
-    };
-    double mss = ewc.compute_structural_similarity(0,1,input_covers);
-    //since cover union of 0 and 0 is 4 and intersection is 2 mss should be 2/4 = 2
-    ASSERT_EQ(mss,0.5);
+    std::vector<std::unordered_set<int>> input_covers = {{1, 2, 3}, {2, 3, 5}, {1, 8, 5}};
+    double mss = ewc.compute_structural_similarity(0, 1, input_covers);
+    // since cover union of 0 and 0 is 4 and intersection is 2 mss should be 2/4 = 2
+    ASSERT_EQ(mss, 0.5);
 }
 TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
     std::vector<int> offsets = {0, 2, 4, 6, 8, 10};
