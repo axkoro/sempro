@@ -16,6 +16,9 @@ class Graph {
     friend class WeightedGraph;
     friend class WeightedEdgeIterator;
 
+   public:
+    enum feature_type { b, d, i };  // bool, double, int
+
    protected:
     int num_nodes;
     std::vector<int> offsets;

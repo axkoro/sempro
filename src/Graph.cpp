@@ -7,16 +7,12 @@
 #include <unordered_set>
 
 Graph::Graph(std::string edges_path) {
-    num_nodes =
-        parse_node_count_from_edge_file(edges_path);  // TODO: make this work with the edge_file
+    num_nodes = parse_node_count_from_edge_file(edges_path);
     read_edges(edges_path);
 }
 
-Graph::Graph(std::vector<int> offsets, std::vector<int> edges) {
-    this->offsets = offsets;
-    this->edges = edges;
-    num_nodes = offsets.size() - 1;
-}
+Graph::Graph(std::vector<int> offsets, std::vector<int> edges)
+    : offsets(offsets), edges(edges), num_nodes(offsets.size() - 1) {}
 
 int Graph::get_num_nodes() const { return num_nodes; }
 

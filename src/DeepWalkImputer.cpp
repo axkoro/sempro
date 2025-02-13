@@ -10,7 +10,7 @@ DeepWalkImputer::DeepWalkImputer(Graph& g, Config& c, int seed)
 
 void DeepWalkImputer::run() {
     EdgeWeightCalculator ew_calc(graph, config.fusion_coefficient);
-    StaticMinimalGraph weighted_graph = ew_calc.generate_weighted_graph();
+    WeightedGraph weighted_graph = ew_calc.generate_weighted_graph();
 
     RandomWalkGenerator rw_gen(weighted_graph, config.walk_length, config.num_walks, seed);
     std::vector<std::vector<int>> walks = rw_gen.generate_walks();
