@@ -51,8 +51,8 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	add_executable(DeepWalkTest
 		src/tests/DeepWalkTest.cpp
 		src/RandomWalkGenerator.cpp
-		# src/SkipGram.cpp
-		# src/NegativeSampler.cpp
+		src/SkipGram.cpp
+		src/NegativeSampler.cpp
 		src/Matrix.cpp
 		src/Vector.cpp
 		src/Graph.cpp

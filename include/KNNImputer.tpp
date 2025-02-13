@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include "KNNImputer.hpp"
+#include "KNNImputer.hpp"  // because IntelliSense is stupid
 
 template <typename T>
 void KNNImputer<T>::run() {

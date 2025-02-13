@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "Imputer.hpp"
+#include "Imputer.hpp"  // because IntelliSense is stupid
 
 template <typename T>
 double Imputer<T>::compute_global_average(int feature) {

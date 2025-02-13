@@ -6,7 +6,7 @@
 #include <numeric>
 #include <unordered_map>
 
-#include "CommunityImputer.hpp"
+#include "CommunityImputer.hpp"  // because IntelliSense is stupid
 
 template <typename T>
 void CommunityImputer<T>::run() {
