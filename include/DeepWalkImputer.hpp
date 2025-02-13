@@ -3,7 +3,8 @@
 #include "Imputer.hpp"
 #include "Matrix.hpp"
 
-class DeepWalkImputer : public Imputer {
+template <typename T>
+class DeepWalkImputer : public Imputer<T> {
    public:
     // TODO: add documentation for how to use default config (and only change specific paramters)
     struct Config {  // TODO: research best initial parameters
@@ -34,13 +35,15 @@ class DeepWalkImputer : public Imputer {
     };
 
     DeepWalkImputer(Graph& g, int seed = -1);
-    DeepWalkImputer(Graph& g, Config& c, int seed = -1);
+    DeepWalkImputer(Graph& g, const Config& c, int seed = -1);
 
     void run();
 
    private:
-    Config config;
+    Config& config;
     int seed;
 
     void impute_features(const Matrix& embeddings);
 };
+
+#include "DeepWalkImputer.tpp"

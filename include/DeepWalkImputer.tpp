@@ -1,15 +1,19 @@
-#include "DeepWalkImputer.hpp"
+#pragma once
 
 #include "EdgeWeightCalculator.hpp"
 #include "RandomWalkGenerator.hpp"
 #include "SkipGram.hpp"
 
-DeepWalkImputer::DeepWalkImputer(Graph& g, int seed) : Imputer(g), config(), seed(seed) {};
-DeepWalkImputer::DeepWalkImputer(Graph& g, Config& c, int seed)
-    : Imputer(g), config(c), seed(seed) {};
+template <typename T>
+DeepWalkImputer<T>::DeepWalkImputer(Graph& g, int seed) : Imputer(g), config(), seed(seed){};
 
-void DeepWalkImputer::run() {
-    EdgeWeightCalculator ew_calc(graph, config.fusion_coefficient);
+template <typename T>
+DeepWalkImputer<T>::DeepWalkImputer(Graph& g, const Config& c, int seed)
+    : Imputer(g), config(c), seed(seed){};
+
+template <typename T>
+void DeepWalkImputer<T>::run() {
+    EdgeWeightCalculator<T> ew_calc(graph, config.fusion_coefficient);
     WeightedGraph weighted_graph = ew_calc.generate_weighted_graph();
 
     RandomWalkGenerator rw_gen(weighted_graph, config.walk_length, config.num_walks, seed);
@@ -23,4 +27,5 @@ void DeepWalkImputer::run() {
     impute_features(embeddings);
 }
 
-void DeepWalkImputer::impute_features(const Matrix& embeddings) {}
+template <typename T>
+void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {}

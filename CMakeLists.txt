@@ -48,19 +48,19 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_compile_options(CommunityImputerTest PRIVATE -coverage)
 	target_link_options(CommunityImputerTest PRIVATE -coverage)
 
-	# add_executable(DeepWalkTest
-	# 	src/tests/DeepWalkTest.cpp
-	# 	src/SkipGram.cpp
-	# 	src/NegativeSampler.cpp
-	# 	src/Matrix.cpp
-	# 	src/Vector.cpp
-	# 	src/RandomWalkGenerator.cpp
-	# 	src/StaticMinimalGraph.cpp
-	# 	src/Graph.cpp)
-	# target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	# target_link_libraries(DeepWalkTest PRIVATE gtest OpenMP::OpenMP_CXX)
-	# target_compile_options(DeepWalkTest PRIVATE -coverage)
-	# target_link_options(DeepWalkTest PRIVATE -coverage)
+	add_executable(DeepWalkTest
+		src/tests/DeepWalkTest.cpp
+		# src/RandomWalkGenerator.cpp
+		# src/SkipGram.cpp
+		# src/NegativeSampler.cpp
+		src/Matrix.cpp
+		src/Vector.cpp
+		src/Graph.cpp
+		src/WeightedGraph.cpp)
+	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(DeepWalkTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(DeepWalkTest PRIVATE -coverage)
+	target_link_options(DeepWalkTest PRIVATE -coverage)
 
 	add_executable(LinearAlgebraTest
 		src/tests/LinearAlgebraTest.cpp
