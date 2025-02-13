@@ -34,7 +34,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 		src/tests/LouvainTest.cpp
 		src/Louvain.cpp
 		src/Graph.cpp
-		src/DynamicMinimalGraph.cpp)
+		src/DynamicGraph.cpp)
 	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(LouvainTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainTest PRIVATE -coverage)
@@ -100,7 +100,7 @@ else() # Build Python bindings as libraries
 	pybind11_add_module(_louvain
 		src/py11_louvain.cpp
 		src/Louvain.cpp
-		src/DynamicMinimalGraph.cpp
+		src/DynamicGraph.cpp
 		src/Graph.cpp)
 	target_link_libraries(_louvain PRIVATE OpenMP::OpenMP_CXX)
 	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)

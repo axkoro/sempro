@@ -1,8 +1,8 @@
-#include "DynamicMinimalGraph.hpp"
+#include "DynamicGraph.hpp"
 
-DynamicMinimalGraph::DynamicMinimalGraph(int n) : edges(n), num_edges(0) {}
+DynamicGraph::DynamicGraph(int n) : edges(n), num_edges(0) {}
 
-DynamicMinimalGraph::DynamicMinimalGraph(const Graph& g) {
+DynamicGraph::DynamicGraph(const Graph& g) {
     int num_nodes = g.get_num_nodes();
     num_edges = g.get_num_edges();
     edges.resize(num_nodes);
@@ -18,11 +18,11 @@ DynamicMinimalGraph::DynamicMinimalGraph(const Graph& g) {
     }
 }
 
-int DynamicMinimalGraph::get_num_nodes() const { return (int)edges.size(); }
+int DynamicGraph::get_num_nodes() const { return (int)edges.size(); }
 
-int DynamicMinimalGraph::get_num_edges() const { return num_edges; }
+int DynamicGraph::get_num_edges() const { return num_edges; }
 
-int DynamicMinimalGraph::get_degree(int u) const {
+int DynamicGraph::get_degree(int u) const {
     int deg = 0.0;
     for (auto& p : edges[u]) {
         deg += p.second;
@@ -30,11 +30,11 @@ int DynamicMinimalGraph::get_degree(int u) const {
     return deg;
 }
 
-const std::vector<std::pair<int, int>>& DynamicMinimalGraph::get_neighbours(int u) const {
+const std::vector<std::pair<int, int>>& DynamicGraph::get_neighbours(int u) const {
     return edges[u];
 }
 
-void DynamicMinimalGraph::add_edge(int u, int v, int w) {
+void DynamicGraph::add_edge(int u, int v, int w) {
     if (u == v) {  // self-loop
         edges[u].push_back({v, w});
         num_edges++;
