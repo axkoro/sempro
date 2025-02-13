@@ -16,7 +16,7 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	add_executable(GraphTest
 		src/tests/GraphTest.cpp
 		src/Graph.cpp
-		src/WeightedGraph.cpp)
+		src/GraphEdgeWeights.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(GraphTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(GraphTest PRIVATE -coverage)
@@ -50,13 +50,13 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 
 	add_executable(DeepWalkTest
 		src/tests/DeepWalkTest.cpp
-		# src/RandomWalkGenerator.cpp
+		src/RandomWalkGenerator.cpp
 		# src/SkipGram.cpp
 		# src/NegativeSampler.cpp
 		src/Matrix.cpp
 		src/Vector.cpp
 		src/Graph.cpp
-		src/WeightedGraph.cpp)
+		src/GraphEdgeWeights.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(DeepWalkTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)

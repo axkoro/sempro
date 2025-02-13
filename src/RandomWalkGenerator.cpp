@@ -4,9 +4,9 @@
 #include <iostream>
 #include <random>
 
-RandomWalkGenerator::RandomWalkGenerator(const WeightedGraph& graph, int walk_length, int num_walks,
-                                         int seed)
-    : graph(graph), walk_length(walk_length), num_walks(num_walks) {
+RandomWalkGenerator::RandomWalkGenerator(const Graph& graph, const GraphEdgeWeights& edge_weights,
+                                         int walk_length, int num_walks, int seed)
+    : graph(graph), edge_weights(edge_weights), walk_length(walk_length), num_walks(num_walks) {
     if (seed == -1) {
         std::random_device rd;
         rng.seed(rd());
@@ -16,7 +16,7 @@ RandomWalkGenerator::RandomWalkGenerator(const WeightedGraph& graph, int walk_le
 }
 
 int RandomWalkGenerator::select_weighted_random_neighbor(
-    const std::vector<WeightedGraph::Edge>& neighbors, std::mt19937& rng) {
+    const std::vector<GraphEdgeWeights::Edge>& neighbors, std::mt19937& rng) {
     std::vector<double> cumulative_weights(neighbors.size());
     cumulative_weights[0] = neighbors[0].weight;
 
@@ -51,11 +51,11 @@ std::vector<int> RandomWalkGenerator::perform_walk(int start_node) {
     walk[0] = start_node;
     int current_node = start_node;
 
-    std::vector<WeightedGraph::Edge> neighbors = graph.get_edges(current_node);
+    std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
     if (neighbors.empty()) return walk;
 
     for (int i = 1; i < walk_length; ++i) {
-        std::vector<WeightedGraph::Edge> neighbors = graph.get_edges(current_node);
+        std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
         current_node = select_weighted_random_neighbor(neighbors, rng);
         walk[i] = current_node;
     }

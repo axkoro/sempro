@@ -1,19 +1,20 @@
-#include "WeightedGraph.hpp"
+#include "GraphEdgeWeights.hpp"
 
 #include <queue>
 #include <unordered_set>
 
-// --- WeightedGraph Implementation ---
+// --- GraphEdgeWeights Implementation ---
 
-WeightedGraph::WeightedGraph(Graph& graph) : graph(graph), edge_weights(graph.edges.size(), 1.0) {}
+GraphEdgeWeights::GraphEdgeWeights(Graph& graph)
+    : graph(graph), edge_weights(graph.edges.size(), 1.0) {}
 
-WeightedEdgeIterator WeightedGraph::begin() { return WeightedEdgeIterator(this, 0); }
+WeightedEdgeIterator GraphEdgeWeights::begin() { return WeightedEdgeIterator(this, 0); }
 
-WeightedEdgeIterator WeightedGraph::end() {
+WeightedEdgeIterator GraphEdgeWeights::end() {
     return WeightedEdgeIterator(this, edge_weights.size());
 }
 
-std::vector<WeightedGraph::Edge> WeightedGraph::get_edges(int node) const {
+std::vector<GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node) const {
     if (!(graph.is_valid_node(node))) throw std::logic_error("Node does not exist");
 
     std::vector<Edge> neighbours(graph.offsets[node + 1] - graph.offsets[node]);
@@ -27,7 +28,8 @@ std::vector<WeightedGraph::Edge> WeightedGraph::get_edges(int node) const {
     return neighbours;
 }
 
-std::vector<typename WeightedGraph::Edge> WeightedGraph::get_edges(int node, int depth) const {
+std::vector<typename GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node,
+                                                                         int depth) const {
     if (!graph.is_valid_node(node)) throw std::logic_error("Node does not exist");
 
     std::unordered_set<int> visited;
@@ -59,7 +61,7 @@ std::vector<typename WeightedGraph::Edge> WeightedGraph::get_edges(int node, int
 
 // --- WeightedEdgeIterator Implementation ---
 
-WeightedEdgeIterator::WeightedEdgeIterator(WeightedGraph* wg, size_t idx)
+WeightedEdgeIterator::WeightedEdgeIterator(GraphEdgeWeights* wg, size_t idx)
     : weighted_graph(wg), index(idx), current_node(0) {
     // Advance current_node until we find the node corresponding to index.
     while (current_node + 1 < weighted_graph->graph.offsets.size() &&

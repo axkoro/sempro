@@ -2,8 +2,9 @@
 
 #include <unordered_set>
 
+#include "AttributedGraph.hpp"
 #include "Graph.hpp"
-#include "WeightedGraph.hpp"
+#include "GraphEdgeWeights.hpp"
 
 #define FRIEND_TEST(test_case_name, test_name) friend class test_case_name##_##test_name##_Test
 
@@ -20,7 +21,7 @@ class EdgeWeightCalculator {
 
    public:
     EdgeWeightCalculator(AttributedGraph<T>& g, double fusion_coefficient);
-    WeightedGraph generate_weighted_graph();
+    GraphEdgeWeights generate_edge_weights();
 
    private:
     double compute_weight(int u, int v, std::vector<std::unordered_set<int>>& covers);

@@ -5,24 +5,22 @@
 #include <type_traits>
 #include <unordered_set>
 
-#include "AttributedGraph.hpp"
 #include "EdgeWeightCalculator.hpp"  // because IntelliSense is stupid
-#include "WeightedGraph.hpp"
 
 template <typename T>
 EdgeWeightCalculator<T>::EdgeWeightCalculator(AttributedGraph<T>& graph, double fusion_coefficient)
     : graph(graph), fusion_coefficient(fusion_coefficient) {}
 
 template <typename T>
-WeightedGraph EdgeWeightCalculator<T>::generate_weighted_graph() {
-    WeightedGraph wgraph(graph);
+GraphEdgeWeights EdgeWeightCalculator<T>::generate_edge_weights() {
+    GraphEdgeWeights edge_weights(graph);
     std::vector<std::unordered_set<int>> covers = compute_covers();
 
-    for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
+    for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it) {
         auto [source, target] = it.get_edge();
         *it = compute_weight(source, target, covers);
     }
-    return wgraph;
+    return edge_weights;
 }
 
 template <typename T>

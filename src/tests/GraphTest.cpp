@@ -9,7 +9,7 @@
 #include <unordered_set>
 
 #include "AttributedGraph.hpp"
-#include "WeightedGraph.hpp"
+#include "GraphEdgeWeights.hpp"
 
 class GraphTest : public testing::Test {};
 
@@ -372,7 +372,7 @@ TEST(GraphTest, is_valid_node) {
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
 }
 
-// --- Weighted Graph Tests ---
+// --- Edge Weight Tests ---
 
 // A minimal concrete Graph implementation for testing (because the Graph class is abstract atm).
 class DummyGraph : public AttributedGraph<double> {
@@ -392,8 +392,8 @@ class DummyGraph : public AttributedGraph<double> {
     }
 };
 
-// Test that the WeightedGraph is constructed with the default weight 1.0.
-TEST(WeightedGraphEdgesTest, DefaultWeights) {
+// Test that the GraphEdgeWeights is constructed with the default weight 1.0.
+TEST(GraphEdgeWeightsTest, DefaultWeights) {
     std::vector<int> offsets = {0, 2, 4, 6};
     // Graph with 3 nodes:
     // Node 0: edges[0..1] -> {1, 2}
@@ -401,22 +401,22 @@ TEST(WeightedGraphEdgesTest, DefaultWeights) {
     // Node 2: edges[4..5] -> {0, 1}
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
-        EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 1.0);
+        EXPECT_DOUBLE_EQ(edge_weights.edge_weights[i], 1.0);
     }
 }
 
 // Test immediate edge retrieval for a node.
-TEST(WeightedGraphEdgesTest, GetEdgesImmediate) {
+TEST(GraphEdgeWeightsTest, GetEdgesImmediate) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Immediate edges from node 0.
-    auto immediateEdges = wgraph.get_edges(0);
+    auto immediateEdges = edge_weights.get_edges(0);
     EXPECT_EQ(immediateEdges.size(), 2u);
     // Check that the targets are correct.
     EXPECT_EQ(immediateEdges[0].target, 1);
@@ -427,21 +427,21 @@ TEST(WeightedGraphEdgesTest, GetEdgesImmediate) {
 }
 
 // Test edge retrieval with a given BFS depth.
-TEST(WeightedGraphEdgesTest, GetEdgesWithDepth) {
+TEST(GraphEdgeWeightsTest, GetEdgesWithDepth) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // For node 0 with depth = 1, should return immediate edges.
-    auto depth1Edges = wgraph.get_edges(0, 1);
+    auto depth1Edges = edge_weights.get_edges(0, 1);
     EXPECT_EQ(depth1Edges.size(), 2u);
 
     // For node 0 with depth = 2:
     // Depth 1: from node 0: edges (0->1) and (0->2).
     // Depth 2: from node 1: (1->0) and (1->2) and from node 2: (2->0) and (2->1).
     // Total edges: 2 + 2 + 2 = 6.
-    auto depth2Edges = wgraph.get_edges(0, 2);
+    auto depth2Edges = edge_weights.get_edges(0, 2);
     EXPECT_EQ(depth2Edges.size(), 6u);
 
     // Verify that the collected targets appear as expected:
@@ -459,27 +459,27 @@ TEST(WeightedGraphEdgesTest, GetEdgesWithDepth) {
 }
 
 // Test that an invalid node parameter throws an exception.
-TEST(WeightedGraphEdgesTest, GetEdgesInvalidNode) {
+TEST(GraphEdgeWeightsTest, GetEdgesInvalidNode) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
-    EXPECT_THROW(wgraph.get_edges(-1), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(100), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(-1, 2), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(100, 2), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(-1), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(100), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(-1, 2), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(100, 2), std::logic_error);
 }
 
-TEST(WeightedGraphEdgesTest, IteratorFunctionality) {
+TEST(GraphEdgeWeightsTest, IteratorFunctionality) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Iterate through edges using the iterator.
     size_t count = 0;
-    for (auto it = wgraph.begin(); it != wgraph.end(); ++it, ++count) {
+    for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it, ++count) {
         std::pair<int, int> edge = it.get_edge();
         // Determine expected source node based on CSR offsets:
         int expected_source = 0;
@@ -495,18 +495,18 @@ TEST(WeightedGraphEdgesTest, IteratorFunctionality) {
     EXPECT_EQ(count, 6u);
 }
 
-TEST(WeightedGraphEdgesTest, ModifyWeightsViaIterator) {
+TEST(GraphEdgeWeightsTest, ModifyWeightsViaIterator) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Double each edge weight via the iterator.
-    for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
+    for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it) {
         *it *= 2.0;
     }
     for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
-        EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 2.0);
+        EXPECT_DOUBLE_EQ(edge_weights.edge_weights[i], 2.0);
     }
 }
 

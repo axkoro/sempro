@@ -9,11 +9,11 @@ class GraphException : public std::runtime_error {  // TODO: do we need this?
     explicit GraphException(const std::string& message) : std::runtime_error(message) {};
 };
 
-class WeightedGraph;
+class GraphEdgeWeights;
 class WeightedEdgeIterator;
 
 class Graph {
-    friend class WeightedGraph;
+    friend class GraphEdgeWeights;
     friend class WeightedEdgeIterator;
 
    public:

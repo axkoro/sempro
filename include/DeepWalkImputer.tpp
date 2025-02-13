@@ -14,9 +14,9 @@ DeepWalkImputer<T>::DeepWalkImputer(Graph& g, const Config& c, int seed)
 template <typename T>
 void DeepWalkImputer<T>::run() {
     EdgeWeightCalculator<T> ew_calc(graph, config.fusion_coefficient);
-    WeightedGraph weighted_graph = ew_calc.generate_weighted_graph();
+    GraphEdgeWeights edge_weights = ew_calc.generate_edge_weights();
 
-    RandomWalkGenerator rw_gen(weighted_graph, config.walk_length, config.num_walks, seed);
+    RandomWalkGenerator rw_gen(graph, edge_weights, config.walk_length, config.num_walks, seed);
     std::vector<std::vector<int>> walks = rw_gen.generate_walks();
 
     SkipGram::Config cfg(config);
