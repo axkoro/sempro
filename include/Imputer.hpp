@@ -14,7 +14,9 @@ class Imputer {
 
    protected:
     double compute_global_average(int feature);
-    T round_value(double value);
 };
+
+template <typename T>
+T round_value(double value);
 
 #include "Imputer.tpp"

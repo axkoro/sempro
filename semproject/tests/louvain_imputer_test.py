@@ -12,8 +12,8 @@ print("Graph created successfully!")
 
 communities = [0, 0, 0, 1, 1]  # Example: Nodes 0, 1, 2 in community 0; 3, 4 in community 1
 start_time = time.time()
-imputer = strats_module.LouvainImputer(graph, communities)
-print("LouvainImputer initialized successfully!")
+imputer = strats_module.CommunityImputer(graph, communities)
+print("CommunityImputer initialized successfully!")
 
 imputer.run()
 print("Imputation completed successfully!")

@@ -1,17 +1,16 @@
 #include <gtest/gtest.h>
 
-#include "KNNImputer.hpp"
-#include "LouvainImputer.hpp"
+#include "CommunityImputer.hpp"
 
-TEST(LouvainImputerTest, TestFeatureImputationDouble) {
+TEST(CommunityImputerTest, TestFeatureImputationDouble) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
     std::string features_path = "../data/test/louvain/double_features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
     std::vector<int> communities = {0, 0, 0, 1, 1};
 
-    LouvainImputer imputer(graph, communities);
+    CommunityImputer imputer(graph, communities);
     imputer.run();
 
     std::vector<std::vector<double>> expected_output = {{4.21, 3.97, 2.29, 1.78, 3.92, 2.69},
@@ -23,22 +22,21 @@ TEST(LouvainImputerTest, TestFeatureImputationDouble) {
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_NEAR(graph.get_double_feature(node, feature), expected_output[node][feature],
-                        1e-2)
+            EXPECT_NEAR(graph.get_feature(node, feature), expected_output[node][feature], 1e-2)
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
 }
 
-TEST(LouvainImputerTest, TestFeatureImputationBool) {
+TEST(CommunityImputerTest, TestFeatureImputationBool) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
     std::string features_path = "../data/test/louvain/bool_features_example.txt";
-    GraphBool graph(edges_path, features_path);
+    AttributedGraph<bool> graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
     std::vector<int> communities = {0, 0, 0, 1, 1};
 
-    LouvainImputer imputer(graph, communities);
+    CommunityImputer imputer(graph, communities);
     imputer.run();
 
     std::vector<std::vector<bool>> expected_output = {{true, false, true, true, false, true},
@@ -50,21 +48,21 @@ TEST(LouvainImputerTest, TestFeatureImputationBool) {
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_EQ(graph.get_bool_feature(node, feature), expected_output[node][feature])
+            EXPECT_EQ(graph.get_feature(node, feature), expected_output[node][feature])
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }
 }
 
-TEST(LouvainImputerTest, TestFeatureImputationInt) {
+TEST(CommunityImputerTest, TestFeatureImputationInt) {
     std::string edges_path = "../data/test/louvain/edges_example.txt";
     std::string features_path = "../data/test/louvain/int_features_example.txt";
-    GraphInt graph(edges_path, features_path);
+    AttributedGraph<int> graph(edges_path, features_path);
 
     // Assigning nodes to two communities for testing purposes
     std::vector<int> communities = {0, 0, 0, 1, 1};
 
-    LouvainImputer imputer(graph, communities);
+    CommunityImputer imputer(graph, communities);
     imputer.run();
 
     std::vector<std::vector<int>> expected_output = {{1, 0, 3, 0, 0, 0},
@@ -76,7 +74,7 @@ TEST(LouvainImputerTest, TestFeatureImputationInt) {
     // Verify the output
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         for (int feature = 0; feature < graph.get_num_features() - 1; ++feature) {
-            EXPECT_EQ(graph.get_int_feature(node, feature), expected_output[node][feature])
+            EXPECT_EQ(graph.get_feature(node, feature), expected_output[node][feature])
                 << "Node " << node << " Feature " << feature << " is incorrect.";
         }
     }

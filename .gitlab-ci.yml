@@ -17,7 +17,7 @@ cpp_unit_tests:
     - ./GraphTest
     - ./KNNImputerTest
     - ./LouvainTest
-    - ./LouvainImputerTest
+    - ./CommunityImputerTest
     - ./LinearAlgebraTest
     - ./NegativeSamplerTest
     - ./DeepWalkTest

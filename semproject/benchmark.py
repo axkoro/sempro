@@ -81,7 +81,7 @@ def strat_benchmark(strategy, data_set, knn_depth=3):
         end_time2 = time.time()
         print(f"Louvain community detection on '{data_set_case}' completed in {end_time2 - start_time2:.1f} seconds")
 
-        louvain_imputer = strats_module.LouvainImputer(graph, communities)
+        louvain_imputer = strats_module.CommunityImputer(graph, communities)
         louvain_imputer.run()
     elif strategy == "deepwalk":
         return

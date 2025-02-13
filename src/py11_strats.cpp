@@ -1,8 +1,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "CommunityImputer.hpp"
+#include "Imputer.hpp"
 #include "KNNImputer.hpp"
-#include "LouvainImputer.hpp"
 
 namespace py = pybind11;
 
@@ -17,9 +18,9 @@ PYBIND11_MODULE(_strats, m) {
         .def("set_depth", &KNNImputer::set_depth, py::arg("k"))
         .def("get_depth", &KNNImputer::get_depth);
 
-    py::class_<LouvainImputer>(m, "LouvainImputer")
+    py::class_<CommunityImputer>(m, "CommunityImputer")
         .def(py::init<GraphBool&, const std::vector<int>&>(), py::keep_alive<1, 2>())
         .def(py::init<GraphDouble&, const std::vector<int>&>(), py::keep_alive<1, 2>())
         .def(py::init<GraphInt&, const std::vector<int>&>(), py::keep_alive<1, 2>())
-        .def("run", &LouvainImputer::run);
+        .def("run", &CommunityImputer::run);
 }
