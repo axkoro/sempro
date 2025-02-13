@@ -3,10 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <sstream>
 #include <unordered_set>
 
 Graph::Graph(std::string edges_path) {
-    num_nodes = parse_node_count(edges_path);  // TODO: make this work with the edge_file
+    num_nodes =
+        parse_node_count_from_edge_file(edges_path);  // TODO: make this work with the edge_file
     read_edges(edges_path);
 }
 
@@ -117,4 +119,37 @@ void Graph::print_edges() const {
             }
         }
     }
+}
+
+int Graph::parse_node_count_from_edge_file(std::string edges_path) {
+    std::ifstream file(edges_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + edges_path);
+
+    // iterate backwards to find beginning of last line
+    // TODO: do this independent of whether the last line is newline-terminated
+    file.seekg(-2, file.end);  // -2 because -1 would be '\n'
+    size_t pos = file.tellg();
+    while (file.get() != '\n') {
+        file.seekg(--pos);
+    }
+
+    // get node from last line
+    std::string last_line;
+    if (!std::getline(file, last_line)) {
+        throw std::runtime_error("Failed to read the last line");
+    }
+
+    std::istringstream line_stream(last_line);
+    int node;
+    if (!(line_stream >> node)) {
+        throw std::runtime_error("Failed to parse integer");
+    }
+
+    file.close();
+
+    if (node < 0) {
+        throw std::runtime_error("Invalid node value");
+    }
+
+    return node + 1;  // assuming naming starts at 0
 }

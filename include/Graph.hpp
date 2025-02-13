@@ -107,16 +107,14 @@ class Graph {
      * @brief Prints unique edges of the graph to the console.
      */
     void print_edges() const;
+
+   private:
+    /**
+     * @brief Parses the number of nodes from the features file.
+     *
+     * @param edges_path Path to the edges file.
+     * @return Total number of nodes.
+     * @throws std::runtime_error If file errors occur or parsing fails.
+     */
+    static int parse_node_count_from_edge_file(std::string edges_path);
 };
-
-// Utility functions
-
-/**
- * @brief Parses the number of nodes from the features file.
- *
- * @param features_path Path to the features file.
- * @return Total number of nodes.
- * @throws std::runtime_error If file errors occur or parsing fails.
- */
-int parse_node_count(std::string features_path);  // TODO: make static private class members
-// TODO: do this using the edge file if only edges_file is given

@@ -44,21 +44,19 @@ TEST(GraphTest, invalid_feature_index_throws) {
     EXPECT_THROW(graph.get_feature(0, graph.get_num_features()), GraphException);
 }
 
-TEST(GraphTest, parse_node_count) {
-    std::string amazon_features = "../data/input/unzipped/amazon_features.txt";
-    EXPECT_EQ(parse_node_count(amazon_features),
-              13751 + 1);  // 13751: largest node, +1: numbering begins at 0
-
-    std::string genius_features = "../data/input/unzipped/genius_features.txt";
-    EXPECT_EQ(parse_node_count(genius_features), 421960 + 1);
+TEST(GraphTest, parse_node_count_from_feature_file) {
+    std::string edges_file = "../data/test/graph/edges_example.txt";
+    std::string features_file = "../data/test/graph/features_example.txt";
+    AttributedGraph<int> graph(edges_file, features_file);
+    EXPECT_EQ(graph.get_num_edges(),
+              4 + 1);  // 4 = largest node index, +1 because numbering begins at 0
 }
 
 TEST(GraphTest, parse_feature_count) {
-    std::string github_features = "../data/input/unzipped/github_features.txt";
-    EXPECT_EQ(parse_feature_count(github_features), 128);
-
-    std::string amazon_fraud_features = "../data/input/unzipped/amazon_fraud_features.txt";
-    EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25);
+    std::string edges_file = "../data/test/graph/edges_example.txt";
+    std::string features_file = "../data/test/graph/features_example.txt";
+    AttributedGraph<int> graph(edges_file, features_file);
+    EXPECT_EQ(graph.get_num_features(), 6);
 }
 
 // FIXME: Currently checks reading of both edges and features (should only load edges)

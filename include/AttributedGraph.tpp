@@ -19,7 +19,7 @@ AttributedGraph<T>::AttributedGraph(std::string edges_path, std::string features
             "AttributedGraph class does not support non-arithmetic node attribute types");
     }
 
-    num_nodes = parse_node_count(features_path);
+    num_nodes = parse_node_count_from_feature_file(features_path);
     num_features = parse_feature_count(features_path);
     read_edges(edges_path);
     read_features(features_path);
@@ -179,7 +179,8 @@ void AttributedGraph<T>::parse_features_line(std::string& line) {
     labels[node] = std::strtol(ptr, NULL, 10);
 }
 
-int parse_node_count(std::string features_path) {
+template <typename T>
+int AttributedGraph<T>::parse_node_count_from_feature_file(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file: " + features_path);
@@ -213,7 +214,8 @@ int parse_node_count(std::string features_path) {
     return node + 1;  // assuming naming starts at 0
 }
 
-int parse_feature_count(std::string features_path) {
+template <typename T>
+int AttributedGraph<T>::parse_feature_count(std::string features_path) {
     std::ifstream file(features_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file: " + features_path);
