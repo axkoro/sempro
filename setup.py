@@ -130,23 +130,17 @@ def load_submodule_requirements():
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="semproject",
+    name="graph_imputer",
     version="0.10",
     author="",
     author_email="",
     description="",
     long_description="",
-    ext_modules=[CMakeExtension("semproject._graph"), CMakeExtension("semproject._strats"),CMakeExtension("semproject._louvain")],
+    ext_modules=[CMakeExtension("graph_imputer.cpp_graph_module"), CMakeExtension("graph_imputer.cpp_imputation_module"), CMakeExtension("graph_imputer.cpp_louvain_module")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
-    packages=['semproject'],
+    packages=['graph_imputer'],
     python_requires=">=3.8, <3.13", # < 3.13 due to current incompatablity with torch
-    entry_points={
-        'console_scripts': [
-            'evaluate=semproject.evaluate:main',
-            'benchmark=semproject.benchmark:main',
-        ],
-    },
     install_requires=["numpy", "matplotlib"].append(load_submodule_requirements())
 )

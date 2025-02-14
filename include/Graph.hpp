@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-class GraphException : public std::runtime_error {  // TODO: do we need this?
+class GraphException : public std::runtime_error {
    public:
     explicit GraphException(const std::string& message) : std::runtime_error(message) {};
 };
@@ -15,9 +15,6 @@ class WeightedEdgeIterator;
 class Graph {
     friend class GraphEdgeWeights;
     friend class WeightedEdgeIterator;
-
-   public:
-    enum feature_type { b, d, i };  // bool, double, int
 
    protected:
     int num_nodes;
@@ -94,8 +91,14 @@ class Graph {
      */
     bool is_valid_node(int node) const;
 
-    // File I/O
+    // Debug/Display
 
+    /**
+     * @brief Prints unique edges of the graph to the console.
+     */
+    void print_edges() const;
+
+   protected:
     /**
      * @brief Reads edges from a file and builds the graph.
      *
@@ -103,13 +106,6 @@ class Graph {
      * @throws std::runtime_error If the number of nodes is uninitialized or file errors occur.
      */
     void read_edges(std::string edges_path);
-
-    // Debug/Display
-
-    /**
-     * @brief Prints unique edges of the graph to the console.
-     */
-    void print_edges() const;
 
    private:
     /**

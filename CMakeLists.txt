@@ -81,29 +81,30 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 	target_link_options(NegativeSamplerTest PRIVATE -coverage)
 
 else() # Build Python bindings as libraries
+	set(CMAKE_BUILD_TYPE Release)
 	add_subdirectory(extlibs/pybind11)
 
-	pybind11_add_module(_graph
-		src/py11_graph.cpp
+	pybind11_add_module(cpp_graph_module
+		src/pybind/py11_graph.cpp
 		src/Graph.cpp)
-	target_link_libraries(_graph PRIVATE OpenMP::OpenMP_CXX)
-	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
+	target_link_libraries(cpp_graph_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_graph_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_graph_module PROPERTIES LINKER_LANGUAGE CXX)
 	
-	pybind11_add_module(_strats
-		src/py11_strats.cpp
+	pybind11_add_module(cpp_imputation_module
+		src/pybind/py11_imputation.cpp
 		src/Graph.cpp)
-	target_link_libraries(_strats PRIVATE OpenMP::OpenMP_CXX)
-	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
+	target_link_libraries(cpp_imputation_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_imputation_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_imputation_module PROPERTIES LINKER_LANGUAGE CXX)
 
-	pybind11_add_module(_louvain
-		src/py11_louvain.cpp
+	pybind11_add_module(cpp_louvain_module
+		src/pybind/py11_louvain.cpp
 		src/Louvain.cpp
 		src/DynamicGraph.cpp
 		src/Graph.cpp)
-	target_link_libraries(_louvain PRIVATE OpenMP::OpenMP_CXX)
-	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
+	target_link_libraries(cpp_louvain_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_louvain_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_louvain_module PROPERTIES LINKER_LANGUAGE CXX)
 
 endif()
