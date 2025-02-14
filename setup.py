@@ -142,5 +142,10 @@ setup(
     extras_require={"test": ["pytest>=6.0"]},
     packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
-    install_requires=["numpy", "matplotlib"].append(load_submodule_requirements()),
+    install_requires=["pyyaml", "matplotlib", *load_submodule_requirements()],
+    entry_points={
+        "console_scripts": [
+            "graph-impute=graph_impute.cli:main",
+        ]
+    },
 )

@@ -12,14 +12,14 @@ template <typename T>
 void CommunityImputer<T>::run() {
     std::unordered_map<uint64_t, double> averages;  // (community, feature) -> average
     int num_nodes = this->graph.get_num_nodes();
-    int num_feautures = this->graph.get_num_features();
+    int num_features = this->graph.get_num_features();
 
 // Impute missing features with community means
 #pragma omp parallel for schedule(dynamic)
     for (int node = 0; node < num_nodes; ++node) {
         int community = communities[node];
 
-        for (int feature = 0; feature < num_feautures; ++feature) {
+        for (int feature = 0; feature < num_features; ++feature) {
             if (this->graph.is_missing(node, feature)) {
                 double average;
                 uint64_t key = encode_comm_feature_pair(community, feature);
