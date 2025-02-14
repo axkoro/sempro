@@ -1,8 +1,7 @@
 from typing import Type, Union
 
-from bindings import load_cpp_graph
-
 from . import cpp_graph_module as g
+from .bindings import load_cpp_graph
 
 
 class Graph:
@@ -17,11 +16,11 @@ class Graph:
         """
         Wraps a given cpp_graph object.
         """
-        if cpp_graph.isinstance(g.GraphFloat):
+        if isinstance(cpp_graph, g.GraphFloat):
             self.feature_type = float
-        elif cpp_graph.isinstance(g.GraphInt):
+        elif isinstance(cpp_graph, g.GraphInt):
             self.feature_type = int
-        elif cpp_graph.isinstance(g.GraphBool):
+        elif isinstance(cpp_graph, g.GraphBool):
             self.feature_type = bool
         else:
             raise TypeError(f"Unsupported Graph object: {type(cpp_graph).__name__}")

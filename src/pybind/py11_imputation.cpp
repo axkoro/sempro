@@ -3,21 +3,20 @@
 
 #include "CommunityImputer.hpp"
 #include "DeepWalkImputer.hpp"
-#include "Imputer.hpp"
 #include "KNNImputer.hpp"
 
 namespace py = pybind11;
 
 template <typename T>
 void bind_knn_imputer(py::module &m, const std::string &name) {
-    py::class_<KNNImputer<T>, Imputer<T>>(m, name.c_str())
+    py::class_<KNNImputer<T>>(m, name.c_str())
         .def(py::init<AttributedGraph<T> &, int>(), py::arg("graph"), py::arg("depth") = 2)
         .def("run", &KNNImputer<T>::run);
 }
 
 template <typename T>
 void bind_community_imputer(py::module &m, const std::string &name) {
-    py::class_<CommunityImputer<T>, Imputer<T>>(m, name.c_str())
+    py::class_<CommunityImputer<T>>(m, name.c_str())
         .def(py::init<AttributedGraph<T> &, const std::vector<int> &>(), py::arg("graph"),
              py::arg("communities"))
         .def("run", &CommunityImputer<T>::run);
@@ -25,7 +24,7 @@ void bind_community_imputer(py::module &m, const std::string &name) {
 
 template <typename T>
 void bind_deepwalk_imputer(py::module &m, const std::string &name) {
-    py::class_<DeepWalkImputer<T>, Imputer<T>>(m, name.c_str())
+    py::class_<DeepWalkImputer<T>>(m, name.c_str())
         .def(py::init<AttributedGraph<T> &, int>(), py::arg("graph"), py::arg("seed") = -1)
         .def(py::init<AttributedGraph<T> &, const DeepWalkConfig &, int>(), py::arg("graph"),
              py::arg("config"), py::arg("seed") = -1)

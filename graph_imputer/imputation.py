@@ -1,48 +1,60 @@
 from abc import ABC, abstractmethod
 
-from bindings import (
+from .bindings import (
     cpp_create_community_imputer,
     cpp_create_deepwalk_config,
     cpp_create_deepwalk_imputer,
     cpp_create_knn_imputer,
+    cpp_create_louvain_community_detector,
 )
-from graph import Graph
+from .graph import Graph
 
 
-class BaseImputer(ABC):
+class Imputer(ABC):
     def __init__(self, graph: Graph):
         self.graph = graph
         self.cpp_imputer = None
 
     @abstractmethod
-    def impute(self) -> Graph:
+    def impute(self) -> None:
         """
         Impute missing node features and return a new Graph with imputed data.
         """
         pass
 
 
-class KNNImputer(BaseImputer):
+class KNNImputer(Imputer):
     def __init__(self, graph: Graph, depth: int = 2):
         super().__init__(graph)
         self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth)
 
-    def impute(self) -> Graph:
-        imputed_cpp_graph = self.cpp_imputer.run()
-        return Graph(imputed_cpp_graph)
+    def impute(self) -> None:
+        self.cpp_imputer.run()
 
 
-class CommunityImputer(BaseImputer):
-    def __init__(self, graph: Graph):
+class CommunityImputer(Imputer):
+    def __init__(self, graph: Graph, community_algorithm: str = "louvain"):
         super().__init__(graph)
-        self.cpp_imputer = cpp_create_community_imputer(graph.cpp_graph)
+        self.community_algorithm = community_algorithm
+        self.communities_ready = False
 
-    def impute(self) -> Graph:
-        imputed_cpp_graph = self.cpp_imputer.run()
-        return Graph(imputed_cpp_graph)
+    def find_communities(self):
+        if self.community_algorithm == "louvain":
+            community_detector = cpp_create_louvain_community_detector(self.graph.cpp_graph)
+        else:
+            raise NotImplementedError(
+                f"'{self.community_algorithm}' is not a valid community detection algorithm"
+            )
+        communities = community_detector.execute()
+        self.cpp_imputer = cpp_create_community_imputer(self.graph.cpp_graph, communities)
+
+    def impute(self) -> None:
+        if not self.communities_ready:
+            self.find_communities()
+        self.cpp_imputer.run()
 
 
-class DeepWalkImputer(BaseImputer):
+class DeepWalkImputer(Imputer):
     def __init__(
         self,
         graph: Graph,
@@ -70,18 +82,17 @@ class DeepWalkImputer(BaseImputer):
         )
         self.cpp_imputer = cpp_create_deepwalk_imputer(graph.cpp_graph, self.config)
 
-    def impute(self) -> Graph:
-        imputed_cpp_graph = self.cpp_imputer.run()
-        return Graph(imputed_cpp_graph)
+    def impute(self) -> None:
+        self.cpp_imputer.run()
 
 
-def create_imputer(strategy: str, graph: Graph) -> BaseImputer:
+def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
     strategy = strategy.lower()
     if strategy == "knn":
-        return KNNImputer(graph)
+        return KNNImputer(graph, **kwargs)
     elif strategy == "community":
-        return CommunityImputer(graph)
+        return CommunityImputer(graph, **kwargs)
     elif strategy == "deepwalk":
-        return DeepWalkImputer(graph)
+        return DeepWalkImputer(graph, **kwargs)
     else:
         raise ValueError(f"Unknown strategy: {strategy}")

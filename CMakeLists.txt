@@ -93,7 +93,13 @@ else() # Build Python bindings as libraries
 	
 	pybind11_add_module(cpp_imputation_module
 		src/pybind/py11_imputation.cpp
-		src/Graph.cpp)
+		src/RandomWalkGenerator.cpp
+		src/SkipGram.cpp
+		src/NegativeSampler.cpp
+		src/Matrix.cpp
+		src/Vector.cpp
+		src/Graph.cpp
+		src/GraphEdgeWeights.cpp)
 	target_link_libraries(cpp_imputation_module PRIVATE OpenMP::OpenMP_CXX)
 	target_include_directories(cpp_imputation_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	set_target_properties(cpp_imputation_module PROPERTIES LINKER_LANGUAGE CXX)

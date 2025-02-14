@@ -23,8 +23,7 @@ void bind_attributed_graph(py::module &m, const std::string &name) {
 }
 
 PYBIND11_MODULE(cpp_graph_module, m) {
-    py::class_<GraphException, std::exception>(m, "GraphException")
-        .def(py::init<const std::string &>());
+    py::register_exception<GraphException>(m, "GraphException");
 
     py::class_<Graph>(m, "Graph")
         .def(py::init<>())

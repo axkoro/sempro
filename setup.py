@@ -48,7 +48,7 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
-            "-DBUILD_TESTS=OFF", # don't build gtest
+            "-DBUILD_TESTS=OFF",  # don't build gtest
         ]
         build_args = []
         # Adding CMake arguments set as environment variable
@@ -92,9 +92,7 @@ class CMakeBuild(build_ext):
 
             # Multi-config generators have a different way to specify configs
             if not single_config:
-                cmake_args += [
-                    f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}"
-                ]
+                cmake_args += [f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{cfg.upper()}={extdir}"]
                 build_args += ["--config", cfg]
 
         if sys.platform.startswith("darwin"):
@@ -116,16 +114,14 @@ class CMakeBuild(build_ext):
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
-        subprocess.run(
-            ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
-        )
-        subprocess.run(
-            ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
-        )
+        subprocess.run(["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True)
+        subprocess.run(["cmake", "--build", ".", *build_args], cwd=build_temp, check=True)
+
 
 def load_submodule_requirements():
-    with open('extlibs/evaluation/requirements_full.txt') as f:
+    with open("extlibs/evaluation/requirements_full.txt") as f:
         return f.read().splitlines()
+
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
@@ -136,11 +132,15 @@ setup(
     author_email="",
     description="",
     long_description="",
-    ext_modules=[CMakeExtension("graph_imputer.cpp_graph_module"), CMakeExtension("graph_imputer.cpp_imputation_module"), CMakeExtension("graph_imputer.cpp_louvain_module")],
+    ext_modules=[
+        CMakeExtension("graph_imputer.cpp_graph_module"),
+        CMakeExtension("graph_imputer.cpp_imputation_module"),
+        CMakeExtension("graph_imputer.cpp_louvain_module"),
+    ],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
-    packages=['graph_imputer'],
-    python_requires=">=3.8, <3.13", # < 3.13 due to current incompatablity with torch
-    install_requires=["numpy", "matplotlib"].append(load_submodule_requirements())
+    packages=["graph_imputer"],
+    python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
+    install_requires=["numpy", "matplotlib"].append(load_submodule_requirements()),
 )

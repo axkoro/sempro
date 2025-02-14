@@ -1,7 +1,8 @@
-from typing import Union
+from typing import List, Union
 
 from . import cpp_graph_module as g
 from . import cpp_imputation_module as im
+from . import cpp_louvain_module as l
 
 
 def load_cpp_graph(
@@ -42,10 +43,10 @@ _community_imputer_map = {
 
 
 def cpp_create_community_imputer(
-    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool],
+    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool], communities: List[int]
 ) -> Union[im.CommunityImputerFloat, im.CommunityImputerInt, im.CommunityImputerBool]:
     imputer_class = _community_imputer_map.get(type(cpp_graph))
-    return imputer_class(cpp_graph)
+    return imputer_class(cpp_graph, communities)
 
 
 _deepwalk_imputer_map = {
@@ -56,10 +57,10 @@ _deepwalk_imputer_map = {
 
 
 def cpp_create_deepwalk_imputer(
-    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool],
+    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool], config: im.DeepWalkConfig
 ) -> Union[im.DeepWalkImputerFloat, im.DeepWalkImputerInt, im.DeepWalkImputerBool]:
     imputer_class = _deepwalk_imputer_map.get(type(cpp_graph))
-    return imputer_class(cpp_graph)
+    return imputer_class(cpp_graph, config)
 
 
 def cpp_create_deepwalk_config(
@@ -88,3 +89,7 @@ def cpp_create_deepwalk_config(
     config.validate()
 
     return config
+
+
+def cpp_create_louvain_community_detector(cpp_graph: g.Graph) -> l.Louvain:
+    return l.Louvain(cpp_graph)
