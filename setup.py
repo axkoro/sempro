@@ -126,21 +126,21 @@ def load_submodule_requirements():
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="graph_imputer",
+    name="graph_impute",
     version="0.10",
     author="",
     author_email="",
     description="",
     long_description="",
     ext_modules=[
-        CMakeExtension("graph_imputer.cpp_graph_module"),
-        CMakeExtension("graph_imputer.cpp_imputation_module"),
-        CMakeExtension("graph_imputer.cpp_louvain_module"),
+        CMakeExtension("graph_impute.cpp_graph_module"),
+        CMakeExtension("graph_impute.cpp_imputation_module"),
+        CMakeExtension("graph_impute.cpp_louvain_module"),
     ],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
-    packages=["graph_imputer"],
+    packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
     install_requires=["numpy", "matplotlib"].append(load_submodule_requirements()),
 )

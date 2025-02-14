@@ -1,8 +1,8 @@
 import os
 import tempfile
 
-from graph_imputer.graph import Graph
-from graph_imputer.imputation import (
+from graph_impute.graph import Graph
+from graph_impute.imputation import (
     CommunityImputer,
     DeepWalkImputer,
     KNNImputer,
@@ -14,17 +14,13 @@ def create_dummy_files():
     edges_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
     features_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
 
-    edges_file.write("""
-                     1 0
-                     2 1
-                     3 2
-                     """)
-    features_file.write("""
-                        0\t0.1, 0.2\t4
-                        1\t#, 0.4\t4
-                        2\t0.5, #\t-2
-                        3\t0.7, 0.8\t0\n
-                        """)
+    edges_file.write("""1 0\n
+                     2 1\n
+                     3 2\n""")
+    features_file.write("""0\t0.1, 0.2\t4\n
+                        1\t#, 0.4\t4\n
+                        2\t0.5, #\t-2\n
+                        3\t0.7, 0.8\t0\n""")
 
     edges_file.close()
     features_file.close()
