@@ -5,10 +5,30 @@ variables:
 
 stages:
   - build
+  - test
   - evaluate
 
-cpp_unit_tests:
+python_build:
   stage: build
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  script:
+    - python -m build --wheel .
+  artifacts:
+    paths:
+      - dist/*.whl
+
+python_tests:
+  stage: test
+  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+  needs:
+    - python_build
+  script:
+    - pip install dist/*.whl
+    - coverage run -m pytest graph_impute/tests
+    - coverage report -m
+
+cpp_unit_tests:
+  stage: test
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:cpp
   script:
     - mkdir build && cd build
@@ -22,15 +42,6 @@ cpp_unit_tests:
     - ./NegativeSamplerTest
     - ./DeepWalkTest
     - gcovr -r ../  -e '.*/extlibs/.*'
-
-python_build:
-  stage: build
-  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
-  script:
-    - python -m build --wheel .
-  artifacts:
-    paths:
-      - dist/*.whl
 
 evaluate:
   stage: evaluate
