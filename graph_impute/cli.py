@@ -95,11 +95,7 @@ def validate_command(args):
             )
 
 
-def main():
-    args = parse_args()
-    validate_command(args)
-
-    # get file paths & feature_type
+def load_dataset_config(args):
     if args.dataset:
         config_path = args.config  # will always be set due to default value
         with open(config_path) as file:
@@ -110,16 +106,18 @@ def main():
             features_path = data[args.dataset]["features"]
             if args.evaluate:
                 reference_path = data[args.dataset]["reference"]
-        except IndexError as err:
+        except KeyError as err:
             raise LookupError(
                 f"Could not find all relevant data for data set '{args.dataset}' in '{config_path}' (see documentation for information about the config)"
             ) from err
     else:
-        feature_type_str = args.feature_type
         edges_path = args.edges
         features_path = args.features
+        feature_type_str = args.feature_type
         if args.evaluate:
             reference_path = args.reference
+        else:
+            reference_path = ""
 
     type_map = {
         "bool": bool,
@@ -128,7 +126,14 @@ def main():
     }
     feature_type = type_map[feature_type_str]
 
-    # run strategy (possibly with timing)
+    return edges_path, features_path, reference_path, feature_type
+
+
+def main():
+    args = parse_args()
+    validate_command(args)
+    edges_path, features_path, reference_path, feature_type = load_dataset_config(args)
+
     load_time_start = time.time()
     graph = Graph.load(edges_path, features_path, feature_type=feature_type)
     imputer = create_imputer(args.strategy, graph)
@@ -163,13 +168,15 @@ def main():
             Load time:   {load_time:{max_width}.2f} s
             Save time:   {save_time:{max_width}.2f} s""")
 
-        if args.strategy == "community":
+        if args.strategy == "community":  #
             community_detection_time = community_detection_time_end - community_detection_time_start
             output.append(f"Community detection time: {community_detection_time:{max_width}.2f} s")
 
         print(output)
 
     if args.evaluate:
+        evaluate_time_start = time.time()
+
         overlap_total, overlap_missing, max_error, avg_error, r2_score = (
             evaluate_imputed_features_file(
                 imputed_features_path=args.output,
@@ -179,12 +186,15 @@ def main():
             )
         )
 
+        evaluate_time_end = time.time()
+        if args.time:
+            evaluate_time = evaluate_time_end - evaluate_time_start
+            print(f"Evaluate time: {evaluate_time:{max_width}.2f} s\n")
+
         print(f"overlap (total): {overlap_total * 100:2.2f} %")
         print(f"overlap (missing): {overlap_missing * 100:2.2f} %")
-
         print(f"max error (abs): {max_error:2.2f}")
         print(f"avg error (abs): {avg_error:2.2f}")
-
         print(f"R2 score: {r2_score:2.2f}")
 
 
