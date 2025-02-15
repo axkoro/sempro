@@ -30,6 +30,7 @@ python_tests:
 cpp_unit_tests:
   stage: test
   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:cpp
+  needs: []
   script:
     - mkdir build && cd build
     - cmake -GNinja -DBUILD_TESTS=ON ..
