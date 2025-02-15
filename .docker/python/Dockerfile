@@ -11,9 +11,9 @@ unzip \
 RUN pip install \
 build \
 coverage \
-ptest \
+pytest \
 matplotlib
 
-# Install dependencies of evaluation submodule
-COPY ./extlibs/evaluation/requirements_full.txt ./extlibs/evaluation/
-RUN pip install -r ./extlibs/evaluation/requirements_full.txt
+# # Install dependencies of evaluation submodule
+# COPY ./extlibs/evaluation/requirements_full.txt ./extlibs/evaluation/
+# RUN pip install -r ./extlibs/evaluation/requirements_full.txt

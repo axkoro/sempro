@@ -118,9 +118,9 @@ class CMakeBuild(build_ext):
         subprocess.run(["cmake", "--build", ".", *build_args], cwd=build_temp, check=True)
 
 
-def load_submodule_requirements():
-    with open("extlibs/evaluation/requirements_full.txt") as f:
-        return f.read().splitlines()
+# def load_submodule_requirements():
+#     with open("extlibs/evaluation/requirements_full.txt") as f:
+#         return f.read().splitlines()
 
 
 # The information here can also be placed in setup.cfg - better separation of
@@ -145,7 +145,7 @@ setup(
     },
     packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
-    install_requires=["pyyaml", *load_submodule_requirements()],
+    install_requires=["pyyaml"],
     entry_points={
         "console_scripts": [
             "graph-impute=graph_impute.cli:main",
