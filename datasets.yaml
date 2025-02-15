@@ -8,7 +8,6 @@ amazon_fraud:
   feature_type: float
   edges: ./data/input/amazon_fraud_edges.txt
   features: ./data/input/amazon_fraud_features.txt
-  reference: ./data/reference/amazon_fraud_features.txt
 
 cora:
   feature_type: bool

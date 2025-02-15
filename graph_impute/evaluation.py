@@ -17,7 +17,7 @@ def evaluate_imputed_graph(graph: Graph, reference_path: str):
 
     temp_file.close()
     try:
-        os.remove()
+        os.remove(temp_file.name)
     except OSError:
         pass
 
@@ -35,14 +35,14 @@ def evaluate_imputed_features_file(
         raise ValueError(
             "Reference feature dimensions don't match imputed feature dimensions (either num_features or num_nodes)"
         )
-    num_features = imputed_features.shape[0] * imputed_features.shape[1]
+    total_num_features = imputed_features.shape[0] * imputed_features.shape[1]
 
-    absolute_overlap = compute_overlap(imputed_features, ref_features)
-    overlap_total = absolute_overlap / num_features
+    num_overlapping = compute_overlap(imputed_features, ref_features)
+    overlap_total = num_overlapping / total_num_features
 
     num_missing, missing_map = count_missing_features(input_features_path)
     if num_missing > 0:
-        overlap_missing = (absolute_overlap - num_features + num_missing) / num_missing
+        overlap_missing = (num_overlapping - total_num_features + num_missing) / num_missing
     else:
         raise ValueError(
             f"There are no missing features in '{input_features_path}', so nothing to evaluate."
@@ -60,21 +60,19 @@ def evaluate_imputed_features_file(
 def read_features(
     features_path: str, feature_type: Union[Type[float], Type[int], Type[bool]] = float
 ) -> npt.NDArray:
-    num_lines = sum(1 for _ in open(features_path, "rb"))
     with open(features_path, "rb") as f:
-        line = f.readline()
-        num_features = len(line.split(b"\t")[1].split(b" "))
-    orig_features = np.zeros((num_lines, num_features), feature_type)
+        lines = f.readlines()
+    num_lines = len(lines)
+    num_features = len(lines[0].split(b"\t")[1].split(b" "))
 
-    with open(features_path, "rb") as f:
-        line_idx = 0
-        for line in f:
-            features = line.split(b"\t")[1].split(b", ")
-            for feature_idx in range(num_features):
-                # TODO: throw if non_number in imputed_features_path
-                orig_features[line_idx, feature_idx] = feature_type(features[feature_idx])
-            line_idx += 1
-    return orig_features
+    features = np.zeros((num_lines, num_features), dtype=feature_type)
+    for line_idx, line in enumerate(lines):
+        line_features_str = line.split(b"\t")[1]
+        if b"#" in line_features_str:
+            raise ValueError(f"Missing feature detected on line {line_idx}.")
+        line_values = np.fromstring(line_features_str, sep=",", dtype=np.float64)
+        features[line_idx, :] = line_values
+    return features
 
 
 def compute_overlap(
@@ -106,7 +104,7 @@ def count_missing_features(features_path: str) -> tuple[int, List[tuple[int, int
 def measure_avg_and_max_distance(
     features_x: npt.NDArray, features_y: npt.NDArray
 ) -> tuple[float, float]:
-    if features_x.dtype == np.bool:
+    if features_x.dtype == np.bool_:
         diff = np.abs(features_x ^ features_y)
     else:
         diff = np.abs(features_x - features_y)
@@ -114,14 +112,21 @@ def measure_avg_and_max_distance(
 
 
 def measure_r2_score(
-    features_x: npt.NDArray, features_y: npt.NDArray, missing_map: List[tuple[int, int]]
+    ref_features: npt.NDArray,
+    pred_features: npt.NDArray,
+    missing_map: List[tuple[int, int]],
+    all_features: bool = True,
 ) -> float:
-    x = np.zeros(len(missing_map))
-    y = np.zeros(len(missing_map))
+    if all_features:
+        score = r2_score(ref_features, pred_features)
+    else:  # compute r2 score only over the missing features / predictions
+        feature_type = ref_features.dtype
+        x = np.zeros(len(missing_map), dtype=feature_type)
+        y = np.zeros(len(missing_map), dtype=feature_type)
 
-    for i in range(len(missing_map)):
-        x[i] = features_x[missing_map[i][0], missing_map[i][1]]
-        y[i] = features_y[missing_map[i][0], missing_map[i][1]]
+        x = ref_features[missing_map[:][0], missing_map[:][1]]
+        y = pred_features[missing_map[:][0], missing_map[:][1]]
 
-    report = r2_score(x, y)
-    return report
+        score = r2_score(x, y)
+
+    return score
