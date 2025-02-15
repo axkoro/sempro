@@ -139,10 +139,13 @@ setup(
     ],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    extras_require={"test": ["pytest>=6.0"]},
+    extras_require={
+        "test": ["pytest>=6.0", "coverage>=7.6"],
+        "plot": ["matplotlib>=3.10"],
+    },
     packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
-    install_requires=["pyyaml", "matplotlib", *load_submodule_requirements()],
+    install_requires=["pyyaml", *load_submodule_requirements()],
     entry_points={
         "console_scripts": [
             "graph-impute=graph_impute.cli:main",

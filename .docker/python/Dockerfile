@@ -10,6 +10,8 @@ unzip \
 
 RUN pip install \
 build \
+coverage \
+ptest \
 matplotlib
 
 # Install dependencies of evaluation submodule

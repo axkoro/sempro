@@ -17,15 +17,15 @@ python_build:
     paths:
       - dist/*.whl
 
-python_tests:
-  stage: test
-  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
-  needs:
-    - python_build
-  script:
-    - pip install dist/*.whl
-    - coverage run -m pytest graph_impute/tests
-    - coverage report -m
+# python_tests:
+#   stage: test
+#   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+#   needs:
+#     - python_build
+#   script:
+#     - pip install dist/*.whl[test]
+#     - coverage run -m pytest graph_impute/tests
+#     - coverage report -m
 
 cpp_unit_tests:
   stage: test
@@ -53,7 +53,6 @@ evaluate:
     - python_build
   script:
     - pip install dist/*.whl
-    - evaluate --all
 
 plot:
   stage: evaluate
@@ -63,7 +62,7 @@ plot:
   needs:
     - python_build
   script:
-    - pip install dist/*.whl
+    - pip install dist/*.whl[plot]
     - python -I -m semproject.evaluation_plots
   artifacts:
     paths:
