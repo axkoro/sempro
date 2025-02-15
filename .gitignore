@@ -2,19 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,python,cmake
 
 ### Custom ###
-
 # Downloads from the evaluation script
 download/
-
-# Data output from benchmark
-data/output/knn/*
-!data/output/knn/.gitkeep
-
-data/output/louvain/*
-!data/output/louvain/.gitkeep
-
-data/output/deepwalk/*
-!data/output/deepwalk/.gitkeep
 
 # Results and plots
 /*.txt
