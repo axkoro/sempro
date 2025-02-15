@@ -145,7 +145,7 @@ setup(
     },
     packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
-    install_requires=["pyyaml"],
+    install_requires=["pyyaml", "scikit-learn"],
     entry_points={
         "console_scripts": [
             "graph-impute=graph_impute.cli:main",

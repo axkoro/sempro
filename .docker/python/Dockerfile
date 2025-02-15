@@ -12,7 +12,9 @@ RUN pip install \
 build \
 coverage \
 pytest \
-matplotlib
+pyyaml \
+scikit-learn \
+matplotlib 
 
 # # Install dependencies of evaluation submodule
 # COPY ./extlibs/evaluation/requirements_full.txt ./extlibs/evaluation/
