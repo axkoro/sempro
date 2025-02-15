@@ -58,17 +58,15 @@ evaluate:
   script:
     - pip install dist/*.whl
     - graph-impute --strategy ${STRATEGY} --dataset ${DATASET} --time --evaluate
-
-plot:
-  stage: evaluate
-  image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
-  timeout: 2h
-  when: manual
-  needs:
-    - python_build
-  script:
-    - pip install dist/*.whl[plot]
-    - python -I -m semproject.evaluation_plots
-  artifacts:
-    paths:
-      - "*.png"
+# plot:
+#   stage: evaluate
+#   image: gitlab.informatik.hu-berlin.de:4567/axkoro/sempro:python
+#   timeout: 2h
+#   when: manual
+#   needs:
+#     - python_build
+#   script:
+#     - pip install dist/*.whl[plot]
+#   artifacts:
+#     paths:
+#       - "*.png"
