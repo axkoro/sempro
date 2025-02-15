@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import time
 from textwrap import dedent
 
@@ -10,64 +11,100 @@ from .imputation import create_imputer
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Graph imputation CLI tool.")
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Imputation tool with multiple strategies.",
+    )
 
-    parser.add_argument(
+    general = parser.add_argument_group("General Options")
+    general.add_argument(
         "--strategy",
         choices=["knn", "community", "deepwalk"],
         required=True,
         help="Imputation strategy to use.",
     )
-
-    parser.add_argument(
-        "--dataset", type=str, help='Name of a pre-configured dataset (e.g., "amazon").'
+    general.add_argument(
+        "--dataset", type=str, help='Pre-configured dataset name (e.g., "amazon").'
     )
-
-    parser.add_argument(
-        "--edges",
-        type=str,
-        help='Path to the file containing edge data. Defaults to searching for "*edges.txt" in the working directory.',
-    )
-
-    parser.add_argument(
-        "--features",
-        type=str,
-        help='Path to the file containing feature data. Defaults to searching for "*features.txt" in the working directory.',
-    )
-
-    parser.add_argument(
+    general.add_argument("--edges", type=str, help="File path for edge data.")
+    general.add_argument("--features", type=str, help="File path for feature data.")
+    general.add_argument(
         "--output",
         type=str,
         default="./imputed_features.txt",
-        help="Path to store the imputed feature data. Default is './imputed_features.txt'.",
+        help="File path to store imputed features.",
     )
-
-    parser.add_argument(
+    general.add_argument(
         "--feature-type",
         choices=["bool", "int", "float"],
         default="float",
-        help="Data type of the features in the graph. Default is 'float'.",
+        help="Type of feature data in the graph.",
     )
-
-    parser.add_argument(
-        "--evaluate", action="store_true", help="Evaluate the quality of the imputed features."
-    )
-
-    parser.add_argument(
-        "--reference",
-        type=str,
-        help="Path to the reference data for evaluation when --evaluate is passed.",
-    )
-
-    parser.add_argument(
-        "--time", action="store_true", help="Time all major substeps of the process."
-    )
-
-    parser.add_argument(
+    general.add_argument(
         "--config",
         type=str,
         default="./datasets.yaml",
-        help="Path for the configuration file mapping dataset names to file paths. Default is './datasets.yaml'.",
+        help="Configuration file mapping dataset names to file paths.",
+    )
+
+    eval_group = parser.add_argument_group("Evaluation Options")
+    eval_group.add_argument(
+        "--evaluate", action="store_true", help="Evaluate the quality of imputed features."
+    )
+    eval_group.add_argument(
+        "--reference", type=str, help="Reference data file path for evaluation."
+    )
+    eval_group.add_argument("--time", action="store_true", help="Time major processing steps.")
+
+    knn_group = parser.add_argument_group("KNN Imputer Options")
+    knn_group.add_argument(
+        "--depth", type=int, default=2, help="Recursion depth for KNN imputation."
+    )
+
+    community_group = parser.add_argument_group("Community Imputer Options")
+    community_group.add_argument(
+        "--community-algorithm",
+        type=str,
+        default="louvain",
+        help="Algorithm to use for community detection.",
+    )
+
+    deepwalk_group = parser.add_argument_group("DeepWalk Imputer Options")
+    deepwalk_group.add_argument(
+        "--fusion-coefficient",
+        type=float,
+        default=0.6,
+        help="Fusion coefficient for DeepWalk imputation.",
+    )
+    deepwalk_group.add_argument(
+        "--walk-length", type=int, default=40, help="Length of each random walk."
+    )
+    deepwalk_group.add_argument(
+        "--num-walks", type=int, default=10, help="Number of walks per node."
+    )
+    deepwalk_group.add_argument(
+        "--embedding-size", type=int, default=128, help="Size of the embedding vector."
+    )
+    deepwalk_group.add_argument(
+        "--context-window", type=int, default=10, help="Context window size for embedding learning."
+    )
+    deepwalk_group.add_argument(
+        "--num-negative-samples",
+        type=int,
+        default=10,
+        help="Number of negative samples per positive sample.",
+    )
+    deepwalk_group.add_argument(
+        "--smoothing-exponent",
+        type=float,
+        default=0.75,
+        help="Smoothing exponent for sampling distribution.",
+    )
+    deepwalk_group.add_argument(
+        "--num-epochs", type=int, default=5, help="Number of epochs for training."
+    )
+    deepwalk_group.add_argument(
+        "--learning-rate", type=float, default=0.025, help="Learning rate for the optimizer."
     )
 
     return parser.parse_args()
@@ -136,7 +173,10 @@ def main():
 
     load_time_start = time.time()
     graph = Graph.load(edges_path, features_path, feature_type=feature_type)
-    imputer = create_imputer(args.strategy, graph)
+
+    kwargs = deepcopy(vars(args))  # possible parameters for imputers
+    kwargs.pop("strategy")  # would be duplicate
+    imputer = create_imputer(args.strategy, graph, **kwargs)
     load_time_end = time.time()
 
     if args.strategy == "community":
@@ -153,7 +193,7 @@ def main():
     save_time_end = time.time()
 
     if args.time:
-        total_time = save_time_end - load_time_start
+        total_time = save_time_end - load_time_start  # excluding evaluation
         load_time = load_time_end - load_time_start
         impute_time = impute_time_end - impute_time_start
         save_time = save_time_end - save_time_start
@@ -170,7 +210,7 @@ def main():
 
         if args.strategy == "community":  #
             community_detection_time = community_detection_time_end - community_detection_time_start
-            output.append(f"Community detection time: {community_detection_time:{max_width}.2f} s")
+            output += f"\nCommunity detection time: {community_detection_time:{max_width}.2f} s"
 
         print(output)
 

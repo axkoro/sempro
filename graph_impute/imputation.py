@@ -1,3 +1,4 @@
+import inspect
 from abc import ABC, abstractmethod
 
 from .bindings import (
@@ -98,6 +99,7 @@ class CommunityImputer(Imputer):
             )
         communities = community_detector.execute()
         self.cpp_imputer = cpp_create_community_imputer(self.graph.cpp_graph, communities)
+        self.communities_ready = True
 
     def impute(self) -> None:
         """
@@ -202,12 +204,21 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
     ValueError
         If an unknown strategy is provided.
     """
-    strategy = strategy.lower()
-    if strategy == "knn":
-        return KNNImputer(graph, **kwargs)
-    elif strategy == "community":
-        return CommunityImputer(graph, **kwargs)
-    elif strategy == "deepwalk":
-        return DeepWalkImputer(graph, **kwargs)
-    else:
-        raise ValueError(f"Unknown strategy: {strategy}")
+    imputer_classes = {
+        "knn": KNNImputer,
+        "community": CommunityImputer,
+        "deepwalk": DeepWalkImputer,
+    }
+    try:
+        imputer_class = imputer_classes[strategy.lower()]
+    except KeyError as e:
+        raise ValueError(f"Unknown strategy: '{strategy}'") from e
+
+    valid_params = inspect.signature(imputer_class.__init__).parameters
+    filtered_kwargs = {
+        parameter_name: parameter_value
+        for parameter_name, parameter_value in kwargs.items()
+        if parameter_name in valid_params
+    }
+
+    return imputer_class(graph, **filtered_kwargs)
