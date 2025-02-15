@@ -9,11 +9,25 @@ from sklearn.metrics import r2_score
 from .graph import Graph
 
 
-def evaluate_imputed_graph(graph: Graph, reference_path: str):
+def evaluate_imputed_graph(graph: Graph, input_features_path: str, reference_path: str):
+    """
+    Evaluate imputed graph features against a reference.
+
+    Parameters
+    ----------
+    graph : Graph
+        Graph object containing imputed features.
+    reference_path : str
+        Path to the reference features file used for evaluation.
+    """
     temp_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
     Graph.save(temp_file)
 
-    evaluate_imputed_features_file(temp_file, reference_path)
+    evaluate_imputed_features_file(
+        imputed_features_path=temp_file,
+        input_features_path=input_features_path,
+        reference_path=reference_path,
+    )
 
     temp_file.close()
     try:
@@ -27,13 +41,44 @@ def evaluate_imputed_features_file(
     reference_path: str,
     input_features_path: str,
     feature_type: Union[Type[float], Type[int], Type[bool]] = float,
-):
+) -> tuple[float, float, float, float, float]:
+    """
+    Evaluate the quality of imputed features against a reference.
+
+    Parameters
+    ----------
+    imputed_features_path : str
+        File path to the imputed features.
+    reference_path : str
+        File path to the reference features.
+    input_features_path : str
+        File path to the input features that indicate missing values.
+    feature_type : {float, int, bool}, optional
+        Data type of the features, by default float.
+
+    Returns
+    -------
+    tuple of float
+        A tuple containing:
+        - overlap_total (float): Ratio of overlapping features over total features.
+        - overlap_missing (float): Ratio of overlapping features over missing features.
+        - max_error (float): Maximum error between imputed and reference features.
+        - avg_error (float): Average error between imputed and reference features.
+        - r2_score (float): R² score measuring the imputation performance.
+
+    Raises
+    ------
+    ValueError
+        If the dimensions of the imputed and reference features do not match, or if there are
+        no missing features in `input_features_path` to evaluate.
+    """
     imputed_features = read_features(imputed_features_path, feature_type)
     ref_features = read_features(reference_path, feature_type)
 
     if np.shape(imputed_features) != np.shape(ref_features):
         raise ValueError(
-            "Reference feature dimensions don't match imputed feature dimensions (either num_features or num_nodes)"
+            "Reference feature dimensions don't match imputed feature dimensions "
+            "(either num_features or num_nodes)"
         )
     total_num_features = imputed_features.shape[0] * imputed_features.shape[1]
 
