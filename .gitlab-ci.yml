@@ -51,8 +51,13 @@ evaluate:
   allow_failure: true
   needs:
     - python_build
+  parallel:
+    matrix:
+      - STRATEGY: ["knn", "community", "deepwalk"]
+        DATASET: ["amazon", "cora", "genius", "github", "twitch"]
   script:
     - pip install dist/*.whl
+    - graph-impute --strategy ${STRATEGY} --dataset ${DATASET} --time --evaluate
 
 plot:
   stage: evaluate
