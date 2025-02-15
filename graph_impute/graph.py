@@ -5,15 +5,6 @@ from .bindings import load_cpp_graph
 
 
 class Graph:
-    """
-    A wrapper for a C++ graph object.
-
-    Parameters
-    ----------
-    cpp_graph : Union[g.GraphFloat, g.GraphInt, g.GraphBool]
-        A C++ graph instance.
-    """
-
     def __init__(
         self,
         cpp_graph: Union[

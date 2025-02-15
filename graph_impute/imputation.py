@@ -28,7 +28,8 @@ class Imputer(ABC):
     @abstractmethod
     def impute(self) -> None:
         """
-        Impute missing node features (in-place on the graph that was passed to the constructor).
+        Impute missing node features in-place, meaning the imputed features
+        will be stored within the Graph that was passed to the Imputer.
 
         Returns
         -------
@@ -54,13 +55,6 @@ class KNNImputer(Imputer):
         self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth)
 
     def impute(self) -> None:
-        """
-        Run the KNN imputation process.
-
-        Returns
-        -------
-        None
-        """
         self.cpp_imputer.run()
 
 
@@ -104,7 +98,8 @@ class CommunityImputer(Imputer):
     def impute(self) -> None:
         """
         Impute missing features using community detection.
-        If communities have not been previously detected by runnning detect_communities(), this step will be performed before running the actual imputation strategy.
+        If communities have not been previously detected by runnning detect_communities(),
+        this step will be performed before running the actual imputation strategy.
 
         Returns
         -------
@@ -171,13 +166,6 @@ class DeepWalkImputer(Imputer):
         self.cpp_imputer = cpp_create_deepwalk_imputer(graph.cpp_graph, self.config)
 
     def impute(self) -> None:
-        """
-        Run the DeepWalk imputation process.
-
-        Returns
-        -------
-        None
-        """
         self.cpp_imputer.run()
 
 
