@@ -17,7 +17,7 @@ void bind_knn_imputer(py::module &m, const std::string &name) {
 template <typename T>
 void bind_community_imputer(py::module &m, const std::string &name) {
     py::class_<CommunityImputer<T>>(m, name.c_str())
-        .def(py::init<AttributedGraph<T> &, const std::vector<int> &>(), py::arg("graph"),
+        .def(py::init<AttributedGraph<T> &, const std::vector<int>>(), py::arg("graph"),
              py::arg("communities"))
         .def("run", &CommunityImputer<T>::run);
 }
