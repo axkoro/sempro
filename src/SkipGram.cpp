@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
-SkipGram::SkipGram(int num_nodes, Config& config, int seed)
+SkipGram::SkipGram(int num_nodes, SkipGramConfig& config, int seed)
     : num_nodes(num_nodes), config(config), seed(seed) {
     std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
     double limit = 0.5 / config.embedding_size;

@@ -1,0 +1,34 @@
+amazon:
+  feature_type: bool
+  edges: ./data/input/amazon_edges.txt
+  features: ./data/input/amazon_features.txt
+  reference: ./data/reference/amazon_features.txt
+
+amazon_fraud:
+  feature_type: float
+  edges: ./data/input/amazon_fraud_edges.txt
+  features: ./data/input/amazon_fraud_features.txt
+
+cora:
+  feature_type: bool
+  edges: ./data/input/corafull_edges.txt
+  features: ./data/input/corafull_features.txt
+  reference: ./data/reference/corafull_features.txt
+
+genius:
+  feature_type: int
+  edges: ./data/input/genius_edges.txt
+  features: ./data/input/genius_features.txt
+  reference: ./data/reference/genius_features.txt
+
+github:
+  feature_type: float
+  edges: ./data/input/github_edges.txt
+  features: ./data/input/github_features.txt
+  reference: ./data/reference/github_features.txt
+
+twitch:
+  feature_type: float
+  edges: ./data/input/twitch_edges.txt
+  features: ./data/input/twitch_features.txt
+  reference: ./data/reference/twitch_features.txt

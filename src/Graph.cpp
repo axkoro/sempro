@@ -1,44 +1,25 @@
 #include "Graph.hpp"
 
-#include <algorithm>
-#include <charconv>
 #include <fstream>
 #include <iostream>
 #include <queue>
 #include <sstream>
 #include <unordered_set>
 
-GraphException::GraphException(const std::string& message) : std::runtime_error(message) {}
-
-Graph::Graph(std::vector<int> offsets, std::vector<int> edges) {
-    this->offsets = offsets;
-    this->edges = edges;
-    num_nodes = offsets.size() - 1;
+Graph::Graph(std::string edges_path) {
+    num_nodes = parse_node_count_from_edge_file(edges_path);
+    read_edges(edges_path);
 }
+
+Graph::Graph(std::vector<int> offsets, std::vector<int> edges)
+    : offsets(offsets), edges(edges), num_nodes(offsets.size() - 1) {}
 
 int Graph::get_num_nodes() const { return num_nodes; }
 
-int Graph::get_num_features() const { return num_features; }
-
 int Graph::get_num_edges() const { return edges.size() / 2; }
 
-Graph::feature_type Graph::get_type() const { return type; }
-
-int Graph::get_label(int node) const { return labels[node]; }
-
-void Graph::set_missing(int node, int feature, bool value) { missing[node][feature] = value; }
-
-std::vector<int> Graph::get_missing_features(int node) const {
-    std::vector<int> missing_features_list;
-    for (int feature = 0; feature < num_features; feature++) {
-        if (is_missing(node, feature)) missing_features_list.push_back(feature);
-    }
-
-    return missing_features_list;
-}
-
 std::vector<int> Graph::get_neighbours(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+    if (!is_valid_node(node)) throw GraphException("Node does not exist");
 
     std::vector<int> neighbours(offsets[node + 1] - offsets[node]);
     std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
@@ -47,7 +28,7 @@ std::vector<int> Graph::get_neighbours(int node) const {
 }
 
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
 
     std::unordered_set<int> visited;
     std::queue<int> frontier;
@@ -73,11 +54,13 @@ std::vector<int> Graph::get_neighbours(int node, int depth) const {
 }
 
 int Graph::get_degree(int node) const {
-    if (!(is_valid_node(node))) throw std::logic_error("Node does not exist");
+    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
     return offsets[node + 1] - offsets[node];
 }
 
 bool Graph::has_edge(int source, int target) const {
+    if (!is_valid_node(source) || !is_valid_node(target))
+        throw GraphException("Invalid node index.");
     // might be optimized by checking whether source's or target's adjacency list is smaller
     for (int i = offsets[source]; i < offsets[source + 1]; i++) {
         if (edges[i] == target) return true;
@@ -87,13 +70,7 @@ bool Graph::has_edge(int source, int target) const {
 
 bool Graph::is_valid_node(int node) const { return node >= 0 && node < num_nodes; }
 
-bool Graph::is_missing(int node, int feature) const { return missing[node][feature]; }
-
 void Graph::read_edges(std::string edges_path) {
-    if (num_nodes == -1) {
-        throw std::runtime_error("num_nodes needs to be initialised before calling read_edges");
-    }
-
     std::ifstream file(edges_path);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file: " + edges_path);
@@ -140,27 +117,13 @@ void Graph::print_edges() const {
     }
 }
 
-void Graph::print_features_to_file(std::string output_path) const {
-    std::ofstream file(output_path, std::ios::out | std::ios::trunc);
-    if (!file.is_open()) throw std::runtime_error("Could not open file: " + output_path);
-
-    std::streambuf* coutbuf = std::cout.rdbuf();  // save old buf
-    std::cout.rdbuf(file.rdbuf());                // redirect std::cout to file
-
-    print_features();
-
-    std::cout.rdbuf(coutbuf);  // reset to standard output again
-    file.close();
-}
-
-int parse_node_count(std::string features_path) {
-    std::ifstream file(features_path);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file: " + features_path);
-    }
+int Graph::parse_node_count_from_edge_file(std::string edges_path) {
+    std::ifstream file(edges_path);
+    if (!file.is_open()) throw std::runtime_error("Could not open file: " + edges_path);
 
     // iterate backwards to find beginning of last line
-    file.seekg(-2, file.end);  // -2 because -1 would be '\n' (see assumptions)
+    // TODO: do this independent of whether the last line is newline-terminated
+    file.seekg(-2, file.end);  // -2 because -1 would be '\n'
     size_t pos = file.tellg();
     while (file.get() != '\n') {
         file.seekg(--pos);
@@ -185,22 +148,4 @@ int parse_node_count(std::string features_path) {
     }
 
     return node + 1;  // assuming naming starts at 0
-}
-
-int parse_feature_count(std::string features_path) {
-    std::ifstream file(features_path);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file: " + features_path);
-    }
-
-    std::string line;
-    if (!std::getline(file, line)) {
-        throw std::runtime_error("Failed to read the first line");
-    }
-
-    int comma_count = std::count(line.begin(), line.end(), ',');
-    if (comma_count == 0)
-        throw std::runtime_error("Invalid format: no commas found in the line of file '" +
-                                 features_path + "'");
-    return comma_count + 1;  // assuming one comma after every feature except the last
 }

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "Graph.hpp"
 #include "KNNImputer.hpp"
 
 class KNNTest : public testing::Test {};
@@ -14,9 +13,9 @@ TEST(KNNTest, testKNN) {
     std::string edges_path = "../data/test/knn/test_edges.txt";
     std::string features_path = "../data/test/knn/test_missing_features.txt";
     std::string complete_path = "../data/test/knn/test_complete_features.txt";
-    GraphDouble graph(edges_path, features_path);
-    KNNImputer knn(graph);
-    knn.set_depth(2);
+
+    AttributedGraph<double> graph(edges_path, features_path);
+    KNNImputer<double> knn(graph, 2);
     knn.run();
 
     std::string temp_file_path = "temp_imputation_results.txt";
@@ -49,42 +48,29 @@ TEST(KNNTest, testKNN) {
     bool more_lines = std::getline(file1, line1) || std::getline(file2, line2);
     EXPECT_FALSE(more_lines) << "Files have different lengths";
 
-    // Clean up
-    // std::remove(temp_file_path.c_str());
+    std::remove(temp_file_path.c_str());
 }
 
-TEST(KNNTest, testDepth) {
-    std::string edges_path = "../data/test/knn/test_edges.txt";
-    std::string features_path = "../data/test/knn/test_missing_features.txt";
-    GraphDouble graph(edges_path, features_path);
-    KNNImputer knn(graph);
-    knn.set_depth(3);
-    EXPECT_EQ(knn.get_depth(), 3);
-    EXPECT_NE(knn.get_depth(), 2);
-    knn.set_depth(5);
-    EXPECT_EQ(knn.get_depth(), 5);
-    EXPECT_NE(knn.get_depth(), 3);
-}
 TEST(KNNTest, testGlobalAverage) {
-    std::setprecision(5);
     std::string edges_path = "../data/test/knn/test_edges.txt";
     std::string features_path = "../data/test/knn/test_missing_features.txt";
-    GraphDouble graph(edges_path, features_path);
-    KNNImputer knn = KNNImputer(graph);
-    double average0 = compute_global_average_double(graph, 0);
-    double average1 = compute_global_average_double(graph, 1);
-    double average2 = compute_global_average_double(graph, 2);
+
+    AttributedGraph<double> graph(edges_path, features_path);
+    KNNImputer<double> knn(graph, 3);
+
+    double average0 = knn.compute_global_average(0);
+    double average1 = knn.compute_global_average(1);
+    double average2 = knn.compute_global_average(2);
 
     EXPECT_EQ(average0, 0);
     EXPECT_EQ(average1, 1);
     EXPECT_EQ(average2, 2);
 
-    knn.set_depth(3);
     knn.run();
 
-    average0 = compute_global_average_double(graph, 0);
-    average1 = compute_global_average_double(graph, 1);
-    average2 = compute_global_average_double(graph, 2);
+    average0 = knn.compute_global_average(0);
+    average1 = knn.compute_global_average(1);
+    average2 = knn.compute_global_average(2);
 
     EXPECT_EQ(average0, 0);
     EXPECT_NEAR(average1, 1.08, 1e-5);

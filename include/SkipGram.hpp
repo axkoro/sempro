@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "DeepWalkImputer.hpp"
+#include "Configs.hpp"
 #include "Matrix.hpp"
 #include "NegativeSampler.hpp"
 #include "Vector.hpp"
@@ -35,58 +35,13 @@ class SkipGram {
     };
 
     /**
-     * @brief Configuration parameters for the SkipGram model.
-     *
-     * TODO: research optimal default values.
-     */
-    struct Config {
-        int embedding_size = 128;       ///< Dimensionality of the embeddings.
-        int context_window = 10;        ///< Size of the context window.
-        int num_negative_samples = 10;  ///< Number of negative samples per training pair.
-        double smoothing_exponent =
-            0.75;  ///< Exponent for smoothing the sampling distribution (for the negative samples).
-        int num_epochs = 5;            ///< Number of training epochs.
-        double learning_rate = 0.025;  ///< Initial learning rate.
-
-        /// @brief Default constructor that uses the default member initializers.
-        Config() = default;
-
-        /**
-         * @brief Constructs a Config from a DeepWalkImputer configuration.
-         * @param c A reference to a DeepWalkImputer::Config instance.
-         */
-        Config(DeepWalkImputer::Config& c)
-            : embedding_size(c.embedding_size),
-              context_window(c.context_window),
-              num_negative_samples(c.num_negative_samples),
-              smoothing_exponent(c.smoothing_exponent),
-              num_epochs(c.num_epochs),
-              learning_rate(c.learning_rate) {}
-
-        /**
-         * @brief Validates the configuration parameters.
-         * @return true if all parameters are valid, false otherwise.
-         */
-        bool validate() {
-            if (embedding_size <= 0) return false;
-            if (context_window <= 0) return false;
-            if (num_negative_samples < 0) return false;
-            if (smoothing_exponent <= 0) return false;
-            if (num_epochs <= 0) return false;
-            if (learning_rate <= 0) return false;
-            // if (walk_length < (2 * context_window + 1)) return false;
-            return true;
-        }
-    };
-
-    /**
      * @brief Constructs a SkipGram model.
      *
      * @param num_nodes Total number of nodes.
      * @param config Configuration parameters for training.
      * @param seed Random seed for reproducibility; if -1, a non-deterministic seed is used.
      */
-    SkipGram(int num_nodes, Config& config, int seed = -1);
+    SkipGram(int num_nodes, SkipGramConfig& config, int seed = -1);
 
     /**
      * @brief Trains the SkipGram model using provided random walks.
@@ -110,9 +65,9 @@ class SkipGram {
     Matrix get_embeddings() const;
 
    private:
-    int num_nodes;  ///< Total number of nodes.
-    int seed;       ///< Seed for random number generation.
-    Config config;  ///< Training configuration parameters.
+    int num_nodes;          ///< Total number of nodes.
+    int seed;               ///< Seed for random number generation.
+    SkipGramConfig config;  ///< Training configuration parameters.
 
     /**
      * @brief Embedding matrix for input nodes (stored transposed).

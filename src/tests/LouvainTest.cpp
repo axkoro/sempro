@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "GraphBool.hpp"
-#include "GraphDouble.hpp"
+#include "AttributedGraph.hpp"
 #include "Louvain.hpp"
 
 TEST(LouvainTest, SingleNodeGraph) {
@@ -9,7 +8,7 @@ TEST(LouvainTest, SingleNodeGraph) {
     // offsets[0] = 0, offsets[1] = 0  => node 0 has no neighbors
     std::vector<int> offsets = {0, 0};
     std::vector<int> edges = {};
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -26,7 +25,7 @@ TEST(LouvainTest, TwoNodeNoEdge) {
     // Hence offsets = [0,0,0], edges = {}
     std::vector<int> offsets = {0, 0, 0};
     std::vector<int> edges = {};
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -43,7 +42,7 @@ TEST(LouvainTest, TwoNodeOneEdge) {
     // offsets = [0,1,2], edges = [1,0]
     std::vector<int> offsets = {0, 1, 2};
     std::vector<int> edges = {1, 0};
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -66,7 +65,7 @@ TEST(LouvainTest, ThreeNodeChain) {
     //   - node 2 adjacency is edges[3..4) => [1]
     std::vector<int> offsets = {0, 1, 3, 4};
     std::vector<int> edges = {1, 0, 2, 1};
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -95,7 +94,7 @@ TEST(LouvainTest, CompleteGraph) {
         0, 1, 3,  // neighbors of node 2
         0, 1, 2   // neighbors of node 3
     };
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -130,7 +129,7 @@ TEST(LouvainTest, TwoComponents) {
     //   - node 4 => edges[7..8) = [3]
     std::vector<int> offsets = {0, 2, 4, 6, 7, 8};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1, 4, 3};
-    GraphBool g(offsets, edges);
+    Graph g(offsets, edges);
 
     Louvain lcd(g);
     auto communities = lcd.execute();
@@ -154,7 +153,7 @@ TEST(LouvainTest, TwoComponents) {
 //     std::string edges_path = "../data/input/unzipped/twitch_edges.txt";
 //     std::string features_path = "../data/input/unzipped/twitch_features.txt";
 
-//     GraphDouble g(edges_path, features_path);
+//     Graph g(edges_path, features_path);
 
 //     Louvain lcd(g);
 //     double pre_modularity = lcd.get_modularity();

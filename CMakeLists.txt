@@ -3,69 +3,62 @@ project(semproject CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(BUILD_TESTS "Build tests" ON)
 
 find_package(OpenMP REQUIRED)
 
-add_library(GraphLib
-	src/Graph.cpp
-	src/GraphDouble.cpp
-	src/GraphInt.cpp
-	src/GraphBool.cpp)
-
-target_include_directories(GraphLib PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(GraphLib PRIVATE OpenMP::OpenMP_CXX)
-
-if(BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
+if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
 	add_subdirectory(extlibs/gtest)
 	set(CMAKE_BUILD_TYPE Debug)
-
-	add_executable(GraphTest src/tests/GraphTest.cpp src/WeightedGraph.cpp)
+	
+	add_executable(GraphTest
+		src/tests/GraphTest.cpp
+		src/Graph.cpp
+		src/GraphEdgeWeights.cpp)
 	target_include_directories(GraphTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(GraphTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_link_libraries(GraphTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(GraphTest PRIVATE -coverage)
 	target_link_options(GraphTest PRIVATE -coverage)
 
 	add_executable(KNNImputerTest
 		src/tests/KNNImputerTest.cpp
-		src/Imputer.cpp
-		src/KNNImputer.cpp)
+		src/Graph.cpp)
 	target_include_directories(KNNImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(KNNImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_link_libraries(KNNImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(KNNImputerTest PRIVATE -coverage)
 	target_link_options(KNNImputerTest PRIVATE -coverage)
 
 	add_executable(LouvainTest
 		src/tests/LouvainTest.cpp
 		src/Louvain.cpp
-		src/DynamicMinimalGraph.cpp)
+		src/Graph.cpp
+		src/DynamicGraph.cpp)
 	target_include_directories(LouvainTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(LouvainTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_link_libraries(LouvainTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(LouvainTest PRIVATE -coverage)
 	target_link_options(LouvainTest PRIVATE -coverage)
 
-	add_executable(LouvainImputerTest
-		src/tests/LouvainImputerTest.cpp
-		src/LouvainImputer.cpp
-		src/Imputer.cpp)
-	target_include_directories(LouvainImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(LouvainImputerTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
-	target_compile_options(LouvainImputerTest PRIVATE -coverage)
-	target_link_options(LouvainImputerTest PRIVATE -coverage)
+	add_executable(CommunityImputerTest
+		src/tests/CommunityImputerTest.cpp
+		src/Graph.cpp)
+	target_include_directories(CommunityImputerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	target_link_libraries(CommunityImputerTest PRIVATE gtest OpenMP::OpenMP_CXX)
+	target_compile_options(CommunityImputerTest PRIVATE -coverage)
+	target_link_options(CommunityImputerTest PRIVATE -coverage)
 
-	add_executable(
-		DeepWalkTest
+	add_executable(DeepWalkTest
 		src/tests/DeepWalkTest.cpp
+		src/RandomWalkGenerator.cpp
 		src/SkipGram.cpp
 		src/NegativeSampler.cpp
 		src/Matrix.cpp
 		src/Vector.cpp
-		src/RandomWalkGenerator.cpp
-		src/EdgeWeightCalculator.cpp
-		src/WeightedGraph.cpp)
+		src/Graph.cpp
+		src/GraphEdgeWeights.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(DeepWalkTest PRIVATE gtest GraphLib OpenMP::OpenMP_CXX)
+	target_link_libraries(DeepWalkTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)
 	target_link_options(DeepWalkTest PRIVATE -coverage)
 
@@ -80,36 +73,44 @@ if(BUILD_TESTS) # Instructions for building C++ library and googletest testing s
 
 	add_executable(NegativeSamplerTest
 		src/tests/NegativeSamplerTest.cpp
-		src/NegativeSampler.cpp)
+		src/NegativeSampler.cpp
+		src/Graph.cpp)
 	target_include_directories(NegativeSamplerTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(NegativeSamplerTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(NegativeSamplerTest PRIVATE -coverage)
 	target_link_options(NegativeSamplerTest PRIVATE -coverage)
 
 else() # Build Python bindings as libraries
+	set(CMAKE_BUILD_TYPE Release)
 	add_subdirectory(extlibs/pybind11)
 
-	pybind11_add_module(_graph
-		src/py11_graph.cpp)
-	target_link_libraries(_graph PRIVATE GraphLib OpenMP::OpenMP_CXX)
-	target_include_directories(_graph PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_graph PROPERTIES LINKER_LANGUAGE CXX)
+	pybind11_add_module(cpp_graph_module
+		src/pybind/py11_graph.cpp
+		src/Graph.cpp)
+	target_link_libraries(cpp_graph_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_graph_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_graph_module PROPERTIES LINKER_LANGUAGE CXX)
+	
+	pybind11_add_module(cpp_imputation_module
+		src/pybind/py11_imputation.cpp
+		src/RandomWalkGenerator.cpp
+		src/SkipGram.cpp
+		src/NegativeSampler.cpp
+		src/Matrix.cpp
+		src/Vector.cpp
+		src/Graph.cpp
+		src/GraphEdgeWeights.cpp)
+	target_link_libraries(cpp_imputation_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_imputation_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_imputation_module PROPERTIES LINKER_LANGUAGE CXX)
 
-	pybind11_add_module(_strats
-		src/Imputer.cpp
-		src/KNNImputer.cpp
-		src/LouvainImputer.cpp
-		src/py11_strats.cpp)
-	target_link_libraries(_strats PRIVATE GraphLib OpenMP::OpenMP_CXX)
-	target_include_directories(_strats PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_strats PROPERTIES LINKER_LANGUAGE CXX)
-
-	pybind11_add_module(_louvain
+	pybind11_add_module(cpp_louvain_module
+		src/pybind/py11_louvain.cpp
 		src/Louvain.cpp
-		src/DynamicMinimalGraph.cpp
-		src/py11_louvain.cpp)
-	target_link_libraries(_louvain PRIVATE GraphLib OpenMP::OpenMP_CXX)
-	target_include_directories(_louvain PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	set_target_properties(_louvain PROPERTIES LINKER_LANGUAGE CXX)
+		src/DynamicGraph.cpp
+		src/Graph.cpp)
+	target_link_libraries(cpp_louvain_module PRIVATE OpenMP::OpenMP_CXX)
+	target_include_directories(cpp_louvain_module PUBLIC ${PROJECT_SOURCE_DIR}/include)
+	set_target_properties(cpp_louvain_module PROPERTIES LINKER_LANGUAGE CXX)
 
 endif()

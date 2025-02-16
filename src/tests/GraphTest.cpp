@@ -8,10 +8,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "GraphBool.hpp"
-#include "GraphDouble.hpp"
-#include "GraphInt.hpp"
-#include "WeightedGraph.hpp"
+#include "AttributedGraph.hpp"
+#include "GraphEdgeWeights.hpp"
 
 class GraphTest : public testing::Test {};
 
@@ -30,53 +28,42 @@ TEST(GraphTest, file_not_open_throws_error) {
         std::runtime_error);
 }
 
-TEST(GraphTest, get_double_feature_from_int_graph_throws) {
-    // Create a small int-based graph
-    GraphInt intGraph("../data/test/graph/edges_example.txt",
-                      "../data/test/graph/features_example.txt");
-
-    // Attempt to get a double feature where only int features exist
-    EXPECT_THROW(intGraph.get_double_feature(0, 0), GraphException);
-}
-
 TEST(GraphTest, invalid_node_index_throws) {
-    GraphDouble graph("../data/test/graph/edges_example.txt",
-                      "../data/test/graph/features_example.txt");
+    AttributedGraph<double> graph("../data/test/graph/edges_example.txt",
+                                  "../data/test/graph/features_example.txt");
 
     // Node index out of range
-    EXPECT_THROW(graph.get_double_feature(graph.get_num_nodes(), 0), GraphException);
+    EXPECT_THROW(graph.get_feature(graph.get_num_nodes(), 0), GraphException);
 }
 
 TEST(GraphTest, invalid_feature_index_throws) {
-    GraphDouble graph("../data/test/graph/edges_example.txt",
-                      "../data/test/graph/features_example.txt");
+    AttributedGraph<double> graph("../data/test/graph/edges_example.txt",
+                                  "../data/test/graph/features_example.txt");
 
     // Feature index out of range
-    EXPECT_THROW(graph.get_double_feature(0, graph.get_num_features()), GraphException);
+    EXPECT_THROW(graph.get_feature(0, graph.get_num_features()), GraphException);
 }
 
-TEST(GraphTest, parse_node_count) {
-    std::string amazon_features = "../data/input/unzipped/amazon_features.txt";
-    EXPECT_EQ(parse_node_count(amazon_features),
-              13751 + 1);  // 13751: largest node, +1: numbering begins at 0
-
-    std::string genius_features = "../data/input/unzipped/genius_features.txt";
-    EXPECT_EQ(parse_node_count(genius_features), 421960 + 1);
+TEST(GraphTest, parse_node_count_from_feature_file) {
+    std::string edges_file = "../data/test/graph/edges_example.txt";
+    std::string features_file = "../data/test/graph/features_example.txt";
+    AttributedGraph<int> graph(edges_file, features_file);
+    EXPECT_EQ(graph.get_num_edges(),
+              4 + 1);  // 4 = largest node index, +1 because numbering begins at 0
 }
 
 TEST(GraphTest, parse_feature_count) {
-    std::string github_features = "../data/input/unzipped/github_features.txt";
-    EXPECT_EQ(parse_feature_count(github_features), 128);
-
-    std::string amazon_fraud_features = "../data/input/unzipped/amazon_fraud_features.txt";
-    EXPECT_EQ(parse_feature_count(amazon_fraud_features), 25);
+    std::string edges_file = "../data/test/graph/edges_example.txt";
+    std::string features_file = "../data/test/graph/features_example.txt";
+    AttributedGraph<int> graph(edges_file, features_file);
+    EXPECT_EQ(graph.get_num_features(), 6);
 }
 
 // FIXME: Currently checks reading of both edges and features (should only load edges)
 TEST(GraphTest, read_edges) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Create temporary file for output
     std::string temp_file_path = "temp_edges.txt";
@@ -115,7 +102,7 @@ TEST(GraphTest, read_edges) {
 TEST(GraphTest, print_edges) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -140,7 +127,7 @@ TEST(GraphTest, print_edges) {
 TEST(GraphTest, read_bool_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphBool graph(edges_path, features_path);
+    AttributedGraph<bool> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<bool>> actual_features = {
@@ -169,7 +156,7 @@ TEST(GraphTest, read_bool_features) {
 
             // check features
             if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_bool_feature(node, feature), actual_features[node][feature]);
+                EXPECT_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
             }
         }
     }
@@ -183,7 +170,7 @@ TEST(GraphTest, read_bool_features) {
 TEST(GraphTest, read_int_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphInt graph(edges_path, features_path);
+    AttributedGraph<int> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<int>> actual_features = {
@@ -212,7 +199,7 @@ TEST(GraphTest, read_int_features) {
 
             // check features
             if (!graph.is_missing(node, feature)) {
-                EXPECT_EQ(graph.get_int_feature(node, feature), actual_features[node][feature]);
+                EXPECT_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
             }
         }
     }
@@ -226,7 +213,7 @@ TEST(GraphTest, read_int_features) {
 TEST(GraphTest, read_double_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // clang-format off
     std::vector<std::vector<double>> actual_features = {
@@ -255,8 +242,7 @@ TEST(GraphTest, read_double_features) {
 
             // check features
             if (!graph.is_missing(node, feature)) {
-                EXPECT_DOUBLE_EQ(graph.get_double_feature(node, feature),
-                                 actual_features[node][feature]);
+                EXPECT_DOUBLE_EQ(graph.get_feature(node, feature), actual_features[node][feature]);
             }
         }
     }
@@ -270,7 +256,7 @@ TEST(GraphTest, read_double_features) {
 TEST(GraphTest, print_bool_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphBool graph(edges_path, features_path);
+    AttributedGraph<bool> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -295,7 +281,7 @@ TEST(GraphTest, print_bool_features) {
 TEST(GraphTest, print_int_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphInt graph(edges_path, features_path);
+    AttributedGraph<int> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -320,7 +306,7 @@ TEST(GraphTest, print_int_features) {
 TEST(GraphTest, print_double_features) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     // Redirect std::cout to capture the output
     std::ostringstream output;
@@ -345,7 +331,7 @@ TEST(GraphTest, print_double_features) {
 TEST(GraphTest, get_neighbours) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     std::vector<int> neighbours = graph.get_neighbours(0);
     std::vector<int> expected_neighbours = {1, 4};
@@ -362,7 +348,7 @@ TEST(GraphTest, get_neighbours) {
 TEST(GraphTest, get_degree) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     int degree = graph.get_degree(0);
     EXPECT_GE(degree, 2);
@@ -371,7 +357,7 @@ TEST(GraphTest, get_degree) {
 TEST(GraphTest, has_edge) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.has_edge(0, 4));   // Assumes edge exists
     EXPECT_FALSE(graph.has_edge(0, 2));  // Assumes edge does not exist
@@ -380,33 +366,22 @@ TEST(GraphTest, has_edge) {
 TEST(GraphTest, is_valid_node) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
     EXPECT_TRUE(graph.is_valid_node(0));
     EXPECT_FALSE(graph.is_valid_node(graph.get_num_nodes()));
 }
 
-// --- Weighted Graph Tests ---
+// --- Edge Weight Tests ---
 
 // A minimal concrete Graph implementation for testing (because the Graph class is abstract atm).
-class DummyGraph : public Graph {
+class DummyGraph : public AttributedGraph<double> {
    public:
     DummyGraph(const std::vector<int>& offs, const std::vector<int>& edgs) {
         offsets = offs;
         edges = edgs;
         num_nodes = offs.size() - 1;
     }
-
-    void read_features(std::string) override {}
-    void print_features() const override {}
-
-    bool get_bool_feature(int, int) const override { return false; }
-    double get_double_feature(int, int) const override { return 0.0; }
-    int get_int_feature(int, int) const override { return 0; }
-
-    void set_bool_feature(int, int, bool) override {}
-    void set_double_feature(int, int, double) override {}
-    void set_int_feature(int, int, int) override {}
 
     size_t lookup(int u, int v) const {
         if (u < 0 || u >= get_num_nodes()) throw std::out_of_range("Invalid node");
@@ -417,8 +392,8 @@ class DummyGraph : public Graph {
     }
 };
 
-// Test that the WeightedGraph is constructed with the default weight 1.0.
-TEST(WeightedGraphEdgesTest, DefaultWeights) {
+// Test that the GraphEdgeWeights is constructed with the default weight 1.0.
+TEST(GraphEdgeWeightsTest, DefaultWeights) {
     std::vector<int> offsets = {0, 2, 4, 6};
     // Graph with 3 nodes:
     // Node 0: edges[0..1] -> {1, 2}
@@ -426,23 +401,22 @@ TEST(WeightedGraphEdgesTest, DefaultWeights) {
     // Node 2: edges[4..5] -> {0, 1}
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
-    EXPECT_EQ(wgraph.get_num_edges(), 3);
-    for (size_t i = 0; i < static_cast<size_t>(wgraph.get_num_edges()); ++i) {
-        EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 1.0);
+    for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
+        EXPECT_DOUBLE_EQ(edge_weights.edge_weights[i], 1.0);
     }
 }
 
 // Test immediate edge retrieval for a node.
-TEST(WeightedGraphEdgesTest, GetEdgesImmediate) {
+TEST(GraphEdgeWeightsTest, GetEdgesImmediate) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Immediate edges from node 0.
-    auto immediateEdges = wgraph.get_edges(0);
+    auto immediateEdges = edge_weights.get_edges(0);
     EXPECT_EQ(immediateEdges.size(), 2u);
     // Check that the targets are correct.
     EXPECT_EQ(immediateEdges[0].target, 1);
@@ -453,21 +427,21 @@ TEST(WeightedGraphEdgesTest, GetEdgesImmediate) {
 }
 
 // Test edge retrieval with a given BFS depth.
-TEST(WeightedGraphEdgesTest, GetEdgesWithDepth) {
+TEST(GraphEdgeWeightsTest, GetEdgesWithDepth) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // For node 0 with depth = 1, should return immediate edges.
-    auto depth1Edges = wgraph.get_edges(0, 1);
+    auto depth1Edges = edge_weights.get_edges(0, 1);
     EXPECT_EQ(depth1Edges.size(), 2u);
 
     // For node 0 with depth = 2:
     // Depth 1: from node 0: edges (0->1) and (0->2).
     // Depth 2: from node 1: (1->0) and (1->2) and from node 2: (2->0) and (2->1).
     // Total edges: 2 + 2 + 2 = 6.
-    auto depth2Edges = wgraph.get_edges(0, 2);
+    auto depth2Edges = edge_weights.get_edges(0, 2);
     EXPECT_EQ(depth2Edges.size(), 6u);
 
     // Verify that the collected targets appear as expected:
@@ -485,27 +459,27 @@ TEST(WeightedGraphEdgesTest, GetEdgesWithDepth) {
 }
 
 // Test that an invalid node parameter throws an exception.
-TEST(WeightedGraphEdgesTest, GetEdgesInvalidNode) {
+TEST(GraphEdgeWeightsTest, GetEdgesInvalidNode) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
-    EXPECT_THROW(wgraph.get_edges(-1), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(100), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(-1, 2), std::logic_error);
-    EXPECT_THROW(wgraph.get_edges(100, 2), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(-1), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(100), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(-1, 2), std::logic_error);
+    EXPECT_THROW(edge_weights.get_edges(100, 2), std::logic_error);
 }
 
-TEST(WeightedGraphEdgesTest, IteratorFunctionality) {
+TEST(GraphEdgeWeightsTest, IteratorFunctionality) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Iterate through edges using the iterator.
     size_t count = 0;
-    for (auto it = wgraph.begin(); it != wgraph.end(); ++it, ++count) {
+    for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it, ++count) {
         std::pair<int, int> edge = it.get_edge();
         // Determine expected source node based on CSR offsets:
         int expected_source = 0;
@@ -521,18 +495,18 @@ TEST(WeightedGraphEdgesTest, IteratorFunctionality) {
     EXPECT_EQ(count, 6u);
 }
 
-TEST(WeightedGraphEdgesTest, ModifyWeightsViaIterator) {
+TEST(GraphEdgeWeightsTest, ModifyWeightsViaIterator) {
     std::vector<int> offsets = {0, 2, 4, 6};
     std::vector<int> edges = {1, 2, 0, 2, 0, 1};
     DummyGraph dummy(offsets, edges);
-    WeightedGraph wgraph(dummy);
+    GraphEdgeWeights edge_weights(dummy);
 
     // Double each edge weight via the iterator.
-    for (auto it = wgraph.begin(); it != wgraph.end(); ++it) {
+    for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it) {
         *it *= 2.0;
     }
-    for (size_t i = 0; i < static_cast<size_t>(wgraph.get_num_edges()); ++i) {
-        EXPECT_DOUBLE_EQ(wgraph.edge_weights[i], 2.0);
+    for (size_t i = 0; i < static_cast<size_t>(dummy.get_num_edges()); ++i) {
+        EXPECT_DOUBLE_EQ(edge_weights.edge_weights[i], 2.0);
     }
 }
 

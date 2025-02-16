@@ -3,12 +3,10 @@
 #include <numeric>
 #include <unordered_set>
 
-#include "EdgeWeightCalculator.hpp"
-#include "GraphDouble.hpp"
-#include "RandomWalkGenerator.hpp"
-#include "SkipGram.hpp"
+#include "AttributedGraph.hpp"
+#include "DeepWalkImputer.hpp"
 
-TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
+TEST(EdgeWeightCalculatorTest, generate_edge_weights) {
     // Assumptions (adjust the test if any of this changes during implementation):
     // - fusion coefficient of 0.6
     // - cover depth of 2
@@ -20,13 +18,10 @@ TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
 
     std::string edges_path = "../data/test/deepwalk/test_edges.txt";
     std::string features_path = "../data/test/deepwalk/test_features.txt";
-    GraphDouble original_graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
 
-    EdgeWeightCalculator ewc(original_graph, fusion_coefficient);
-    WeightedGraph weighted_graph = ewc.generate_weighted_graph();
-
-    ASSERT_EQ(weighted_graph.get_num_nodes(), original_graph.get_num_nodes());
-    ASSERT_EQ(weighted_graph.get_num_edges(), original_graph.get_num_edges());
+    EdgeWeightCalculator ewc(graph, fusion_coefficient);
+    GraphEdgeWeights edge_weights = ewc.generate_edge_weights();
 
     // edges are only stored once (descending: 0<->1 is stored in 1's list)
     std::vector<std::unordered_map<int, double>> correct_edges = {
@@ -40,10 +35,10 @@ TEST(EdgeWeightCalculatorTest, generate_weighted_graph) {
         {{4, 0.2971428571}}                          // 7
     };
 
-    int num_nodes = original_graph.get_num_nodes();
+    int num_nodes = graph.get_num_nodes();
     for (int node = 0; node < num_nodes; node++) {
         int count_desc_edges = 0;
-        for (auto edge : weighted_graph.get_edges(node)) {
+        for (auto edge : edge_weights.get_edges(node)) {
             int neighbour = edge.target;
 
             int higher = std::max(node, neighbour);
@@ -70,9 +65,8 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
 
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
     EdgeWeightCalculator ewc(graph, 0.5);
-    WeightedGraph wgraph(graph);
 
     // Compute covers
     std::vector<std::unordered_set<int>> covers = ewc.compute_covers();
@@ -91,26 +85,27 @@ TEST(EdgeWeightCalculatorTest, ComputeCovers) {
 
     ASSERT_EQ(covers, expected_covers);
 }
+
 TEST(EdgeWeightCalculatorTest, cover_union_intersection) {
     std::string edges_path = "../data/test/deepwalk/test_edges_2.txt";
     std::string features_path = "../data/test/deepwalk/test_features_2.txt";
-    GraphDouble graph(edges_path, features_path);
+    AttributedGraph<double> graph(edges_path, features_path);
     EdgeWeightCalculator ewc(graph, 0.5);
-    WeightedGraph wgraph(graph);
 
     std::vector<std::unordered_set<int>> input_covers = {{1, 2, 3}, {2, 3, 5}, {1, 8, 5}};
     double mss = ewc.compute_structural_similarity(0, 1, input_covers);
     // since cover union of 0 and 0 is 4 and intersection is 2 mss should be 2/4 = 2
     ASSERT_EQ(mss, 0.5);
 }
+
 TEST(RandomWalkGeneratorTest, walks_have_correct_length) {
     std::string edges_file = "../data/test/deepwalk/test_edges.txt";
     std::string features_file = "../data/test/deepwalk/test_features.txt";
 
-    GraphDouble graph(edges_file, features_file);
-    WeightedGraph wgraph(graph);
+    AttributedGraph<double> graph(edges_file, features_file);
+    GraphEdgeWeights edge_weights(graph);
 
-    RandomWalkGenerator generator(wgraph, 5, 3);  // 5 steps, 3 walks per node
+    RandomWalkGenerator generator(graph, edge_weights, 5, 3);  // 5 steps, 3 walks per node
     auto walks = generator.generate_walks();
 
     for (const auto& walk : walks) {
@@ -131,13 +126,13 @@ TEST(RandomWalkGeneratorTest, transitions_vary_between_runs) {
     std::string edges_file = "../data/test/deepwalk/test_edges.txt";
     std::string features_file = "../data/test/deepwalk/test_features.txt";
 
-    GraphDouble graph(edges_file, features_file);
-    WeightedGraph wgraph(graph);
+    AttributedGraph<double> graph(edges_file, features_file);
+    GraphEdgeWeights edge_weights(graph);
 
-    RandomWalkGenerator generator1(wgraph, 4, 5);
+    RandomWalkGenerator generator1(graph, edge_weights, 4, 5);
     auto walks1 = generator1.generate_walks();
 
-    RandomWalkGenerator generator2(wgraph, 4, 5);
+    RandomWalkGenerator generator2(graph, edge_weights, 4, 5);
     auto walks2 = generator2.generate_walks();
 
     EXPECT_NE(walks1, walks2);  // Expect different results in different runs
@@ -147,13 +142,13 @@ TEST(RandomWalkGeneratorTest, same_seed_ensures_reproducibility) {
     std::string edges_file = "../data/test/deepwalk/test_edges.txt";
     std::string features_file = "../data/test/deepwalk/test_features.txt";
 
-    GraphDouble graph(edges_file, features_file);
-    WeightedGraph wgraph(graph);
+    AttributedGraph<double> graph(edges_file, features_file);
+    GraphEdgeWeights edge_weights(graph);
 
-    RandomWalkGenerator generator1(wgraph, 4, 5, 42);
+    RandomWalkGenerator generator1(graph, edge_weights, 4, 5, 42);
     auto walks1 = generator1.generate_walks();
 
-    RandomWalkGenerator generator2(wgraph, 4, 5, 42);
+    RandomWalkGenerator generator2(graph, edge_weights, 4, 5, 42);
     auto walks2 = generator2.generate_walks();
 
     EXPECT_EQ(walks1, walks2);  // Walks should be identical if the seed is the same
@@ -162,7 +157,7 @@ TEST(RandomWalkGeneratorTest, same_seed_ensures_reproducibility) {
 class SkipGramTest : public ::testing::Test {
    protected:
     int num_nodes = 10;
-    SkipGram::Config config;
+    SkipGramConfig config;
     SkipGram* model;
 
     void SetUp() override {
