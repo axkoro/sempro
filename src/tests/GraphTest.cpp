@@ -345,6 +345,16 @@ TEST(GraphTest, get_neighbours) {
     EXPECT_EQ(depth_neighbours, expected_depth_neighbours);
 }
 
+TEST(GraphTest, get_k_neighbours) {
+    std::string edges_path = "../data/test/graph/edges_example.txt";
+    std::string features_path = "../data/test/graph/features_example.txt";
+    AttributedGraph<double> graph(edges_path, features_path);
+
+    std::vector<int> neighbours = graph.get_k_nearest_neighbors(0, 1);
+
+    EXPECT_EQ(neighbours.size(), 1);
+}
+
 TEST(GraphTest, get_degree) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
