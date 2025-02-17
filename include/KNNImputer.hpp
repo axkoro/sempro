@@ -10,6 +10,7 @@ class KNNImputer : public Imputer<T> {
 
    private:
     int depth;
+    bool use_k_nearest;
 
    public:
     KNNImputer(AttributedGraph<T>& g, int depth = 2) : Imputer<T>(g), depth(depth) {}
