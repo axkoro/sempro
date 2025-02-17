@@ -143,6 +143,8 @@ def load_dataset_config(args):
             features_path = data[args.dataset]["features"]
             if args.evaluate:
                 reference_path = data[args.dataset]["reference"]
+            else:
+                reference_path = ""
         except KeyError as err:
             raise LookupError(
                 f"Could not find all relevant data for data set '{args.dataset}' in '{config_path}' (see documentation for information about the config)"
