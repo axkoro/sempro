@@ -5,6 +5,8 @@
 #include <queue>
 #include <sstream>
 #include <unordered_set>
+#include <random>
+#include <algorithm>
 
 Graph::Graph(std::string edges_path) {
     num_nodes = parse_node_count_from_edge_file(edges_path);
@@ -25,6 +27,25 @@ std::vector<int> Graph::get_neighbours(int node) const {
     std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
 
     return neighbours;
+}
+
+std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {;
+    if (!is_valid_node(node)) throw GraphException("Node does not exist");
+
+    int start = offsets[node];
+    int end = offsets[node + 1];
+    std::vector<int> neighbors(edges.begin() + start, edges.begin() + end);
+
+    // if fewer than k neighbors, return all
+    if (neighbors.size() <= k) {
+        return neighbors;
+    }
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(neighbors.begin(), neighbors.end(), g);
+
+    return std::vector<int>(neighbors.begin(), neighbors.begin() + k);
 }
 
 std::vector<int> Graph::get_neighbours(int node, int depth) const {

@@ -54,6 +54,16 @@ class Graph {
     std::vector<int> get_neighbours(int node) const;  // TODO: use iterator instead
 
     /**
+     * @brief Gets k random neighbours of a node.
+     *
+     * @param node Index of the node.
+     * @param k Number of neighbours to return.
+     * @return Vector of neighbour node indices.
+     * @throws std::logic_error If the node does not exist.
+     */
+    std::vector<int> get_k_nearest_neighbors(int node, int k);
+
+    /**
      * @brief Gets the neighbours of a node up to a certain depth.
      *
      * @param node Index of the node.
