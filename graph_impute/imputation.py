@@ -50,9 +50,9 @@ class KNNImputer(Imputer):
         The depth for the KNN imputer (default is 2).
     """
 
-    def __init__(self, graph: Graph, depth: int = 2):
+    def __init__(self, graph: Graph, depth: int = 2, use_k_nearest: bool = False):
         super().__init__(graph)
-        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth)
+        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth, use_k_nearest)
 
     def impute(self) -> None:
         self.cpp_imputer.run()
