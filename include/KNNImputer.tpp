@@ -21,7 +21,7 @@ void KNNImputer<T>::run() {
         std::vector<int> neighbours;
 
         if (use_k_nearest) {
-            neighbours = this->graph.get_k_nearest_neighbors(node, depth);  // Implement this
+            neighbours = this->graph.get_k_nearest_neighbors(node, depth);
         } else {
             neighbours = this->graph.get_neighbours(node, depth);
         }
