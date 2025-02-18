@@ -13,7 +13,8 @@ class KNNImputer : public Imputer<T> {
     bool use_k_nearest;
 
    public:
-    KNNImputer(AttributedGraph<T>& g, int depth = 2) : Imputer<T>(g), depth(depth) {}
+    KNNImputer(AttributedGraph<T>& g, int depth = 2, bool use_k_nearest = false)
+        : Imputer<T>(g), depth(depth), use_k_nearest(use_k_nearest) {}
 
     void run() override;
 };
