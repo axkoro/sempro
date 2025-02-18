@@ -32,20 +32,42 @@ std::vector<int> Graph::get_neighbours(int node) const {
 std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {;
     if (!is_valid_node(node)) throw GraphException("Node does not exist");
 
-    int start = offsets[node];
-    int end = offsets[node + 1];
-    std::vector<int> neighbors(edges.begin() + start, edges.begin() + end);
+    std::unordered_set<int> visited;  // To avoid duplicate nodes
+    std::vector<int> selected_neighbors;
+    std::queue<int> to_explore;
 
-    // if fewer than k neighbors, return all
-    if (neighbors.size() <= k) {
-        return neighbors;
+    // Start with direct neighbors
+    to_explore.push(node);
+    visited.insert(node);
+
+    while (!to_explore.empty() && selected_neighbors.size() < k) {
+        int current = to_explore.front();
+        to_explore.pop();
+
+        // Get neighbors of current node
+        int start = offsets[current];
+        int end = offsets[current + 1];
+        std::vector<int> neighbors(edges.begin() + start, edges.begin() + end);
+
+        // Shuffle to add randomness
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(neighbors.begin(), neighbors.end(), g);
+
+        for (int neighbor : neighbors) {
+            if (visited.find(neighbor) == visited.end()) {
+                visited.insert(neighbor);
+                selected_neighbors.push_back(neighbor);
+                to_explore.push(neighbor);
+
+                if (selected_neighbors.size() == k) {
+                    return selected_neighbors;
+                }
+            }
+        }
     }
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(neighbors.begin(), neighbors.end(), g);
-
-    return std::vector<int>(neighbors.begin(), neighbors.begin() + k);
+    return selected_neighbors;
 }
 
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
