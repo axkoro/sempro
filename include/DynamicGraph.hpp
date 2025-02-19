@@ -17,7 +17,7 @@ class DynamicGraph {
     int get_num_edges() const;
 
     int get_degree(int u) const;
-    const std::vector<std::pair<int, int>>& get_neighbours(int u) const;
+    const std::vector<std::pair<int, int>>& get_neighbors(int u) const;
 
     // Add an edge with a given weight in an undirected manner
     void add_edge(int u, int v, int w);

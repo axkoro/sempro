@@ -328,31 +328,31 @@ TEST(GraphTest, print_double_features) {
     EXPECT_EQ(output.str(), expected_print);
 }
 
-TEST(GraphTest, get_neighbours) {
+TEST(GraphTest, get_neighbors) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
     AttributedGraph<double> graph(edges_path, features_path);
 
-    std::vector<int> neighbours = graph.get_neighbours(0);
-    std::vector<int> expected_neighbours = {1, 4};
+    std::vector<int> neighbors = graph.get_neighbors(0);
+    std::vector<int> expected_neighbors = {1, 4};
 
-    EXPECT_EQ(neighbours, expected_neighbours);
+    EXPECT_EQ(neighbors, expected_neighbors);
 
     // Test for a specific depth
-    std::vector<int> depth_neighbours = graph.get_neighbours(0, 2);
-    std::vector<int> expected_depth_neighbours = {3, 2, 4, 1, 0};
+    std::vector<int> depth_neighbors = graph.get_neighbors(0, 2);
+    std::vector<int> expected_depth_neighbors = {3, 2, 4, 1, 0};
 
-    EXPECT_EQ(depth_neighbours, expected_depth_neighbours);
+    EXPECT_EQ(depth_neighbors, expected_depth_neighbors);
 }
 
-TEST(GraphTest, get_k_neighbours) {
+TEST(GraphTest, get_k_neighbors) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
     AttributedGraph<double> graph(edges_path, features_path);
 
-    std::vector<int> neighbours = graph.get_k_nearest_neighbors(0, 1);
+    std::vector<int> neighbors = graph.get_k_nearest_neighbors(0, 1);
 
-    EXPECT_EQ(neighbours.size(), 1);
+    EXPECT_EQ(neighbors.size(), 1);
 }
 
 TEST(GraphTest, get_degree) {

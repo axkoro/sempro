@@ -17,15 +17,15 @@ WeightedEdgeIterator GraphEdgeWeights::end() {
 std::vector<GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node) const {
     if (!(graph.is_valid_node(node))) throw std::logic_error("Node does not exist");
 
-    std::vector<Edge> neighbours(graph.offsets[node + 1] - graph.offsets[node]);
-    size_t num_neighbours = neighbours.size();
+    std::vector<Edge> neighbors(graph.offsets[node + 1] - graph.offsets[node]);
+    size_t num_neighbors = neighbors.size();
     size_t offset = graph.offsets[node];
-    for (size_t i = 0; i < num_neighbours; i++) {
-        neighbours[i].target = graph.edges[offset + i];
-        neighbours[i].weight = edge_weights[offset + i];
+    for (size_t i = 0; i < num_neighbors; i++) {
+        neighbors[i].target = graph.edges[offset + i];
+        neighbors[i].weight = edge_weights[offset + i];
     }
 
-    return neighbours;
+    return neighbors;
 }
 
 std::vector<typename GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node,

@@ -20,13 +20,13 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_edges() const { return edges.size() / 2; }
 
-std::vector<int> Graph::get_neighbours(int node) const {
+std::vector<int> Graph::get_neighbors(int node) const {
     if (!is_valid_node(node)) throw GraphException("Node does not exist");
 
-    std::vector<int> neighbours(offsets[node + 1] - offsets[node]);
-    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbours.begin());
+    std::vector<int> neighbors(offsets[node + 1] - offsets[node]);
+    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbors.begin());
 
-    return neighbours;
+    return neighbors;
 }
 
 std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
@@ -37,37 +37,37 @@ std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
     std::mt19937 g(rd());
 
     std::unordered_set<int> visited;
-    std::vector<int> selected_neighbours;
-    selected_neighbours.reserve(k);
+    std::vector<int> selected_neighbors;
+    selected_neighbors.reserve(k);
     std::queue<int> to_explore;
 
     to_explore.push(node);
     visited.insert(node);
 
-    while (!to_explore.empty() && selected_neighbours.size() < k) {
+    while (!to_explore.empty() && selected_neighbors.size() < k) {
         int current = to_explore.front();
         to_explore.pop();
 
-        std::vector<int> neighbours = get_neighbours(current);
-        std::shuffle(neighbours.begin(), neighbours.end(), g);
+        std::vector<int> neighbors = get_neighbors(current);
+        std::shuffle(neighbors.begin(), neighbors.end(), g);
 
-        for (int neighbour : neighbours) {
-            if (visited.find(neighbour) == visited.end()) {
-                visited.insert(neighbour);
-                selected_neighbours.push_back(neighbour);
-                to_explore.push(neighbour);
+        for (int neighbor : neighbors) {
+            if (visited.find(neighbor) == visited.end()) {
+                visited.insert(neighbor);
+                selected_neighbors.push_back(neighbor);
+                to_explore.push(neighbor);
 
-                if (selected_neighbours.size() == k) {
-                    return selected_neighbours;
+                if (selected_neighbors.size() == k) {
+                    return selected_neighbors;
                 }
             }
         }
     }
 
-    return selected_neighbours;
+    return selected_neighbors;
 }
 
-std::vector<int> Graph::get_neighbours(int node, int depth) const {
+std::vector<int> Graph::get_neighbors(int node, int depth) const {
     if (!(is_valid_node(node))) throw GraphException("Node does not exist");
 
     std::unordered_set<int> visited;
@@ -80,7 +80,7 @@ std::vector<int> Graph::get_neighbours(int node, int depth) const {
         for (int i = 0; i < frontierSize; ++i) {
             int curr = frontier.front();
             frontier.pop();
-            for (auto&& nbr : get_neighbours(curr)) {
+            for (auto&& nbr : get_neighbors(curr)) {
                 if (!visited.count(nbr)) {
                     visited.insert(nbr);
                     frontier.push(nbr);
@@ -88,9 +88,9 @@ std::vector<int> Graph::get_neighbours(int node, int depth) const {
             }
         }
     }
-    std::vector<int> neighbours(visited.begin(), visited.end());
+    std::vector<int> neighbors(visited.begin(), visited.end());
 
-    return neighbours;
+    return neighbors;
 }
 
 int Graph::get_degree(int node) const {
@@ -149,9 +149,9 @@ void Graph::read_edges(std::string edges_path) {
 void Graph::print_edges() const {
     for (int i = 0; i < num_nodes; i++) {
         for (int j = offsets[i]; j < offsets[i + 1]; j++) {
-            int neighbour = edges[j];
-            if (neighbour <= i) {  // to only print unique edges (in descending order)
-                std::cout << i << "\t" << neighbour << "\n";
+            int neighbor = edges[j];
+            if (neighbor <= i) {  // to only print unique edges (in descending order)
+                std::cout << i << "\t" << neighbor << "\n";
             }
         }
     }
