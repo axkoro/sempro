@@ -9,12 +9,12 @@ class KNNImputer : public Imputer<T> {
     FRIEND_TEST(KNNTest, testGlobalAverage);
 
    private:
-    int depth;
-    bool use_k_nearest;
+    int k;
+    bool use_k_hop;
 
    public:
-    KNNImputer(AttributedGraph<T>& g, int depth = 2, bool use_k_nearest = false)
-        : Imputer<T>(g), depth(depth), use_k_nearest(use_k_nearest) {}
+    KNNImputer(AttributedGraph<T>& g, int k = 100, bool use_k_hop = false)
+        : Imputer<T>(g), k(k), use_k_hop(use_k_hop) {}
 
     void run() override;
 };

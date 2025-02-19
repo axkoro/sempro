@@ -58,7 +58,15 @@ def parse_args():
 
     knn_group = parser.add_argument_group("KNN Imputer Options")
     knn_group.add_argument(
-        "--depth", type=int, default=2, help="Recursion depth for KNN imputation."
+        "--k",
+        type=int,
+        default=2,
+        help="The number of neighbours to be used for KNN imputation. If --use-k-hop was passed: number of hops to use.",
+    )
+    eval_group.add_argument(
+        "--use-k-hop",
+        action="store_true",
+        help="Use all neighbours within k hops instead of the k nearest for KNN imputation.",
     )
 
     community_group = parser.add_argument_group("Community Imputer Options")

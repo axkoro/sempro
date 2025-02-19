@@ -15,7 +15,7 @@ TEST(KNNTest, testKNN) {
     std::string complete_path = "../data/test/knn/test_complete_features.txt";
 
     AttributedGraph<double> graph(edges_path, features_path);
-    KNNImputer<double> knn(graph, 2);
+    KNNImputer<double> knn(graph, 2, true);
     knn.run();
 
     std::string temp_file_path = "temp_imputation_results.txt";
@@ -56,7 +56,7 @@ TEST(KNNTest, testGlobalAverage) {
     std::string features_path = "../data/test/knn/test_missing_features.txt";
 
     AttributedGraph<double> graph(edges_path, features_path);
-    KNNImputer<double> knn(graph, 3);
+    KNNImputer<double> knn(graph, 3, true);
 
     double average0 = knn.compute_global_average(0);
     double average1 = knn.compute_global_average(1);

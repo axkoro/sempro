@@ -20,10 +20,10 @@ void KNNImputer<T>::run() {
     for (int node = 0; node < num_nodes; ++node) {
         std::vector<int> neighbours;
 
-        if (use_k_nearest) {
-            neighbours = this->graph.get_k_nearest_neighbors(node, depth);
+        if (use_k_hop) {
+            neighbours = this->graph.get_neighbours(node, k);
         } else {
-            neighbours = this->graph.get_neighbours(node, depth);
+            neighbours = this->graph.get_k_nearest_neighbors(node, k);
         }
         auto missing_features = this->graph.get_missing_features(node);
 

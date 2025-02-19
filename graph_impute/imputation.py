@@ -46,13 +46,13 @@ class KNNImputer(Imputer):
     ----------
     graph : Graph
         The graph to be imputed.
-    depth : int, optional
-        The depth for the KNN imputer (default is 2).
+    k : int, optional
+        The k for the KNN imputer (default is 2).
     """
 
-    def __init__(self, graph: Graph, depth: int = 2, use_k_nearest: bool = False):
+    def __init__(self, graph: Graph, k: int = 2, use_k_hop: bool = False):
         super().__init__(graph)
-        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth, use_k_nearest)
+        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, k, use_k_hop)
 
     def impute(self) -> None:
         self.cpp_imputer.run()
@@ -181,11 +181,14 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
         The graph to be imputed.
     **kwargs
         Additional keyword arguments passed to the imputer constructor.
+        See documentation of the individual imputers for possible arguments.
+
+        Invalid arguments will be ignored and a warning will be printed.
 
     Returns
     -------
     Imputer
-        An instance of a subclass of Imputer.
+        An instance of a concrete Imputer.
 
     Raises
     ------
@@ -203,10 +206,13 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
         raise ValueError(f"Unknown strategy: '{strategy}'") from e
 
     valid_params = inspect.signature(imputer_class.__init__).parameters
-    filtered_kwargs = {
-        parameter_name: parameter_value
-        for parameter_name, parameter_value in kwargs.items()
-        if parameter_name in valid_params
-    }
+    filtered_kwargs = {}
+    for parameter_name, parameter_value in kwargs.items():
+        if parameter_name in valid_params:
+            filtered_kwargs[parameter_name] = parameter_value
+        else:
+            print(
+                f"Warning: parameter {parameter_name} was passed but {imputer_class} doesn't accept it"
+            )
 
     return imputer_class(graph, **filtered_kwargs)

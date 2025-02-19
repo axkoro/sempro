@@ -48,7 +48,7 @@ _knn_imputer_map = {
 
 
 def cpp_create_knn_imputer(
-    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool], depth: int, use_k_nearest: bool
+    cpp_graph: Union[g.GraphFloat, g.GraphInt, g.GraphBool], k: int, use_k_hop: bool
 ) -> Union[im.KNNImputerFloat, im.KNNImputerInt, im.KNNImputerBool]:
     """
     Create a C++ KNN imputer instance for the given graph.
@@ -57,8 +57,6 @@ def cpp_create_knn_imputer(
     ----------
     cpp_graph : Union[g.GraphFloat, g.GraphInt, g.GraphBool]
         A C++ graph instance.
-    depth : int
-        The depth parameter for the KNN imputer.
 
     Returns
     -------
@@ -66,7 +64,7 @@ def cpp_create_knn_imputer(
         A C++ KNN imputer instance.
     """
     imputer_class = _knn_imputer_map.get(type(cpp_graph))
-    return imputer_class(cpp_graph, depth, use_k_nearest)
+    return imputer_class(cpp_graph, k, use_k_hop)
 
 
 _community_imputer_map = {
