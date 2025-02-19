@@ -1,12 +1,12 @@
 #include "Graph.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <random>
 #include <sstream>
 #include <unordered_set>
-#include <random>
-#include <algorithm>
 
 Graph::Graph(std::string edges_path) {
     num_nodes = parse_node_count_from_edge_file(edges_path);
@@ -29,45 +29,42 @@ std::vector<int> Graph::get_neighbours(int node) const {
     return neighbours;
 }
 
-std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {;
+std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
+    ;
     if (!is_valid_node(node)) throw GraphException("Node does not exist");
 
-    std::unordered_set<int> visited;  // To avoid duplicate nodes
-    std::vector<int> selected_neighbors;
+    std::random_device rd;  // for shuffling
+    std::mt19937 g(rd());
+
+    std::unordered_set<int> visited;
+    std::vector<int> selected_neighbours;
+    selected_neighbours.reserve(k);
     std::queue<int> to_explore;
 
-    // Start with direct neighbors
     to_explore.push(node);
     visited.insert(node);
 
-    while (!to_explore.empty() && selected_neighbors.size() < k) {
+    while (!to_explore.empty() && selected_neighbours.size() < k) {
         int current = to_explore.front();
         to_explore.pop();
 
-        // Get neighbors of current node
-        int start = offsets[current];
-        int end = offsets[current + 1];
-        std::vector<int> neighbors(edges.begin() + start, edges.begin() + end);
+        std::vector<int> neighbours = get_neighbours(current);
+        std::shuffle(neighbours.begin(), neighbours.end(), g);
 
-        // Shuffle to add randomness
-        std::random_device rd;
-        std::mt19937 g(rd());
-        std::shuffle(neighbors.begin(), neighbors.end(), g);
+        for (int neighbour : neighbours) {
+            if (visited.find(neighbour) == visited.end()) {
+                visited.insert(neighbour);
+                selected_neighbours.push_back(neighbour);
+                to_explore.push(neighbour);
 
-        for (int neighbor : neighbors) {
-            if (visited.find(neighbor) == visited.end()) {
-                visited.insert(neighbor);
-                selected_neighbors.push_back(neighbor);
-                to_explore.push(neighbor);
-
-                if (selected_neighbors.size() == k) {
-                    return selected_neighbors;
+                if (selected_neighbours.size() == k) {
+                    return selected_neighbours;
                 }
             }
         }
     }
 
-    return selected_neighbors;
+    return selected_neighbours;
 }
 
 std::vector<int> Graph::get_neighbours(int node, int depth) const {
