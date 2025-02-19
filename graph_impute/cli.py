@@ -60,7 +60,7 @@ def parse_args():
     knn_group.add_argument(
         "--k",
         type=int,
-        default=2,
+        # default=100,
         help="The number of neighbors to be used for KNN imputation. If --use-k-hop was passed: number of hops to use.",
     )
     eval_group.add_argument(
@@ -73,7 +73,7 @@ def parse_args():
     community_group.add_argument(
         "--community-algorithm",
         type=str,
-        default="louvain",
+        # default="louvain",
         help="Algorithm to use for community detection.",
     )
 
@@ -81,41 +81,65 @@ def parse_args():
     deepwalk_group.add_argument(
         "--fusion-coefficient",
         type=float,
-        default=0.6,
+        # default=0.6,
         help="Fusion coefficient for DeepWalk imputation.",
     )
     deepwalk_group.add_argument(
-        "--walk-length", type=int, default=40, help="Length of each random walk."
+        "--walk-length",
+        type=int,
+        # default=40,
+        help="Length of each random walk.",
     )
     deepwalk_group.add_argument(
-        "--num-walks", type=int, default=10, help="Number of walks per node."
+        "--num-walks",
+        type=int,
+        # default=10,
+        help="Number of walks per node.",
     )
     deepwalk_group.add_argument(
-        "--embedding-size", type=int, default=128, help="Size of the embedding vector."
+        "--embedding-size",
+        type=int,
+        # default=128,
+        help="Size of the embedding vector.",
     )
     deepwalk_group.add_argument(
-        "--context-window", type=int, default=10, help="Context window size for embedding learning."
+        "--context-window",
+        type=int,
+        # default=10,
+        help="Context window size for embedding learning.",
     )
     deepwalk_group.add_argument(
         "--num-negative-samples",
         type=int,
-        default=10,
+        # default=10,
         help="Number of negative samples per positive sample.",
     )
     deepwalk_group.add_argument(
         "--smoothing-exponent",
         type=float,
-        default=0.75,
+        # default=0.75,
         help="Smoothing exponent for sampling distribution.",
     )
     deepwalk_group.add_argument(
-        "--num-epochs", type=int, default=5, help="Number of epochs for training."
+        "--num-epochs",
+        type=int,
+        # default=5,
+        help="Number of epochs for training.",
     )
     deepwalk_group.add_argument(
-        "--learning-rate", type=float, default=0.025, help="Learning rate for the optimizer."
+        "--learning-rate",
+        type=float,
+        # default=0.025,
+        help="Learning rate for the optimizer.",
     )
 
     return parser.parse_args()
+
+
+def print_ignored_parameter_warning(strategy: str, parameter: str):
+    print(
+        f"Warning: Ignoring parameter '{parameter}' that was passed, which isn't supported by strategy '{strategy}'"
+    )
 
 
 def validate_command(args):
@@ -138,6 +162,36 @@ def validate_command(args):
             print(
                 "Warning: When --dataset is provided, file paths for --edges and --features will be overridden by the dataset configuration."
             )
+
+    if not args.strategy == "knn":
+        if args.k:
+            print_ignored_parameter_warning("knn", "k")
+        if args.use_k_hop:
+            print_ignored_parameter_warning("knn", "use-k-hop")
+
+    if not args.strategy == "community":
+        if args.community_algorithm:
+            print_ignored_parameter_warning("community", "community-algorithm")
+
+    if not args.strategy == "deepwalk":
+        if args.fusion_coefficient:
+            print_ignored_parameter_warning("deepwalk", "fusion-coefficient")
+        if args.walk_length:
+            print_ignored_parameter_warning("deepwalk", "walk-length")
+        if args.num_walks:
+            print_ignored_parameter_warning("deepwalk", "num-walks")
+        if args.embedding_size:
+            print_ignored_parameter_warning("deepwalk", "embedding-size")
+        if args.context_window:
+            print_ignored_parameter_warning("deepwalk", "context-window")
+        if args.num_negative_samples:
+            print_ignored_parameter_warning("deepwalk", "num-negative-samples")
+        if args.smoothing_exponent:
+            print_ignored_parameter_warning("deepwalk", "smoothing-exponent")
+        if args.num_epochs:
+            print_ignored_parameter_warning("deepwalk", "num-epochs")
+        if args.learning_rate:
+            print_ignored_parameter_warning("deepwalk", "learning-rate")
 
 
 def load_dataset_config(args):
@@ -203,24 +257,22 @@ def main():
     save_time_end = time.time()
 
     if args.time:
-        total_time = save_time_end - load_time_start  # excluding evaluation
         load_time = load_time_end - load_time_start
         impute_time = impute_time_end - impute_time_start
         save_time = save_time_end - save_time_start
 
-        times = [total_time, load_time, impute_time, save_time]
+        times = [load_time, impute_time, save_time]
         formatted_times = [f"{t:.2f}" for t in times]
         max_width = max(len(t_str) for t_str in formatted_times)
 
         output = dedent(f"""\
-            Total time:  {total_time:{max_width}.2f} s
             Impute time: {impute_time:{max_width}.2f} s
             Load time:   {load_time:{max_width}.2f} s
             Save time:   {save_time:{max_width}.2f} s""")
 
-        if args.strategy == "community":  #
+        if args.strategy == "community":
             community_detection_time = community_detection_time_end - community_detection_time_start
-            output += f"\nCommunity detection time: {community_detection_time:{max_width}.2f} s"
+            output += f"\nCommunity detection time: {community_detection_time:.2f} s"
 
         print(output)
 
@@ -241,11 +293,15 @@ def main():
             evaluate_time = evaluate_time_end - evaluate_time_start
             print(f"Evaluate time: {evaluate_time:{max_width}.2f} s\n")
 
-        print(f"overlap (total): {overlap_total * 100:2.2f} %")
-        print(f"overlap (missing): {overlap_missing * 100:2.2f} %")
-        print(f"max error (abs): {max_error:2.2f}")
-        print(f"avg error (abs): {avg_error:2.2f}")
-        print(f"R2 score: {r2_score:2.2f}")
+        eval_values = [overlap_total * 100, overlap_missing * 100, max_error, avg_error, r2_score]
+        formatted_eval = [f"{val:.2f}" for val in eval_values]
+        eval_max_width = max(len(val_str) for val_str in formatted_eval)
+
+        print(f"overlap (total):   {overlap_total * 100:{eval_max_width}.2f} %")
+        print(f"overlap (missing): {overlap_missing * 100:{eval_max_width}.2f} %")
+        print(f"max error (abs):   {max_error:{eval_max_width}.2f}")
+        print(f"avg error (abs):   {avg_error:{eval_max_width}.2f}")
+        print(f"R2 score:          {r2_score:{eval_max_width}.2f}")
 
 
 if __name__ == "__main__":

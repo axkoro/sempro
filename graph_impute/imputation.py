@@ -206,13 +206,10 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
         raise ValueError(f"Unknown strategy: '{strategy}'") from e
 
     valid_params = inspect.signature(imputer_class.__init__).parameters
-    filtered_kwargs = {}
-    for parameter_name, parameter_value in kwargs.items():
-        if parameter_name in valid_params:
-            filtered_kwargs[parameter_name] = parameter_value
-        else:
-            print(
-                f"Warning: parameter {parameter_name} was passed but {imputer_class} doesn't accept it"
-            )
+    filtered_kwargs = {
+        parameter_name: parameter_value
+        for parameter_name, parameter_value in kwargs.items()
+        if (parameter_name in valid_params) and (parameter_value is not None)
+    }
 
     return imputer_class(graph, **filtered_kwargs)
