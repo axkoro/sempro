@@ -13,7 +13,7 @@ class KNNImputer : public Imputer<T> {
     bool use_k_hop;
 
    public:
-    KNNImputer(AttributedGraph<T>& g, int k = 100, bool use_k_hop = false)
+    KNNImputer(AttributedGraph<T>& g, int k, bool use_k_hop)
         : Imputer<T>(g), k(k), use_k_hop(use_k_hop) {}
 
     void run() override;

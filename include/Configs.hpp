@@ -1,10 +1,10 @@
 #pragma once
 
 // TODO: add documentation for how to use default config (and only change specific paramters)
-struct DeepWalkConfig {  // TODO: research best initial parameters
-    double fusion_coefficient = 0.5;
+struct DeepWalkConfig {
+    double fusion_coefficient = 0.6;
 
-    int walk_length = 40;
+    int walk_length = 80;
     int num_walks = 10;
 
     int embedding_size = 128;
@@ -12,10 +12,10 @@ struct DeepWalkConfig {  // TODO: research best initial parameters
     int num_negative_samples = 10;
     double smoothing_exponent = 0.75;
 
-    int num_epochs = 5;
+    int num_epochs = 1;
     double learning_rate = 0.025;
 
-    bool validate() {  // TODO:
+    bool validate() {
         if (embedding_size <= 0) return false;
         if (context_window <= 0) return false;
         if (num_negative_samples < 0) return false;
@@ -39,7 +39,7 @@ struct SkipGramConfig {
     int num_negative_samples = 10;  ///< Number of negative samples per training pair.
     double smoothing_exponent =
         0.75;  ///< Exponent for smoothing the sampling distribution (for the negative samples).
-    int num_epochs = 5;            ///< Number of training epochs.
+    int num_epochs = 1;            ///< Number of training epochs.
     double learning_rate = 0.025;  ///< Initial learning rate.
 
     /// @brief Default constructor that uses the default member initializers.

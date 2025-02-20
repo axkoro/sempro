@@ -2,6 +2,7 @@ import argparse
 import time
 from copy import deepcopy
 from textwrap import dedent
+from typing import Any
 
 import yaml
 
@@ -10,7 +11,7 @@ from .graph import Graph
 from .imputation import create_imputer
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Imputation tool with multiple strategies.",
@@ -63,10 +64,11 @@ def parse_args():
         # default=100,
         help="The number of neighbors to be used for KNN imputation. If --use-k-hop was passed: number of hops to use.",
     )
-    eval_group.add_argument(
+    knn_group.add_argument(
         "--use-k-hop",
         action="store_true",
-        help="Use all neighbors within k hops instead of the k nearest for KNN imputation.",
+        default=None,  # because otherwise 'False' is default which makes checking if this argument was passed impossible (for warning messages)
+        help="Use neighbors within k hops instead of the k nearest (for KNN imputation).",
     )
 
     community_group = parser.add_argument_group("Community Imputer Options")
@@ -136,13 +138,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def print_ignored_parameter_warning(strategy: str, parameter: str):
-    print(
-        f"Warning: Ignoring parameter '{parameter}' that was passed, which isn't supported by strategy '{strategy}'"
-    )
-
-
-def validate_command(args):
+def validate_command(args: argparse.Namespace) -> None:
     """
     Validates the parsed command line arguments.
     Raises:
@@ -163,38 +159,8 @@ def validate_command(args):
                 "Warning: When --dataset is provided, file paths for --edges and --features will be overridden by the dataset configuration."
             )
 
-    if not args.strategy == "knn":
-        if args.k:
-            print_ignored_parameter_warning("knn", "k")
-        if args.use_k_hop:
-            print_ignored_parameter_warning("knn", "use-k-hop")
 
-    if not args.strategy == "community":
-        if args.community_algorithm:
-            print_ignored_parameter_warning("community", "community-algorithm")
-
-    if not args.strategy == "deepwalk":
-        if args.fusion_coefficient:
-            print_ignored_parameter_warning("deepwalk", "fusion-coefficient")
-        if args.walk_length:
-            print_ignored_parameter_warning("deepwalk", "walk-length")
-        if args.num_walks:
-            print_ignored_parameter_warning("deepwalk", "num-walks")
-        if args.embedding_size:
-            print_ignored_parameter_warning("deepwalk", "embedding-size")
-        if args.context_window:
-            print_ignored_parameter_warning("deepwalk", "context-window")
-        if args.num_negative_samples:
-            print_ignored_parameter_warning("deepwalk", "num-negative-samples")
-        if args.smoothing_exponent:
-            print_ignored_parameter_warning("deepwalk", "smoothing-exponent")
-        if args.num_epochs:
-            print_ignored_parameter_warning("deepwalk", "num-epochs")
-        if args.learning_rate:
-            print_ignored_parameter_warning("deepwalk", "learning-rate")
-
-
-def load_dataset_config(args):
+def load_dataset_config(args: argparse.Namespace) -> tuple[str, str, str, str]:
     if args.dataset:
         config_path = args.config  # will always be set due to default value
         with open(config_path) as file:
@@ -230,6 +196,25 @@ def load_dataset_config(args):
     return edges_path, features_path, reference_path, feature_type
 
 
+def extract_parameters(args: argparse.Namespace) -> dict[str, Any]:
+    non_parameters = [
+        "strategy",
+        "dataset",
+        "edges",
+        "features",
+        "output",
+        "feature_type",
+        "config",
+        "evaluate",
+        "reference",
+        "time",
+    ]
+    parameters = deepcopy(args.__dict__)
+    for parameter in non_parameters:
+        parameters.pop(parameter)
+    return parameters
+
+
 def main():
     args = parse_args()
     validate_command(args)
@@ -237,9 +222,7 @@ def main():
 
     load_time_start = time.time()
     graph = Graph.load(edges_path, features_path, feature_type=feature_type)
-
-    kwargs = deepcopy(vars(args))  # possible parameters for imputers
-    kwargs.pop("strategy")  # would be duplicate
+    kwargs = extract_parameters(args)
     imputer = create_imputer(args.strategy, graph, **kwargs)
     load_time_end = time.time()
 
