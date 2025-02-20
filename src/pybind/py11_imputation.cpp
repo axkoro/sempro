@@ -10,7 +10,8 @@ namespace py = pybind11;
 template <typename T>
 void bind_knn_imputer(py::module &m, const std::string &name) {
     py::class_<KNNImputer<T>>(m, name.c_str())
-        .def(py::init<AttributedGraph<T> &, int>(), py::arg("graph"), py::arg("depth") = 2)
+        .def(py::init<AttributedGraph<T> &, int, bool>(), py::arg("graph"), py::arg("k") = 100,
+             py::arg("use_k_hop") = false)
         .def("run", &KNNImputer<T>::run);
 }
 

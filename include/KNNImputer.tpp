@@ -18,16 +18,22 @@ void KNNImputer<T>::run() {
 
 #pragma omp parallel for schedule(dynamic)
     for (int node = 0; node < num_nodes; ++node) {
-        auto neighbours = this->graph.get_neighbours(node, depth);
+        std::vector<int> neighbors;
+
+        if (use_k_hop) {
+            neighbors = this->graph.get_neighbors(node, k);
+        } else {
+            neighbors = this->graph.get_k_nearest_neighbors(node, k);
+        }
         auto missing_features = this->graph.get_missing_features(node);
 
         for (int feature : missing_features) {
             double sum = 0.0;
             int count = 0;
 
-            for (int neighbour : neighbours) {
-                if (!this->graph.is_missing(neighbour, feature)) {
-                    T feature_val = this->graph.get_feature(neighbour, feature);
+            for (int neighbor : neighbors) {
+                if (!this->graph.is_missing(neighbor, feature)) {
+                    T feature_val = this->graph.get_feature(neighbor, feature);
                     sum += static_cast<double>(feature_val);
                     ++count;
                 }

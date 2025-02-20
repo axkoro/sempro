@@ -32,9 +32,9 @@ PYBIND11_MODULE(cpp_graph_module, m) {
         //   py::arg("edges"))
         .def("get_num_nodes", &Graph::get_num_nodes)
         .def("get_num_edges", &Graph::get_num_edges)
-        //    .def("get_neighbours", (std::vector<int>(Graph::*)(int) const) &
-        //    Graph::get_neighbours) .def("get_neighbours_depth",
-        //         (std::vector<int>(Graph::*)(int, int) const) & Graph::get_neighbours)
+        //    .def("get_neighbors", (std::vector<int>(Graph::*)(int) const) &
+        //    Graph::get_neighbors) .def("get_neighbors_depth",
+        //         (std::vector<int>(Graph::*)(int, int) const) & Graph::get_neighbors)
         //    .def("get_degree", &Graph::get_degree)
         //    .def("has_edge", &Graph::has_edge)
         //    .def("is_valid_node", &Graph::is_valid_node)

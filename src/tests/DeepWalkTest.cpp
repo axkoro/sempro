@@ -39,11 +39,11 @@ TEST(EdgeWeightCalculatorTest, generate_edge_weights) {
     for (int node = 0; node < num_nodes; node++) {
         int count_desc_edges = 0;
         for (auto edge : edge_weights.get_edges(node)) {
-            int neighbour = edge.target;
+            int neighbor = edge.target;
 
-            int higher = std::max(node, neighbour);
-            int lower = std::min(node, neighbour);
-            if (neighbour == lower) {
+            int higher = std::max(node, neighbor);
+            int lower = std::min(node, neighbor);
+            if (neighbor == lower) {
                 count_desc_edges++;
             }
 

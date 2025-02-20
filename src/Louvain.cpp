@@ -23,10 +23,10 @@ void Louvain::initialize() {
 
     for (int node = 0; node < num_nodes; node++) {
         // Initialize community connections
-        for (auto pair : current_graph.get_neighbours(node)) {
-            int neighbour = pair.first;
-            if (neighbour >= node) {  // prevent double counting of edges
-                uint64_t comm_pair = encode_community_pair(node, neighbour);
+        for (auto pair : current_graph.get_neighbors(node)) {
+            int neighbor = pair.first;
+            if (neighbor >= node) {  // prevent double counting of edges
+                uint64_t comm_pair = encode_community_pair(node, neighbor);
                 community_connections.emplace(comm_pair, 1);  // initial graph is unweighted
             }
         }
@@ -68,19 +68,19 @@ bool Louvain::optimize_modularity() {
         for (int node : nodes) {
             int current_comm = local_node_to_community[node];
 
-            // Find neighbouring communities
-            std::unordered_set<int> neighbour_communities;
-            auto neighbours = current_graph.get_neighbours(node);
-            for (auto pair : neighbours) {
-                int neighbour = pair.first;
-                neighbour_communities.insert(local_node_to_community[neighbour]);
+            // Find neighboring communities
+            std::unordered_set<int> neighbor_communities;
+            auto neighbors = current_graph.get_neighbors(node);
+            for (auto pair : neighbors) {
+                int neighbor = pair.first;
+                neighbor_communities.insert(local_node_to_community[neighbor]);
             }
 
             // Find best community
             int best_community = current_comm;
             double best_gain = 0;
 
-            for (int candidate_comm : neighbour_communities) {
+            for (int candidate_comm : neighbor_communities) {
                 double gain = calculate_modularity_gain(node, candidate_comm);
                 if (gain > best_gain) {
                     best_gain = gain;
@@ -103,11 +103,11 @@ bool Louvain::optimize_modularity() {
 double Louvain::calculate_modularity_gain(int node, int target_comm) {
     int weight_to_community = 0;
 
-    for (auto pair : current_graph.get_neighbours(node)) {
-        int neighbour = pair.first;
+    for (auto pair : current_graph.get_neighbors(node)) {
+        int neighbor = pair.first;
         int weight = pair.second;
 
-        if (local_node_to_community[neighbour] == target_comm) {
+        if (local_node_to_community[neighbor] == target_comm) {
             weight_to_community += weight;
         }
     }
@@ -126,12 +126,12 @@ void Louvain::move_node(int node, int old_comm, int new_comm) {
     community_total_weights[old_comm] -= node_weight;
     community_total_weights[new_comm] += node_weight;
 
-    for (auto pair : current_graph.get_neighbours(node)) {
-        int neighbour = pair.first;
+    for (auto pair : current_graph.get_neighbors(node)) {
+        int neighbor = pair.first;
         int weight = pair.second;
 
-        update_community_connection(old_comm, local_node_to_community[neighbour], -weight);
-        update_community_connection(new_comm, local_node_to_community[neighbour], weight);
+        update_community_connection(old_comm, local_node_to_community[neighbor], -weight);
+        update_community_connection(new_comm, local_node_to_community[neighbor], weight);
     }
 }
 

@@ -85,9 +85,9 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator<T>::compute_covers(int
     std::vector<std::unordered_set<int>> covers(num_nodes);
 
     for (int node = 0; node < num_nodes; ++node) {
-        std::vector<int> neighbours = graph.get_neighbours(node, depth);
-        for (const auto& neighbour : neighbours) {
-            covers[node].insert(neighbour);
+        std::vector<int> neighbors = graph.get_neighbors(node, depth);
+        for (const auto& neighbor : neighbors) {
+            covers[node].insert(neighbor);
         }
         covers[node].erase(node);
     }

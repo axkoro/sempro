@@ -9,7 +9,9 @@ from sklearn.metrics import r2_score
 from .graph import Graph
 
 
-def evaluate_imputed_graph(graph: Graph, input_features_path: str, reference_path: str):
+def evaluate_imputed_graph(
+    graph: Graph, input_features_path: str, reference_path: str
+) -> tuple[float, float, float, float, float]:
     """
     Evaluate imputed graph features against a reference.
 
@@ -21,19 +23,23 @@ def evaluate_imputed_graph(graph: Graph, input_features_path: str, reference_pat
         Path to the reference features file used for evaluation.
     """
     temp_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
-    Graph.save(temp_file)
+    graph.save(temp_file.name)
 
-    evaluate_imputed_features_file(
-        imputed_features_path=temp_file,
+    overlap_total, overlap_missing, max_error, avg_error, r2_score = evaluate_imputed_features_file(
+        imputed_features_path=temp_file.name,
         input_features_path=input_features_path,
         reference_path=reference_path,
+        feature_type=graph.feature_type,
     )
 
     temp_file.close()
     try:
         os.remove(temp_file.name)
     except OSError:
+        print("Failed to delete temp files for evaluation")
         pass
+
+    return overlap_total, overlap_missing, max_error, avg_error, r2_score
 
 
 def evaluate_imputed_features_file(

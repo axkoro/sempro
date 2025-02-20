@@ -46,13 +46,13 @@ class KNNImputer(Imputer):
     ----------
     graph : Graph
         The graph to be imputed.
-    depth : int, optional
-        The depth for the KNN imputer (default is 2).
+    k : int, optional
+        The k for the KNN imputer (default is 2).
     """
 
-    def __init__(self, graph: Graph, depth: int = 2):
+    def __init__(self, graph: Graph, k: int = 100, use_k_hop: bool = False):
         super().__init__(graph)
-        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, depth)
+        self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, k, use_k_hop)
 
     def impute(self) -> None:
         self.cpp_imputer.run()
@@ -142,13 +142,13 @@ class DeepWalkImputer(Imputer):
         self,
         graph: Graph,
         fusion_coefficient: float = 0.6,
-        walk_length: int = 40,
+        walk_length: int = 80,
         num_walks: int = 10,
         embedding_size: int = 128,
         context_window: int = 10,
         num_negative_samples: int = 10,
         smoothing_exponent: float = 0.75,
-        num_epochs: int = 5,
+        num_epochs: int = 1,
         learning_rate: float = 0.025,
     ):
         super().__init__(graph)
@@ -181,11 +181,14 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
         The graph to be imputed.
     **kwargs
         Additional keyword arguments passed to the imputer constructor.
+        See documentation of the individual imputers for possible arguments.
+
+        Invalid arguments will be ignored and a warning will be printed.
 
     Returns
     -------
     Imputer
-        An instance of a subclass of Imputer.
+        An instance of a concrete Imputer.
 
     Raises
     ------
@@ -203,10 +206,15 @@ def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:
         raise ValueError(f"Unknown strategy: '{strategy}'") from e
 
     valid_params = inspect.signature(imputer_class.__init__).parameters
-    filtered_kwargs = {
-        parameter_name: parameter_value
-        for parameter_name, parameter_value in kwargs.items()
-        if parameter_name in valid_params
-    }
+    filtered_kwargs = {}
+    for parameter_name, parameter_value in kwargs.items():
+        if parameter_value is None:
+            continue
+        if parameter_name in valid_params:
+            filtered_kwargs[parameter_name] = parameter_value
+        else:
+            print(
+                f"Warning: Ignoring parameter '{parameter_name}' that was passed, but which isn't supported by strategy '{strategy}'"
+            )
 
     return imputer_class(graph, **filtered_kwargs)

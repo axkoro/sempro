@@ -45,23 +45,33 @@ class Graph {
     int get_num_edges() const;
 
     /**
-     * @brief Gets the immediate neighbours of a node.
+     * @brief Gets the immediate neighbors of a node.
      *
      * @param node Index of the node.
-     * @return Vector of neighbour node indices.
+     * @return Vector of neighbor node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbours(int node) const;  // TODO: use iterator instead
+    std::vector<int> get_neighbors(int node) const;  // TODO: use iterator instead
 
     /**
-     * @brief Gets the neighbours of a node up to a certain depth.
+     * @brief Gets k random neighbors of a node.
      *
      * @param node Index of the node.
-     * @param depth Depth of neighbour search.
-     * @return Vector of neighbour node indices.
+     * @param k Number of neighbors to return.
+     * @return Vector of neighbor node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbours(int node, int depth) const;  // TODO: ? use iterator instead
+    std::vector<int> get_k_nearest_neighbors(int node, int k);
+
+    /**
+     * @brief Gets the neighbors of a node up to a certain depth.
+     *
+     * @param node Index of the node.
+     * @param depth Depth of neighbor search.
+     * @return Vector of neighbor node indices.
+     * @throws std::logic_error If the node does not exist.
+     */
+    std::vector<int> get_neighbors(int node, int depth) const;  // TODO: ? use iterator instead
 
     /**
      * @brief Gets the degree of a node.

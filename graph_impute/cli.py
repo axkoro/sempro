@@ -2,6 +2,7 @@ import argparse
 import time
 from copy import deepcopy
 from textwrap import dedent
+from typing import Any
 
 import yaml
 
@@ -10,7 +11,7 @@ from .graph import Graph
 from .imputation import create_imputer
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Imputation tool with multiple strategies.",
@@ -58,14 +59,23 @@ def parse_args():
 
     knn_group = parser.add_argument_group("KNN Imputer Options")
     knn_group.add_argument(
-        "--depth", type=int, default=2, help="Recursion depth for KNN imputation."
+        "--k",
+        type=int,
+        # default=100,
+        help="The number of neighbors to be used for KNN imputation. If --use-k-hop was passed: number of hops to use.",
+    )
+    knn_group.add_argument(
+        "--use-k-hop",
+        action="store_true",
+        default=None,  # because otherwise 'False' is default which makes checking if this argument was passed impossible (for warning messages)
+        help="Use neighbors within k hops instead of the k nearest (for KNN imputation).",
     )
 
     community_group = parser.add_argument_group("Community Imputer Options")
     community_group.add_argument(
         "--community-algorithm",
         type=str,
-        default="louvain",
+        # default="louvain",
         help="Algorithm to use for community detection.",
     )
 
@@ -73,44 +83,62 @@ def parse_args():
     deepwalk_group.add_argument(
         "--fusion-coefficient",
         type=float,
-        default=0.6,
+        # default=0.6,
         help="Fusion coefficient for DeepWalk imputation.",
     )
     deepwalk_group.add_argument(
-        "--walk-length", type=int, default=40, help="Length of each random walk."
+        "--walk-length",
+        type=int,
+        # default=40,
+        help="Length of each random walk.",
     )
     deepwalk_group.add_argument(
-        "--num-walks", type=int, default=10, help="Number of walks per node."
+        "--num-walks",
+        type=int,
+        # default=10,
+        help="Number of walks per node.",
     )
     deepwalk_group.add_argument(
-        "--embedding-size", type=int, default=128, help="Size of the embedding vector."
+        "--embedding-size",
+        type=int,
+        # default=128,
+        help="Size of the embedding vector.",
     )
     deepwalk_group.add_argument(
-        "--context-window", type=int, default=10, help="Context window size for embedding learning."
+        "--context-window",
+        type=int,
+        # default=10,
+        help="Context window size for embedding learning.",
     )
     deepwalk_group.add_argument(
         "--num-negative-samples",
         type=int,
-        default=10,
+        # default=10,
         help="Number of negative samples per positive sample.",
     )
     deepwalk_group.add_argument(
         "--smoothing-exponent",
         type=float,
-        default=0.75,
+        # default=0.75,
         help="Smoothing exponent for sampling distribution.",
     )
     deepwalk_group.add_argument(
-        "--num-epochs", type=int, default=5, help="Number of epochs for training."
+        "--num-epochs",
+        type=int,
+        # default=5,
+        help="Number of epochs for training.",
     )
     deepwalk_group.add_argument(
-        "--learning-rate", type=float, default=0.025, help="Learning rate for the optimizer."
+        "--learning-rate",
+        type=float,
+        # default=0.025,
+        help="Learning rate for the optimizer.",
     )
 
     return parser.parse_args()
 
 
-def validate_command(args):
+def validate_command(args: argparse.Namespace) -> None:
     """
     Validates the parsed command line arguments.
     Raises:
@@ -132,7 +160,7 @@ def validate_command(args):
             )
 
 
-def load_dataset_config(args):
+def load_dataset_config(args: argparse.Namespace) -> tuple[str, str, str, str]:
     if args.dataset:
         config_path = args.config  # will always be set due to default value
         with open(config_path) as file:
@@ -168,6 +196,25 @@ def load_dataset_config(args):
     return edges_path, features_path, reference_path, feature_type
 
 
+def extract_parameters(args: argparse.Namespace) -> dict[str, Any]:
+    non_parameters = [
+        "strategy",
+        "dataset",
+        "edges",
+        "features",
+        "output",
+        "feature_type",
+        "config",
+        "evaluate",
+        "reference",
+        "time",
+    ]
+    parameters = deepcopy(args.__dict__)
+    for parameter in non_parameters:
+        parameters.pop(parameter)
+    return parameters
+
+
 def main():
     args = parse_args()
     validate_command(args)
@@ -175,9 +222,7 @@ def main():
 
     load_time_start = time.time()
     graph = Graph.load(edges_path, features_path, feature_type=feature_type)
-
-    kwargs = deepcopy(vars(args))  # possible parameters for imputers
-    kwargs.pop("strategy")  # would be duplicate
+    kwargs = extract_parameters(args)
     imputer = create_imputer(args.strategy, graph, **kwargs)
     load_time_end = time.time()
 
@@ -195,24 +240,22 @@ def main():
     save_time_end = time.time()
 
     if args.time:
-        total_time = save_time_end - load_time_start  # excluding evaluation
         load_time = load_time_end - load_time_start
         impute_time = impute_time_end - impute_time_start
         save_time = save_time_end - save_time_start
 
-        times = [total_time, load_time, impute_time, save_time]
+        times = [load_time, impute_time, save_time]
         formatted_times = [f"{t:.2f}" for t in times]
         max_width = max(len(t_str) for t_str in formatted_times)
 
         output = dedent(f"""\
-            Total time:  {total_time:{max_width}.2f} s
             Impute time: {impute_time:{max_width}.2f} s
             Load time:   {load_time:{max_width}.2f} s
             Save time:   {save_time:{max_width}.2f} s""")
 
-        if args.strategy == "community":  #
+        if args.strategy == "community":
             community_detection_time = community_detection_time_end - community_detection_time_start
-            output += f"\nCommunity detection time: {community_detection_time:{max_width}.2f} s"
+            output += f"\nCommunity detection time: {community_detection_time:.2f} s"
 
         print(output)
 
@@ -233,11 +276,15 @@ def main():
             evaluate_time = evaluate_time_end - evaluate_time_start
             print(f"Evaluate time: {evaluate_time:{max_width}.2f} s\n")
 
-        print(f"overlap (total): {overlap_total * 100:2.2f} %")
-        print(f"overlap (missing): {overlap_missing * 100:2.2f} %")
-        print(f"max error (abs): {max_error:2.2f}")
-        print(f"avg error (abs): {avg_error:2.2f}")
-        print(f"R2 score: {r2_score:2.2f}")
+        eval_values = [overlap_total * 100, overlap_missing * 100, max_error, avg_error, r2_score]
+        formatted_eval = [f"{val:.2f}" for val in eval_values]
+        eval_max_width = max(len(val_str) for val_str in formatted_eval)
+
+        print(f"overlap (total):   {overlap_total * 100:{eval_max_width}.2f} %")
+        print(f"overlap (missing): {overlap_missing * 100:{eval_max_width}.2f} %")
+        print(f"max error (abs):   {max_error:{eval_max_width}.2f}")
+        print(f"avg error (abs):   {avg_error:{eval_max_width}.2f}")
+        print(f"R2 score:          {r2_score:{eval_max_width}.2f}")
 
 
 if __name__ == "__main__":

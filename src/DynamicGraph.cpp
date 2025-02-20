@@ -8,11 +8,11 @@ DynamicGraph::DynamicGraph(const Graph& g) {
     edges.resize(num_nodes);
 
     for (int node = 0; node < num_nodes; ++node) {
-        const auto& neighbours = g.get_neighbours(node);
-        for (int neighbour : neighbours) {
-            if (neighbour > node) {  // to avoid double counting
-                edges[node].push_back({neighbour, 1});
-                edges[neighbour].push_back({node, 1});
+        const auto& neighbors = g.get_neighbors(node);
+        for (int neighbor : neighbors) {
+            if (neighbor > node) {  // to avoid double counting
+                edges[node].push_back({neighbor, 1});
+                edges[neighbor].push_back({node, 1});
             }
         }
     }
@@ -30,7 +30,7 @@ int DynamicGraph::get_degree(int u) const {
     return deg;
 }
 
-const std::vector<std::pair<int, int>>& DynamicGraph::get_neighbours(int u) const {
+const std::vector<std::pair<int, int>>& DynamicGraph::get_neighbors(int u) const {
     return edges[u];
 }
 

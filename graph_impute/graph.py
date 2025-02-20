@@ -51,7 +51,6 @@ class Graph:
         Graph
             A Graph instance wrapping the corresponding C++ graph.
         """
-        feature_type = feature_type
         cpp_graph = load_cpp_graph(edges_file, features_file, feature_type)
         return cls(cpp_graph)
 
