@@ -72,3 +72,20 @@ struct SkipGramConfig {
         return true;
     }
 };
+
+struct LouvainConfig {
+    int max_levels = 10;       ///< Maximum levels for the Louvain hierarchy
+    int max_iterations = 50;  ///< Maximum iterations in optimize_modularity
+    double tolerance = 1e-4;   ///< Minimum modularity improvement threshold
+
+    /**
+     * @brief Validates the configuration parameters.
+     * @return true if all parameters are valid, false otherwise.
+     */
+    bool validate() {
+        if (max_levels <= 0) return false;
+        if (max_iterations <= 0) return false;
+        if (tolerance < 0) return false;
+        return true;
+    }
+};
