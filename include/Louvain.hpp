@@ -4,12 +4,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Configs.hpp"
 #include "DynamicGraph.hpp"
 #include "Graph.hpp"
 
 class Louvain {
    public:
-    explicit Louvain(const Graph &g);
+    explicit Louvain(const Graph &g, const LouvainConfig &config);
 
     std::vector<int> execute();
 
@@ -17,7 +18,7 @@ class Louvain {
 
    private:
     bool executed = false;
-    int max_iterations = 50;
+    LouvainConfig config;
 
     DynamicGraph current_graph;
 
@@ -33,8 +34,6 @@ class Louvain {
     std::vector<int> community_total_weights;
 
     int total_edge_weight;
-
-    void set_max_iterations(int max_iterations);
 
     void initialize();
     bool optimize_modularity();
