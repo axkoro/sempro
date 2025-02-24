@@ -12,13 +12,45 @@ RandomWalkGenerator::RandomWalkGenerator(const Graph& graph, const GraphEdgeWeig
       edge_weights(edge_weights),
       walk_length(walk_length),
       num_walks(num_walks),
-      seed(seed) {
+      seed(seed) {}
+
+std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
     if (seed == -1) {
         std::random_device rd;
-        rng.seed(rd());
-    } else {
-        rng.seed(seed);
+        seed = rd();
     }
+
+    int num_nodes = graph.get_num_nodes();
+    std::vector<std::vector<int>> walks(num_nodes * num_walks, std::vector<int>(walk_length));
+
+#pragma omp parallel
+    {
+        std::mt19937 thread_local_rng(seed + omp_get_thread_num());
+#pragma omp for
+        for (int node = 0; node < num_nodes; ++node) {
+            int node_offset = node * num_walks;
+            for (int i = 0; i < num_walks; ++i) {
+                walks[node_offset + i] = perform_walk(node, thread_local_rng);
+            }
+        }
+    }
+    return walks;  // TODO: benchmark if returning with move semantics is quicker
+}
+
+std::vector<int> RandomWalkGenerator::perform_walk(int start_node, std::mt19937& rng) {
+    std::vector<int> walk(walk_length);
+    walk[0] = start_node;
+    int current_node = start_node;
+
+    std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
+    if (neighbors.empty()) return walk;
+
+    for (int i = 1; i < walk_length; ++i) {
+        std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
+        current_node = select_weighted_random_neighbor(neighbors, rng);
+        walk[i] = current_node;
+    }
+    return walk;  // TODO: benchmark if using move semantics is quicker
 }
 
 int RandomWalkGenerator::select_weighted_random_neighbor(
@@ -37,48 +69,4 @@ int RandomWalkGenerator::select_weighted_random_neighbor(
     int index = std::distance(cumulative_weights.begin(), it);
 
     return neighbors[index].target;
-}
-
-std::vector<std::vector<int>> RandomWalkGenerator::generate_walks() {
-    int num_nodes = graph.get_num_nodes();
-    std::vector<std::vector<int>> walks(num_nodes * num_walks, std::vector<int>(walk_length));
-
-    // Precompute seeds for each walk
-    std::vector<int> seeds(num_nodes * num_walks);
-    if (seed == -1) {
-        std::random_device rd;
-        for (int i = 0; i < num_nodes * num_walks; ++i) {
-            seeds[i] = rd();
-        }
-    } else {
-        std::mt19937 seed_rng(seed);
-        for (int i = 0; i < num_nodes * num_walks; ++i) {
-            seeds[i] = seed_rng();
-        }
-    }
-
-#pragma omp parallel for
-    for (int node = 0; node < num_nodes; ++node) {
-        for (int i = 0; i < num_walks; ++i) {
-            std::mt19937 local_rng(seeds[node * num_walks + i]);
-            walks[node * num_walks + i] = perform_walk(node, local_rng);
-        }
-    }
-    return walks;  // TODO: benchmark if returning with move semantics is quicker
-}
-
-std::vector<int> RandomWalkGenerator::perform_walk(int start_node, std::mt19937& local_rng) {
-    std::vector<int> walk(walk_length);
-    walk[0] = start_node;
-    int current_node = start_node;
-
-    std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
-    if (neighbors.empty()) return walk;
-
-    for (int i = 1; i < walk_length; ++i) {
-        std::vector<GraphEdgeWeights::Edge> neighbors = edge_weights.get_edges(current_node);
-        current_node = select_weighted_random_neighbor(neighbors, local_rng);
-        walk[i] = current_node;
-    }
-    return walk;  // TODO: benchmark if using move semantics is quicker
 }
