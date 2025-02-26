@@ -133,7 +133,7 @@ def compute_overlap(
     return ground_truth.sum()
 
 
-def count_missing_features(features_path: str) -> tuple[int, List[tuple[int, int]]]:
+def count_missing_features(features_path: str) -> tuple[int, npt.NDArray]:
     num_missing_features = 0
     missing_feature_indices = []
     with open(features_path, encoding="UTF-8") as f:
@@ -144,11 +144,11 @@ def count_missing_features(features_path: str) -> tuple[int, List[tuple[int, int
             for item in features:
                 if str(item) == "#":
                     num_missing_features += 1
-                    missing_feature_indices.append(
-                        (line_idx, feature_idx)
-                    )  # deviation from original measure-quality.py script (indented here)
+                    missing_feature_indices.append((line_idx, feature_idx))
                 feature_idx = feature_idx + 1
             line_idx = line_idx + 1
+
+    missing_feature_indices = np.array(missing_feature_indices)
     return num_missing_features, missing_feature_indices
 
 
@@ -166,7 +166,7 @@ def measure_r2_score(
     ref_features: npt.NDArray,
     pred_features: npt.NDArray,
     missing_map: List[tuple[int, int]],
-    all_features: bool = True,
+    all_features: bool = False,
 ) -> float:
     if all_features:
         score = r2_score(ref_features, pred_features)
@@ -175,8 +175,9 @@ def measure_r2_score(
         x = np.zeros(len(missing_map), dtype=feature_type)
         y = np.zeros(len(missing_map), dtype=feature_type)
 
-        x = ref_features[missing_map[:][0], missing_map[:][1]]
-        y = pred_features[missing_map[:][0], missing_map[:][1]]
+        missing_map = np.array(missing_map)
+        x = ref_features[missing_map[:, 0], missing_map[:, 1]]
+        y = pred_features[missing_map[:, 0], missing_map[:, 1]]
 
         score = r2_score(x, y)
 
