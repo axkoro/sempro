@@ -51,7 +51,7 @@ double EdgeWeightCalculator<T>::compute_feature_similarity(int u, int v) {
 
 template <typename T>
 bool EdgeWeightCalculator<T>::have_similar_feature(int node1, int node2, int feature_idx) {
-    if (graph.is_missing(node1, feature_idx) || graph.is_missing(node1, feature_idx)) return false;
+    if (graph.is_missing(node1, feature_idx) || graph.is_missing(node2, feature_idx)) return false;
     T feature1 = graph.get_feature(node1, feature_idx);
     T feature2 = graph.get_feature(node2, feature_idx);
     if (std::is_floating_point_v<T>) {
@@ -90,6 +90,7 @@ template <typename T>
 std::vector<std::unordered_set<int>> EdgeWeightCalculator<T>::compute_covers(int depth) {
     int num_nodes = graph.get_num_nodes();
     std::vector<std::unordered_set<int>> covers(num_nodes);
+
 #pragma omp parallel for
     for (int node = 0; node < num_nodes; ++node) {
         std::vector<int> neighbors = graph.get_neighbors(node, depth);
