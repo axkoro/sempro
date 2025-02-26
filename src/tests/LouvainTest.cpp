@@ -3,6 +3,8 @@
 #include "AttributedGraph.hpp"
 #include "Louvain.hpp"
 
+LouvainConfig config;  // Global config for all tests
+
 TEST(LouvainTest, SingleNodeGraph) {
     // Graph with 1 node (node 0) and zero edges.
     // offsets[0] = 0, offsets[1] = 0  => node 0 has no neighbors
@@ -10,7 +12,7 @@ TEST(LouvainTest, SingleNodeGraph) {
     std::vector<int> edges = {};
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 1u);
@@ -27,7 +29,7 @@ TEST(LouvainTest, TwoNodeNoEdge) {
     std::vector<int> edges = {};
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 2u);
@@ -44,7 +46,7 @@ TEST(LouvainTest, TwoNodeOneEdge) {
     std::vector<int> edges = {1, 0};
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 2u);
@@ -67,7 +69,7 @@ TEST(LouvainTest, ThreeNodeChain) {
     std::vector<int> edges = {1, 0, 2, 1};
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 3u);
@@ -96,7 +98,7 @@ TEST(LouvainTest, CompleteGraph) {
     };
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 4u);
@@ -131,7 +133,7 @@ TEST(LouvainTest, TwoComponents) {
     std::vector<int> edges = {1, 2, 0, 2, 0, 1, 4, 3};
     Graph g(offsets, edges);
 
-    Louvain lcd(g);
+    Louvain lcd(g, config);
     auto communities = lcd.execute();
 
     ASSERT_EQ(communities.size(), 5u);

@@ -6,12 +6,10 @@
 #include <random>
 #include <unordered_set>
 
-Louvain::Louvain(const Graph& g) : current_graph(g) {
+Louvain::Louvain(const Graph& g, const LouvainConfig& config) : current_graph(g), config(config) {
     total_edge_weight = g.get_num_edges();
     initialize();
 }
-
-void Louvain::set_max_iterations(int max_iterations) { this->max_iterations = max_iterations; }
 
 void Louvain::initialize() {
     int num_nodes = current_graph.get_num_nodes();
@@ -40,10 +38,12 @@ std::vector<int> Louvain::execute() {
     executed = true;
 
     bool improvement;
+    int level = 0;
     do {
         improvement = optimize_modularity();
         if (improvement) aggregate_communities();
-    } while (improvement);
+        level++;
+    } while (improvement && level < config.max_levels);
 
     return total_node_to_community;
 }
@@ -88,14 +88,14 @@ bool Louvain::optimize_modularity() {
                 }
             }
 
-            if (best_community != current_comm && best_gain > 1e-14) {
+            if (best_community != current_comm && best_gain > config.tolerance) {
                 move_node(node, current_comm, best_community);
                 local_improvement = true;
                 improved = true;
             }
         }
         iterations++;
-    } while (local_improvement && iterations < max_iterations);
+    } while (local_improvement && iterations < config.max_iterations);
 
     return improved;
 }
