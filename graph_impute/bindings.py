@@ -187,7 +187,9 @@ def cpp_create_deepwalk_config(
     return config
 
 
-def cpp_create_louvain_community_detector(cpp_graph: g.Graph) -> l.Louvain:
+def cpp_create_louvain_community_detector(
+    cpp_graph: g.Graph, louvain_config: l.LouvainConfig
+) -> l.Louvain:
     """
     Create a C++ Louvain community detector for the given graph.
 
@@ -201,4 +203,17 @@ def cpp_create_louvain_community_detector(cpp_graph: g.Graph) -> l.Louvain:
     l.Louvain
         A C++ Louvain community detector instance.
     """
-    return l.Louvain(cpp_graph)
+    return l.Louvain(cpp_graph, louvain_config)
+
+
+def cpp_create_louvain_config(
+    max_levels: int = 10, max_iterations: int = 50, tolerance: int = 1e-4
+) -> l.LouvainConfig:
+    config = l.LouvainConfig()
+
+    config.max_levels = max_levels
+    config.max_iterations = max_iterations
+    config.tolerance = tolerance
+
+    config.validate()
+    return config

@@ -7,6 +7,7 @@ from .bindings import (
     cpp_create_deepwalk_imputer,
     cpp_create_knn_imputer,
     cpp_create_louvain_community_detector,
+    cpp_create_louvain_config,
 )
 from .graph import Graph
 
@@ -86,7 +87,8 @@ class CommunityImputer(Imputer):
             If the specified community detection algorithm is not implemented.
         """
         if self.community_algorithm == "louvain":
-            community_detector = cpp_create_louvain_community_detector(self.graph.cpp_graph)
+            config = cpp_create_louvain_config()
+            community_detector = cpp_create_louvain_community_detector(self.graph.cpp_graph, config)
         else:
             raise NotImplementedError(
                 f"'{self.community_algorithm}' is not a valid community detection algorithm"
