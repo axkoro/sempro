@@ -1,5 +1,7 @@
 #pragma once
 
+#include <omp.h>
+
 #include <iostream>
 #include <queue>
 #include <type_traits>
@@ -37,7 +39,7 @@ template <typename T>
 double EdgeWeightCalculator<T>::compute_feature_similarity(int u, int v) {
     int num_features = graph.get_num_features();
     int num_similar_features = 0;
-
+#pragma omp parallel for reduction(+ : num_similar_features)
     for (int feature_idx = 0; feature_idx < num_features; feature_idx++) {
         if (have_similar_feature(u, v, feature_idx)) num_similar_features++;
     }
@@ -49,7 +51,7 @@ double EdgeWeightCalculator<T>::compute_feature_similarity(int u, int v) {
 
 template <typename T>
 bool EdgeWeightCalculator<T>::have_similar_feature(int node1, int node2, int feature_idx) {
-    if (graph.is_missing(node1, feature_idx) || graph.is_missing(node1, feature_idx)) return false;
+    if (graph.is_missing(node1, feature_idx) || graph.is_missing(node2, feature_idx)) return false;
     T feature1 = graph.get_feature(node1, feature_idx);
     T feature2 = graph.get_feature(node2, feature_idx);
     if (std::is_floating_point_v<T>) {
@@ -63,15 +65,20 @@ bool EdgeWeightCalculator<T>::have_similar_feature(int node1, int node2, int fea
 template <typename T>
 double EdgeWeightCalculator<T>::compute_structural_similarity(
     int u, int v, std::vector<std::unordered_set<int>>& covers) {
-    std::unordered_set<int> cover_u = covers[u];
-    std::unordered_set<int> cover_v = covers[v];
+    const std::unordered_set<int>& cover_u = covers[u];
+    const std::unordered_set<int>& cover_v = covers[v];
+
+    std::vector<int> cover_u_vec(cover_u.begin(), cover_u.end());
 
     int intersection_size = 0;
-    for (const auto& node : cover_u) {
-        if (cover_v.count(node)) {
+
+#pragma omp parallel for reduction(+ : intersection_size)
+    for (int i = 0; i < cover_u_vec.size(); ++i) {
+        if (cover_v.count(cover_u_vec[i])) {
             intersection_size++;
         }
     }
+
     int union_size = cover_u.size() + cover_v.size() - intersection_size;
 
     double mss = static_cast<double>(intersection_size) / static_cast<double>(union_size);
@@ -84,6 +91,7 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator<T>::compute_covers(int
     int num_nodes = graph.get_num_nodes();
     std::vector<std::unordered_set<int>> covers(num_nodes);
 
+#pragma omp parallel for
     for (int node = 0; node < num_nodes; ++node) {
         std::vector<int> neighbors = graph.get_neighbors(node, depth);
         for (const auto& neighbor : neighbors) {
