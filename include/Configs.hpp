@@ -15,6 +15,8 @@ struct DeepWalkConfig {
     int num_epochs = 1;
     double learning_rate = 0.025;
 
+    int top_similar = 10;
+
     bool validate() {
         if (embedding_size <= 0) return false;
         if (context_window <= 0) return false;
@@ -22,6 +24,7 @@ struct DeepWalkConfig {
         if (smoothing_exponent <= 0) return false;
         if (num_epochs <= 0) return false;
         if (learning_rate <= 0) return false;
+        if (top_similar <= 0) return false;
         if (walk_length < (2 * context_window + 1))
             return false;  // the full context window would exceed the walk
         return true;
@@ -74,9 +77,9 @@ struct SkipGramConfig {
 };
 
 struct LouvainConfig {
-    int max_levels = 10;       ///< Maximum levels for the Louvain hierarchy
+    int max_levels = 10;      ///< Maximum levels for the Louvain hierarchy
     int max_iterations = 50;  ///< Maximum iterations in optimize_modularity
-    double tolerance = 1e-4;   ///< Minimum modularity improvement threshold
+    double tolerance = 1e-4;  ///< Minimum modularity improvement threshold
 
     /**
      * @brief Validates the configuration parameters.
