@@ -75,6 +75,6 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_simil
 
 template <typename T>
 double DeepWalkImputer<T>::calculate_similarity(const Vector& vec1, const Vector& vec2) {
-    // Implement your similarity calculation here (e.g., cosine similarity)
+    //right now only calculating dot product as similarity TODO:
     double dot_product = vec1 * vec2;
     return dot_product;
