@@ -38,7 +38,6 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     for (int node = 0; node < num_nodes; ++node) {
         for (int feature = 0; feature < num_features; ++feature) {
             if (this->graph.is_missing(node, feature)) {
-                printf("Found missing feature");
                 // Calculate the similarity ranking vector
                 std::vector<std::pair<int, double>> similarity_ranking;
                 for (int other_node = 0; other_node < num_nodes; ++other_node) {
@@ -54,9 +53,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
                           [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
                               return a.second > b.second;
                           });
-                for (const auto& [node, similarity] : similarity_ranking) {
-                    printf("Node: %d, Similarity: %f\n", node, similarity);
-                }
+
                 // Impute the missing feature using the top similar nodes
                 double imputed_value = 0.0;
                 int count = 0;
@@ -69,7 +66,6 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
                 }
                 if (count > 0) {
                     T imputed = round_value<T>(imputed_value / count);
-                    printf("I am imputing %f into node %d feature: %d\n", static_cast<double>(imputed), node, feature);
                     this->graph.set_feature(node, feature, imputed);
                     this->graph.set_missing(node, feature, false);
                 }else {
