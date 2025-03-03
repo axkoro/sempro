@@ -229,13 +229,14 @@ TEST_F(SkipGramTest, TrainWithValidWalksUpdatesEmbeddingsDimensions) {
 
 TEST(DeepWalkImputerTest, no_missing_features) {
     std::string edges_file = "../data/test/deepwalk/test_edges.txt";
-    std::string features_file = "../data/test/deepwalk/test_features.txt";
+    std::string features_file = "../data/test/deepwalk/test_missing_features.txt";
 
     AttributedGraph<double> graph(edges_file, features_file);
     DeepWalkImputer<double> imputer(graph, -1);
     imputer.run();
 
     // Check that no feature is missing for any node
+    int count = 0;
     for (int node = 0; node < graph.get_num_nodes(); ++node) {
         std::vector<int> missing_features = graph.get_missing_features(node);
         ASSERT_TRUE(missing_features.empty()) << "Node " << node << " has missing features.";
