@@ -227,7 +227,19 @@ TEST_F(SkipGramTest, TrainWithValidWalksUpdatesEmbeddingsDimensions) {
     EXPECT_EQ(embeddings.num_cols(), config.embedding_size);
 }
 
-// TEST(DeepWalkImputerTest, test_name) {}
+TEST(DeepWalkImputerTest, no_missing_features) {
+    std::string edges_file = "../data/test/deepwalk/test_edges.txt";
+    std::string features_file = "../data/test/deepwalk/test_missing_features.txt";
+
+    AttributedGraph<double> graph(edges_file, features_file);
+    DeepWalkImputer<double> imputer(graph);
+    imputer.run();
+
+    for (int node = 0; node < graph.get_num_nodes(); ++node) {
+        std::vector<int> missing_features = graph.get_missing_features(node);
+        ASSERT_TRUE(missing_features.empty()) << "Node " << node << " has missing features.";
+    }
+}
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
