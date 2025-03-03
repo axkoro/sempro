@@ -27,11 +27,11 @@ void DeepWalkImputer<T>::run() {
     skip_gram.train(walks);
     const Matrix& embeddings = skip_gram.get_embeddings();
 
-    impute_features(embeddings, config.top_similar);
+    impute_features(embeddings);
 }
 
 template <typename T>
-void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_similar) {
+void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     int num_nodes = this->graph.get_num_nodes();
     int num_features = this->graph.get_num_features();
 
@@ -61,12 +61,15 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_simil
                     if (!this->graph.is_missing(similar_node, feature)) {
                         imputed_value += this->graph.get_feature(similar_node, feature);
                         count++;
-                        if (count == top_similar) break;  // Use the top n similar nodes
+                        if (count == 10) break;  // Use the top n similar nodes
                     }
                 }
                 if (count > 0) {
-                    T rounded_average = round_value<T>(imputed_value /= count);
-                    this->graph.set_feature(node, feature, imputed_value);
+                    T imputed = round_value<T>(imputed_value / count);
+                    this->graph.set_feature(node, feature, imputed);
+                }else {
+                    //for now set value to 1
+                    this->graph.set_feature(node, feature, 1.0);
                 }
             }
         }
@@ -78,3 +81,4 @@ double DeepWalkImputer<T>::calculate_similarity(const Vector& vec1, const Vector
     //right now only calculating dot product as similarity TODO:
     double dot_product = vec1 * vec2;
     return dot_product;
+}
