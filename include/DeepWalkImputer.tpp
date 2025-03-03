@@ -42,8 +42,8 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_simil
                 std::vector<std::pair<int, double>> similarity_ranking;
                 for (int other_node = 0; other_node < num_nodes; ++other_node) {
                     if (node != other_node) {
-                        double similarity =
-                            calculate_similarity(embeddings.get_row(node), embeddings.get_row(other_node));
+                        double similarity = calculate_similarity(embeddings.get_row(node),
+                                                                 embeddings.get_row(other_node));
                         similarity_ranking.push_back({other_node, similarity});
                     }
                 }
@@ -68,8 +68,8 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_simil
                     T imputed = round_value<T>(imputed_value / count);
                     this->graph.set_feature(node, feature, imputed);
                     this->graph.set_missing(node, feature, false);
-                }else {
-                    //for now set value to 1
+                } else {
+                    // for now set value to 1
                     this->graph.set_feature(node, feature, 1.0);
                 }
             }
@@ -79,7 +79,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_simil
 
 template <typename T>
 double DeepWalkImputer<T>::calculate_similarity(const Vector& vec1, const Vector& vec2) {
-    //right now only calculating dot product as similarity TODO:
+    // right now only calculating dot product as similarity TODO:
     double dot_product = vec1 * vec2;
     return dot_product;
 }
