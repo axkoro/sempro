@@ -27,11 +27,11 @@ void DeepWalkImputer<T>::run() {
     skip_gram.train(walks);
     const Matrix& embeddings = skip_gram.get_embeddings();
 
-    impute_features(embeddings);
+    impute_features(embeddings, config.top_similar);
 }
 
 template <typename T>
-void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
+void DeepWalkImputer<T>::impute_features(const Matrix& embeddings, int top_similar) {
     int num_nodes = this->graph.get_num_nodes();
     int num_features = this->graph.get_num_features();
 
@@ -61,7 +61,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
                     if (!this->graph.is_missing(similar_node, feature)) {
                         imputed_value += this->graph.get_feature(similar_node, feature);
                         count++;
-                        if (count == 10) break;  // Use the top n similar nodes
+                        if (count == top_similar) break;  // Use the top n similar nodes
                     }
                 }
                 if (count > 0) {

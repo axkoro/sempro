@@ -15,8 +15,9 @@ class DeepWalkImputer : public Imputer<T> {
    private:
     DeepWalkConfig config;
     int seed;
+    int top_similar;
 
-    void impute_features(const Matrix& embeddings);
+    void impute_features(const Matrix& embeddings, int top_similar);
     double calculate_similarity(const Vector& vec1, const Vector& vec2);
 };
 
