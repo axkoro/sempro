@@ -35,7 +35,7 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks) {
             std::vector<TrainingPair> pairs = generate_pairs(walks[idx], config.context_window);
             std::shuffle(pairs.begin(), pairs.end(), rng);
 
-            for (auto&& pair : pairs) {
+            for (const auto& pair : pairs) {
                 process_pair(pair, learning_rate, sampler);
                 learning_rate -= learning_rate_decrease;
             }
@@ -49,28 +49,30 @@ void SkipGram::process_pair(TrainingPair pair, double learning_rate, NegativeSam
 
     // forward pass
     Vector v_c = W1_T.get_row(pair.center);
-
     Vector v_o = W2.get_row(pair.context);
     double pos_score = sigmoid(v_o * v_c);
 
-    std::vector<double> neg_scores(config.num_negative_samples);
-    std::vector<Vector> v_n_list(config.num_negative_samples, Vector(config.embedding_size));
-    for (int i = 0; i < config.num_negative_samples; i++) {
-        int neg_index = negatives[i];
+    std::vector<double> neg_scores;
+    neg_scores.reserve(config.num_negative_samples);
+    std::vector<Vector> v_n_list;
+    v_n_list.reserve(config.num_negative_samples);
+
+    for (int neg_index : negatives) {
         Vector v_n = W2.get_row(neg_index);
+        v_n_list.emplace_back(v_n);
+
         double score = sigmoid(v_n * v_c);
-        neg_scores[i] = score;
-        v_n_list[i] = v_n;
+        neg_scores.emplace_back(score);
     }
 
     // backpropagation
     // updates to W2
-    Vector gradient_v_o = (1 - pos_score) * v_c;
-    W2.add_to_row(learning_rate * gradient_v_o, pair.context);
+    Vector update_v_o = (learning_rate * (1 - pos_score)) * v_c;
+    W2.add_to_row(update_v_o, pair.context);
 
     for (int i = 0; i < config.num_negative_samples; i++) {
-        Vector gradient_v_n = -neg_scores[i] * v_c;
-        W2.add_to_row(learning_rate * gradient_v_n, negatives[i]);
+        Vector update_v_n = (learning_rate * -neg_scores[i]) * v_c;
+        W2.add_to_row(update_v_n, negatives[i]);
     }
 
     // update to W1
@@ -79,8 +81,8 @@ void SkipGram::process_pair(TrainingPair pair, double learning_rate, NegativeSam
         neg_sum += neg_scores[i] * v_n_list[i];
     }
 
-    Vector gradient_v_c = (1 - pos_score) * v_o - neg_sum;
-    W1_T.add_to_row(learning_rate * gradient_v_c, pair.center);
+    Vector update_v_c = (learning_rate * (1 - pos_score)) * v_o - neg_sum;
+    W1_T.add_to_row(update_v_c, pair.center);
 }
 
 Matrix SkipGram::get_embeddings() const {
@@ -95,17 +97,19 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
     if (walk_length < (2 * window_size + 1))
         throw std::logic_error("Random walks are not long enough for given context window size");
     int num_pairs = window_size * (2 * walk_length - window_size - 1);
-    std::vector<TrainingPair> pairs(num_pairs);
 
-    int insert_idx = 0;
+    std::vector<TrainingPair> pairs;
+    pairs.reserve(num_pairs);
+
     for (int center_idx = 0; center_idx < walk_length; center_idx++) {
         int left_end = std::max(center_idx - window_size, 0);
         int right_end = std::min(center_idx + window_size, walk_length - 1);
-        for (int target_idx = left_end; target_idx <= right_end; target_idx++) {
-            if (target_idx == center_idx) continue;  // make no pair for the center node
-            pairs[insert_idx].center = random_walk[center_idx];
-            pairs[insert_idx].context = random_walk[target_idx];
-            insert_idx++;
+
+        int center_node = random_walk[center_idx];
+
+        for (int context_idx = left_end; context_idx <= right_end; context_idx++) {
+            if (context_idx == center_idx) continue;  // make no pair for the center node
+            pairs.emplace_back(center_node, random_walk[context_idx]);
         }
     }
 

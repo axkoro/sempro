@@ -32,6 +32,7 @@ class SkipGram {
     struct TrainingPair {
         int center;   ///< Index of the center node.
         int context;  ///< Index of the context node.
+        TrainingPair(int center, int context) : center(center), context(context) {};
     };
 
     /**
