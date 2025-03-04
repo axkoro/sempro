@@ -2,9 +2,8 @@
 
 #include <algorithm>
 #include <random>
+#include <span>
 #include <vector>
-
-#include "Vector.hpp"
 
 /**
  * @brief Simple implementation of a matrix stored in row-major format.
@@ -22,7 +21,8 @@ class Matrix {
      * @param num_cols Number of columns.
      * @param value Initial value for each element (default 0.0).
      */
-    Matrix(size_t num_rows, size_t num_cols, double value = 0.0);
+    Matrix(size_t num_rows, size_t num_cols, double value)
+        : num_rows_(num_rows), num_cols_(num_cols), data(num_rows * num_cols, value) {}
 
     /**
      * @brief Constructs a Matrix with elements initialized by a given distribution.
@@ -71,21 +71,24 @@ class Matrix {
     const double& operator()(size_t row, size_t col) const { return data[row * num_cols_ + col]; }
 
     /**
-     * @brief Retrieves a specified row as a Vector.
+     * @brief Retrieves a mutable view of the specified row.
      * @param row_idx Index of the row to retrieve.
-     * @return A Vector containing the row's elements.
+     * @return A view containing the row's elements.
      */
-    Vector get_row(size_t row_idx) const;
+    std::span<double> get_row(size_t row_idx) {
+        size_t row_start = row_idx * num_cols_;
+        return std::span<double>(data.data() + row_start, num_cols_);
+    }
 
     /**
-     * @brief Adds a Vector to a specific row.
-     *
-     * The provided vector must have a size equal to the number of columns.
-     *
-     * @param vec Vector to add.
-     * @param row_idx Index of the row to modify.
+     * @brief Retrieves a read-only view of the specified row.
+     * @param row_idx Index of the row to retrieve.
+     * @return A view containing the row's elements.
      */
-    void add_to_row(const Vector& vec, size_t row_idx);
+    std::span<const double> get_row(size_t row_idx) const {
+        size_t row_start = row_idx * num_cols_;
+        return std::span<const double>(data.data() + row_start, num_cols_);
+    }
 
    private:
     size_t num_rows_;          ///< Number of rows.

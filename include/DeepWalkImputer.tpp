@@ -94,8 +94,7 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
 }
 
 template <typename T>
-double DeepWalkImputer<T>::calculate_similarity(const Vector& vec1, const Vector& vec2) {
-    // right now only calculating dot product as similarity TODO:
-    double dot_product = vec1 * vec2;
-    return dot_product;
+double DeepWalkImputer<T>::calculate_similarity(std::span<const double> vec1,
+                                                std::span<const double> vec2) {
+    return SkipGram::dot_product(vec1, vec2);
 }
