@@ -44,52 +44,44 @@ void SkipGram::train(const std::vector<std::vector<int>>& walks) {
 }
 
 void SkipGram::process_pair(TrainingPair pair, double learning_rate, NegativeSampler& sampler) {
-    std::vector<int> negatives =
-        sampler.sample_negative_nodes(pair.center, config.num_negative_samples);
+    auto negatives = sampler.sample_negative_nodes(pair.center, config.num_negative_samples);
 
-    // forward pass
-    Vector v_c = W1_T.get_row(pair.center);
-    Vector v_o = W2.get_row(pair.context);
-    double pos_score = sigmoid(v_o * v_c);
+    auto v_c = W1_T.get_row(pair.center);  // center embedding
+    auto v_o = W2.get_row(pair.context);   // context embedding
 
-    std::vector<double> neg_scores;
-    neg_scores.reserve(config.num_negative_samples);
-    std::vector<Vector> v_n_list;
-    v_n_list.reserve(config.num_negative_samples);
+    // Forward pass: compute the positive score using a dot product helper
+    double pos_score = sigmoid(dot_product(v_o, v_c));
+
+    // Accumulate weighted negative contributions for updating the center embedding
+    std::vector<double> neg_sum(v_c.size(), 0.0);
 
     for (int neg_index : negatives) {
-        Vector v_n = W2.get_row(neg_index);
-        v_n_list.emplace_back(v_n);
+        auto v_n = W2.get_row(neg_index);
+        double score = sigmoid(dot_product(v_n, v_c));
 
-        double score = sigmoid(v_n * v_c);
-        neg_scores.emplace_back(score);
+        // Accumulate contributions to the cost
+        for (size_t i = 0; i < v_n.size(); i++) {
+            neg_sum[i] += score * v_n[i];
+        }
+
+        // Update the negative sample row in W2
+        for (size_t i = 0; i < v_n.size(); i++) {
+            v_n[i] += learning_rate * (-score) * v_c[i];
+        }
     }
 
-    // backpropagation
-    // updates to W2
-    Vector update_v_o = (learning_rate * (1 - pos_score)) * v_c;
-    W2.add_to_row(update_v_o, pair.context);
-
-    for (int i = 0; i < config.num_negative_samples; i++) {
-        Vector update_v_n = (learning_rate * -neg_scores[i]) * v_c;
-        W2.add_to_row(update_v_n, negatives[i]);
+    // Update the positive context row in W2
+    for (size_t i = 0; i < v_o.size(); i++) {
+        v_o[i] += learning_rate * (1 - pos_score) * v_c[i];
     }
 
-    // update to W1
-    Vector neg_sum(config.embedding_size, 0.0);
-    for (int i = 0; i < config.num_negative_samples; i++) {
-        neg_sum += neg_scores[i] * v_n_list[i];
+    // Update the center row in W1 using the aggregated negative contributions
+    for (size_t i = 0; i < v_c.size(); i++) {
+        v_c[i] += learning_rate * (1 - pos_score) * v_o[i] - neg_sum[i];
     }
-
-    Vector update_v_c = (learning_rate * (1 - pos_score)) * v_o - neg_sum;
-    W1_T.add_to_row(update_v_c, pair.center);
 }
 
-Matrix SkipGram::get_embeddings() const {
-    // potential optimization: return using move semantics (benchmark this before changing!!)
-    // would "destroy" this SkipGram object, but could save a lot of copying
-    return W1_T;
-}
+Matrix SkipGram::get_embeddings() const { return W1_T; }
 
 std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<int>& random_walk,
                                                              int window_size) {
@@ -117,6 +109,11 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
 }
 
 double SkipGram::sigmoid(double val) { return 1 / (1 + exp(-val)); }
+
+double SkipGram::dot_product(std::span<const double> a, std::span<const double> b) {
+    if (a.size() != b.size()) throw std::runtime_error("Vectors must be of equal length.");
+    return std::inner_product(a.begin(), a.end(), b.begin(), 0.0);
+}
 
 double SkipGram::calculate_learning_rate_decrease(double learning_rate, int context_window,
                                                   int walk_length, int total_num_walks) {

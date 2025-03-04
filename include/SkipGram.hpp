@@ -12,7 +12,6 @@
 #include "Configs.hpp"
 #include "Matrix.hpp"
 #include "NegativeSampler.hpp"
-#include "Vector.hpp"
 
 /**
  * @brief Implements the SkipGram model for learning node embeddings.
@@ -130,4 +129,7 @@ class SkipGram {
      */
     static double calculate_learning_rate_decrease(double learning_rate, int context_window,
                                                    int walk_length, int total_num_walks);
+
+   public:
+    static double dot_product(std::span<const double> a, std::span<const double> b);
 };
