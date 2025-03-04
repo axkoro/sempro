@@ -1,5 +1,6 @@
 #include "NegativeSampler.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 NegativeSampler::NegativeSampler(const std::vector<std::vector<int>> &random_walks, int num_nodes,
@@ -43,14 +44,34 @@ int NegativeSampler::draw_sample() {
 }
 
 std::vector<int> NegativeSampler::sample_negative_nodes(int center_node, int num_samples) {
-    std::vector<int> samples(num_samples);
+    std::vector<int> samples;
+    samples.reserve(num_samples);
 
-    int samples_taken = 0;
-    while (samples_taken < num_samples) {
-        int sample = draw_sample();
-        if (sample == center_node) continue;
-        samples[samples_taken] = sample;
-        samples_taken++;
+    const size_t batch_factor = 2;  // TODO: maybe adjust based on frequency of context_node
+    size_t max_batch_size = (num_samples * batch_factor);
+    std::vector<int> batch_indices(max_batch_size);
+    std::vector<double> batch_probs(max_batch_size);
+
+    while (samples.size() < static_cast<size_t>(num_samples)) {
+        // Determine how many samples we need and set batch size accordingly
+        size_t needed = num_samples - samples.size();
+        size_t batch_size = std::min(max_batch_size, needed * batch_factor);
+
+        // Fill the batch buffers
+        for (size_t i = 0; i < batch_size; ++i) {
+            batch_indices[i] = index_distribution(rng);
+            batch_probs[i] = probability_distribution(rng);
+        }
+
+        // Process the batch and add valid samples
+        for (size_t i = 0; i < batch_size; ++i) {
+            int sample = (batch_probs[i] < alias_table.probabilities[batch_indices[i]])
+                             ? batch_indices[i]
+                             : alias_table.aliases[batch_indices[i]];
+            if (sample == center_node) continue;
+            samples.push_back(sample);
+            if (samples.size() >= static_cast<size_t>(num_samples)) break;
+        }
     }
 
     return samples;
