@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstddef>
 #include <vector>
+
+class Matrix;  // forward-definition for friend class
 
 /**
  * @brief Simple implementation of a vector.
@@ -11,10 +12,12 @@
  * and vector addition/subtraction.
  */
 class Vector {
+    friend class Matrix;
+
    public:
     /**
      * @brief Constructs a vector of a given size, initializing all elements.
-     * @param size Number of elements.
+     * @param size Number of data.
      * @param value Initial value for each element (default 0.0).
      */
     Vector(size_t size, double value = 0.0);
@@ -26,24 +29,39 @@ class Vector {
     Vector(std::vector<double> vec);
 
     /**
+     * @brief Constructs a vector from a range of iterators.
+     * @tparam Iterator Type of the iterator.
+     * @param first Iterator pointing to the beginning of the range.
+     * @param last Iterator pointing to the end of the range.
+     */
+    template <typename Iterator>
+    Vector(Iterator first, Iterator last) : data(first, last) {}
+
+    std::vector<double>::iterator begin() { return data.begin(); }
+    std::vector<double>::iterator end() { return data.end(); }
+
+    std::vector<double>::const_iterator begin() const { return data.begin(); }
+    std::vector<double>::const_iterator end() const { return data.end(); }
+
+    /**
      * @brief Returns the number of elements in the vector.
      * @return The size of the vector.
      */
-    size_t size() const;
+    size_t size() const { return data.size(); }
 
     /**
      * @brief Provides mutable access to the element at the specified index.
      * @param idx Index of the element.
      * @return Reference to the element.
      */
-    double& operator[](size_t idx);
+    double& operator[](size_t idx) { return data[idx]; }
 
     /**
      * @brief Provides read-only access to the element at the specified index.
      * @param idx Index of the element.
      * @return Const reference to the element.
      */
-    const double& operator[](size_t idx) const;
+    const double& operator[](size_t idx) const { return data[idx]; }
 
     /**
      * @brief Computes the dot product of two vectors.
@@ -100,5 +118,5 @@ class Vector {
     Vector& operator-=(const Vector& other);
 
    private:
-    std::vector<double> elements;  ///< Container for vector elements.
+    std::vector<double> data;  ///< Container for vector data.
 };

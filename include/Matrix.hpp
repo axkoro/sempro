@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <random>
 #include <vector>
 
@@ -38,22 +39,20 @@ class Matrix {
     template <typename Distribution>
     Matrix(size_t num_rows, size_t num_cols, Distribution dist)
         : num_rows_(num_rows), num_cols_(num_cols), data(num_rows * num_cols) {
-        for (auto& val : data) {
-            val = dist();
-        }
+        std::generate(data.begin(), data.end(), dist);
     }
 
     /**
      * @brief Returns the number of rows.
      * @return The row count.
      */
-    size_t num_rows() const;
+    size_t num_rows() const { return num_rows_; }
 
     /**
      * @brief Returns the number of columns.
      * @return The column count.
      */
-    size_t num_cols() const;
+    size_t num_cols() const { return num_cols_; }
 
     /**
      * @brief Provides mutable access to the element at the specified position.
@@ -61,7 +60,7 @@ class Matrix {
      * @param col Column index.
      * @return Reference to the element.
      */
-    double& operator()(size_t row, size_t col);
+    double& operator()(size_t row, size_t col) { return data[row * num_cols_ + col]; }
 
     /**
      * @brief Provides read-only access to the element at the specified position.
@@ -69,7 +68,7 @@ class Matrix {
      * @param col Column index.
      * @return Const reference to the element.
      */
-    const double& operator()(size_t row, size_t col) const;
+    const double& operator()(size_t row, size_t col) const { return data[row * num_cols_ + col]; }
 
     /**
      * @brief Retrieves a specified row as a Vector.

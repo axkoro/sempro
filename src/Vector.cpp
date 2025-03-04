@@ -1,34 +1,29 @@
 #include "Vector.hpp"
 
+#include <numeric>
 #include <stdexcept>
 
-Vector::Vector(size_t size, double value) : elements(size, value) {}
+Vector::Vector(size_t size, double value) : data(size, value) {}
 
-Vector::Vector(std::vector<double> vec) : elements(vec) {}
-
-size_t Vector::size() const { return elements.size(); }
-
-double& Vector::operator[](size_t idx) { return elements[idx]; }
-
-const double& Vector::operator[](size_t idx) const { return elements[idx]; }
+Vector::Vector(std::vector<double> vec) : data(vec) {}
 
 Vector& Vector::operator+=(const Vector& other) {
-    size_t size = elements.size();
+    size_t size = data.size();
     if (other.size() != size) throw std::runtime_error("Can't sum Vectors of different sizes");
 
     for (size_t i = 0; i < size; i++) {
-        elements[i] += other[i];
+        data[i] += other[i];
     }
 
     return *this;
 }
 
 Vector& Vector::operator-=(const Vector& other) {
-    size_t size = elements.size();
+    size_t size = data.size();
     if (other.size() != size) throw std::runtime_error("Can't subtract Vectors of different sizes");
 
     for (size_t i = 0; i < size; i++) {
-        elements[i] -= other[i];
+        data[i] -= other[i];
     }
 
     return *this;
@@ -52,9 +47,11 @@ Vector operator*(const Vector& vec, double scalar) { return operator*(scalar, ve
 Vector operator*(double scalar, const Vector& vec) {
     size_t size = vec.size();
     Vector result(size);
+
     for (size_t i = 0; i < size; i++) {
         result[i] = scalar * vec[i];
     }
+
     return result;
 }
 
