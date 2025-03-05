@@ -207,7 +207,7 @@ def cpp_create_louvain_community_detector(
 
 
 def cpp_create_louvain_config(
-    max_levels: int = 10, max_iterations: int = 50, tolerance: int = 1e-4
+    max_levels: int, max_iterations: int, tolerance: float
 ) -> l.LouvainConfig:
     config = l.LouvainConfig()
 

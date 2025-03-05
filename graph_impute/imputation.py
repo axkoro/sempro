@@ -71,29 +71,33 @@ class CommunityImputer(Imputer):
         The algorithm used for community detection (default is "louvain").
     """
 
-    def __init__(self, graph: Graph, community_algorithm: str = "louvain"):
+    def __init__(
+        self,
+        graph: Graph,
+        community_algorithm: str = "louvain",
+        max_levels: int = 10,
+        max_iterations: int = 50,
+        tolerance: float = 1e-4,
+    ):
         super().__init__(graph)
-        self.community_algorithm = community_algorithm
         self.communities_ready = False
+
+        if community_algorithm == "louvain":
+            config = cpp_create_louvain_config(max_levels, max_iterations, tolerance)
+            self.community_detector = cpp_create_louvain_community_detector(
+                self.graph.cpp_graph, config
+            )
+        else:
+            raise NotImplementedError(
+                f"'{community_algorithm}' is not a valid community detection algorithm"
+            )
 
     def detect_communities(self):
         """
         Detect communities in the graph using the specified community_algorithm (passed during construction).
         Then instantiate the actual C++ imputer class.
-
-        Raises
-        ------
-        NotImplementedError
-            If the specified community detection algorithm is not implemented.
         """
-        if self.community_algorithm == "louvain":
-            config = cpp_create_louvain_config()
-            community_detector = cpp_create_louvain_community_detector(self.graph.cpp_graph, config)
-        else:
-            raise NotImplementedError(
-                f"'{self.community_algorithm}' is not a valid community detection algorithm"
-            )
-        communities = community_detector.execute()
+        communities = self.community_detector.execute()
         self.cpp_imputer = cpp_create_community_imputer(self.graph.cpp_graph, communities)
         self.communities_ready = True
 
