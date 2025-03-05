@@ -1,15 +1,22 @@
 #include "SkipGram.hpp"
 
+#include <omp.h>
+
 #include <algorithm>
+#include <atomic>
+#include <chrono>
 #include <cmath>
+#include <iostream>
 #include <stdexcept>
 
 SkipGram::SkipGram(int num_nodes, SkipGramConfig& config, int seed)
-    : num_nodes(num_nodes), config(config), seed(seed) {
-    std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
+    : num_nodes(num_nodes),
+      config(config),
+      seed(seed == -1 ? std::random_device{}() : seed),
+      rng(this->seed) {
     double limit = 0.5 / config.embedding_size;
     std::uniform_real_distribution<double> noise_dist(-limit, limit);
-    auto distribution = [&rng, &noise_dist]() { return noise_dist(rng); };
+    auto distribution = [this, &noise_dist]() { return noise_dist(rng); };
 
     W1_T = Matrix(num_nodes, config.embedding_size, distribution);
     W2 = Matrix(num_nodes, config.embedding_size, 0.0);
@@ -18,26 +25,35 @@ SkipGram::SkipGram(int num_nodes, SkipGramConfig& config, int seed)
 void SkipGram::train(const std::vector<std::vector<int>>& walks) {
     if (walks.empty()) throw std::logic_error("Cannot train using empty walks");
 
-    double learning_rate = config.learning_rate;
     double learning_rate_decrease = calculate_learning_rate_decrease(
-        learning_rate, config.context_window, walks[0].size(),
-        walks.size());  // for linear decrease per training pair (see word2vec paper)
-
-    NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent, seed);
-    std::mt19937 rng(seed == -1 ? std::random_device{}() : seed);
+        config.learning_rate, config.context_window, walks[0].size(), walks.size(),
+        config.num_epochs);  // for linear decrease per training pair (see word2vec paper)
 
     for (int epoch = 0; epoch < config.num_epochs; epoch++) {
         std::vector<size_t> walk_indices(walks.size());
         std::iota(walk_indices.begin(), walk_indices.end(), 0);
         std::shuffle(walk_indices.begin(), walk_indices.end(), rng);
 
-        for (size_t idx : walk_indices) {
-            std::vector<TrainingPair> pairs = generate_pairs(walks[idx], config.context_window);
-            std::shuffle(pairs.begin(), pairs.end(), rng);
+        std::atomic<size_t> pairs_processed(0);
+#pragma omp parallel
+        {
+            std::mt19937 rng(seed + omp_get_thread_num());
+            NegativeSampler sampler(walks, num_nodes, config.smoothing_exponent,
+                                    seed);  // TODO: precompute the alias table once and then
+                                            // instantiate all the NegativeSamplers using it
 
-            for (const auto& pair : pairs) {
-                process_pair(pair, learning_rate, sampler);
-                learning_rate -= learning_rate_decrease;
+#pragma omp for
+            for (size_t idx : walk_indices) {
+                std::vector<TrainingPair> pairs = generate_pairs(walks[idx], config.context_window);
+                std::shuffle(pairs.begin(), pairs.end(), rng);
+
+                for (const auto& pair : pairs) {
+                    size_t current_pair = pairs_processed.fetch_add(1, std::memory_order_relaxed);
+                    double learning_rate =
+                        config.learning_rate - current_pair * learning_rate_decrease;
+
+                    process_pair(pair, learning_rate, sampler);
+                }
             }
         }
     }
@@ -47,12 +63,12 @@ void SkipGram::process_pair(TrainingPair pair, double learning_rate, NegativeSam
     auto negatives = sampler.sample_negative_nodes(pair.center, config.num_negative_samples);
 
     auto v_c = W1_T.get_row(pair.center);  // center embedding
-    auto v_o = W2.get_row(pair.context);   // context embedding
+    auto v_o = W2.get_row(pair.context);
 
-    // Forward pass: compute the positive score using a dot product helper
+    // Forward pass: compute the score of the center node
     double pos_score = sigmoid(dot_product(v_o, v_c));
 
-    // Accumulate weighted negative contributions for updating the center embedding
+    // Accumulate the weighted negative contributions (for updating the center embedding)
     std::vector<double> neg_sum(v_c.size(), 0.0);
 
     for (int neg_index : negatives) {
@@ -108,7 +124,11 @@ std::vector<SkipGram::TrainingPair> SkipGram::generate_pairs(const std::vector<i
     return pairs;
 }
 
-double SkipGram::sigmoid(double val) { return 1 / (1 + exp(-val)); }
+double SkipGram::sigmoid(double val) {
+    if (val > 20) return 1;
+    if (val < -20) return 0;
+    return 1 / (1 + exp(-val));
+}
 
 double SkipGram::dot_product(std::span<const double> a, std::span<const double> b) {
     if (a.size() != b.size()) throw std::runtime_error("Vectors must be of equal length.");
@@ -116,10 +136,11 @@ double SkipGram::dot_product(std::span<const double> a, std::span<const double> 
 }
 
 double SkipGram::calculate_learning_rate_decrease(double learning_rate, int context_window,
-                                                  int walk_length, int total_num_walks) {
+                                                  int walk_length, int total_num_walks,
+                                                  int num_epochs) {
     int total_num_training_pairs =
         total_num_walks * (context_window * (2 * walk_length - context_window - 1));
-    double learning_rate_decrease = learning_rate / total_num_training_pairs;
+    double learning_rate_decrease = learning_rate / (total_num_training_pairs * num_epochs);
 
     return learning_rate_decrease;
 }
