@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cmath>
 
 #include "Imputer.hpp"  // because IntelliSense is stupid
