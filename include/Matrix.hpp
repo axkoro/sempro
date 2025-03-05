@@ -1,9 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <random>
+#include <span>
 #include <vector>
-
-#include "Vector.hpp"
 
 /**
  * @brief Simple implementation of a matrix stored in row-major format.
@@ -21,7 +21,8 @@ class Matrix {
      * @param num_cols Number of columns.
      * @param value Initial value for each element (default 0.0).
      */
-    Matrix(size_t num_rows, size_t num_cols, double value = 0.0);
+    Matrix(size_t num_rows, size_t num_cols, double value)
+        : num_rows_(num_rows), num_cols_(num_cols), data(num_rows * num_cols, value) {}
 
     /**
      * @brief Constructs a Matrix with elements initialized by a given distribution.
@@ -38,22 +39,20 @@ class Matrix {
     template <typename Distribution>
     Matrix(size_t num_rows, size_t num_cols, Distribution dist)
         : num_rows_(num_rows), num_cols_(num_cols), data(num_rows * num_cols) {
-        for (auto& val : data) {
-            val = dist();
-        }
+        std::generate(data.begin(), data.end(), dist);
     }
 
     /**
      * @brief Returns the number of rows.
      * @return The row count.
      */
-    size_t num_rows() const;
+    size_t num_rows() const { return num_rows_; }
 
     /**
      * @brief Returns the number of columns.
      * @return The column count.
      */
-    size_t num_cols() const;
+    size_t num_cols() const { return num_cols_; }
 
     /**
      * @brief Provides mutable access to the element at the specified position.
@@ -61,7 +60,7 @@ class Matrix {
      * @param col Column index.
      * @return Reference to the element.
      */
-    double& operator()(size_t row, size_t col);
+    double& operator()(size_t row, size_t col) { return data[row * num_cols_ + col]; }
 
     /**
      * @brief Provides read-only access to the element at the specified position.
@@ -69,24 +68,27 @@ class Matrix {
      * @param col Column index.
      * @return Const reference to the element.
      */
-    const double& operator()(size_t row, size_t col) const;
+    const double& operator()(size_t row, size_t col) const { return data[row * num_cols_ + col]; }
 
     /**
-     * @brief Retrieves a specified row as a Vector.
+     * @brief Retrieves a mutable view of the specified row.
      * @param row_idx Index of the row to retrieve.
-     * @return A Vector containing the row's elements.
+     * @return A view containing the row's elements.
      */
-    Vector get_row(size_t row_idx) const;
+    std::span<double> get_row(size_t row_idx) {
+        size_t row_start = row_idx * num_cols_;
+        return std::span<double>(data.data() + row_start, num_cols_);
+    }
 
     /**
-     * @brief Adds a Vector to a specific row.
-     *
-     * The provided vector must have a size equal to the number of columns.
-     *
-     * @param vec Vector to add.
-     * @param row_idx Index of the row to modify.
+     * @brief Retrieves a read-only view of the specified row.
+     * @param row_idx Index of the row to retrieve.
+     * @return A view containing the row's elements.
      */
-    void add_to_row(const Vector& vec, size_t row_idx);
+    std::span<const double> get_row(size_t row_idx) const {
+        size_t row_start = row_idx * num_cols_;
+        return std::span<const double>(data.data() + row_start, num_cols_);
+    }
 
    private:
     size_t num_rows_;          ///< Number of rows.

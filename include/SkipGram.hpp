@@ -12,7 +12,6 @@
 #include "Configs.hpp"
 #include "Matrix.hpp"
 #include "NegativeSampler.hpp"
-#include "Vector.hpp"
 
 /**
  * @brief Implements the SkipGram model for learning node embeddings.
@@ -32,6 +31,7 @@ class SkipGram {
     struct TrainingPair {
         int center;   ///< Index of the center node.
         int context;  ///< Index of the context node.
+        TrainingPair(int center, int context) : center(center), context(context) {};
     };
 
     /**
@@ -65,8 +65,9 @@ class SkipGram {
     Matrix get_embeddings() const;
 
    private:
-    int num_nodes;          ///< Total number of nodes.
-    int seed;               ///< Seed for random number generation.
+    int num_nodes;  ///< Total number of nodes.
+    int seed;       ///< Seed for random number generation.
+    std::mt19937 rng;
     SkipGramConfig config;  ///< Training configuration parameters.
 
     /**
@@ -128,5 +129,9 @@ class SkipGram {
      * @return double The decrease in learning rate per training pair.
      */
     static double calculate_learning_rate_decrease(double learning_rate, int context_window,
-                                                   int walk_length, int total_num_walks);
+                                                   int walk_length, int total_num_walks,
+                                                   int num_epochs);
+
+   public:
+    static double dot_product(std::span<const double> a, std::span<const double> b);
 };

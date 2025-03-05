@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include "Configs.hpp"
 #include "Imputer.hpp"
 #include "Matrix.hpp"
@@ -18,7 +20,7 @@ class DeepWalkImputer : public Imputer<T> {
 
     void impute_features(const Matrix& embeddings);
     std::vector<std::pair<int, double>> get_similarity_ranking(int node, const Matrix& embeddings);
-    double calculate_similarity(const Vector& vec1, const Vector& vec2);
+    static double calculate_similarity(std::span<const double> vec1, std::span<const double> vec2);
 };
 
 #include "DeepWalkImputer.tpp"

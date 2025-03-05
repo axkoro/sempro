@@ -17,6 +17,7 @@ template <typename T>
 void DeepWalkImputer<T>::run() {
     EdgeWeightCalculator<T> ew_calc(this->graph, config.fusion_coefficient);
     GraphEdgeWeights edge_weights = ew_calc.generate_edge_weights();
+    // GraphEdgeWeights edge_weights(this->graph); // sets every edge weight to 1
 
     RandomWalkGenerator rw_gen(this->graph, edge_weights, config.walk_length, config.num_walks,
                                seed);
@@ -53,7 +54,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
                 if (count == config.top_similar) break;  // Use the top n similar nodes
             }
             if (count > 0) {
-                T imputed_val = round_value<T>(feature_sum / count);
+                T imputed_val = round_value<T>(feature_sum / static_cast<double>(count));
                 this->graph.set_feature(node, feature, imputed_val);
             } else {
                 this->graph.set_feature(node, feature, 1.0);
@@ -77,7 +78,7 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
     similarity_ranking.reserve(num_nodes - 1);
 
     for (int other_node = 0; other_node < num_nodes; ++other_node) {
-        if (node != other_node) continue;
+        if (node == other_node) continue;
 
         double similarity =
             calculate_similarity(embeddings.get_row(node), embeddings.get_row(other_node));
@@ -94,8 +95,7 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
 }
 
 template <typename T>
-double DeepWalkImputer<T>::calculate_similarity(const Vector& vec1, const Vector& vec2) {
-    // right now only calculating dot product as similarity TODO:
-    double dot_product = vec1 * vec2;
-    return dot_product;
+double DeepWalkImputer<T>::calculate_similarity(std::span<const double> vec1,
+                                                std::span<const double> vec2) {
+    return SkipGram::dot_product(vec1, vec2);
 }

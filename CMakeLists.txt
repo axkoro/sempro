@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.17)
 project(semproject CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(BUILD_TESTS "Build tests" ON)
 
 find_package(OpenMP REQUIRED)
 
-if (BUILD_TESTS) # Instructions for building C++ library and googletest testing suite
+if (BUILD_TESTS)
 	add_subdirectory(extlibs/gtest)
 	set(CMAKE_BUILD_TYPE Debug)
 	
@@ -53,23 +52,12 @@ if (BUILD_TESTS) # Instructions for building C++ library and googletest testing 
 		src/RandomWalkGenerator.cpp
 		src/SkipGram.cpp
 		src/NegativeSampler.cpp
-		src/Matrix.cpp
-		src/Vector.cpp
 		src/Graph.cpp
 		src/GraphEdgeWeights.cpp)
 	target_include_directories(DeepWalkTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(DeepWalkTest PRIVATE gtest OpenMP::OpenMP_CXX)
 	target_compile_options(DeepWalkTest PRIVATE -coverage)
 	target_link_options(DeepWalkTest PRIVATE -coverage)
-
-	add_executable(LinearAlgebraTest
-		src/tests/LinearAlgebraTest.cpp
-		src/Vector.cpp
-		src/Matrix.cpp)
-	target_include_directories(LinearAlgebraTest PUBLIC ${PROJECT_SOURCE_DIR}/include)
-	target_link_libraries(LinearAlgebraTest PRIVATE gtest OpenMP::OpenMP_CXX)
-	target_compile_options(LinearAlgebraTest PRIVATE -coverage)
-	target_link_options(LinearAlgebraTest PRIVATE -coverage)
 
 	add_executable(NegativeSamplerTest
 		src/tests/NegativeSamplerTest.cpp
@@ -96,8 +84,6 @@ else() # Build Python bindings as libraries
 		src/RandomWalkGenerator.cpp
 		src/SkipGram.cpp
 		src/NegativeSampler.cpp
-		src/Matrix.cpp
-		src/Vector.cpp
 		src/Graph.cpp
 		src/GraphEdgeWeights.cpp)
 	target_link_libraries(cpp_imputation_module PRIVATE OpenMP::OpenMP_CXX)
