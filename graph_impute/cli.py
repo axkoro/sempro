@@ -79,6 +79,24 @@ def parse_args() -> argparse.Namespace:
         help="Algorithm to use for community detection.",
     )
 
+    community_group.add_argument(
+        "--max-levels",
+        type=int,
+        help="The maximum number of coarsening levels for the Louvain method.",
+    )
+
+    community_group.add_argument(
+        "--max-iterations",
+        type=int,
+        help="The maximum number of iterations in each coarsening level of the Louvain method.",
+    )
+
+    community_group.add_argument(
+        "--tolerance",
+        type=float,
+        help="The minimum improvement in modularity required to continue with the next iteration within the Louvain method.",
+    )
+
     deepwalk_group = parser.add_argument_group("DeepWalk Imputer Options")
     deepwalk_group.add_argument(
         "--fusion-coefficient",
