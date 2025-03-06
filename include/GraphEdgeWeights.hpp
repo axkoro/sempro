@@ -48,7 +48,6 @@ class GraphEdgeWeights {
     WeightedEdgeIterator end();
 
     std::vector<Edge> get_edges(int node) const;
-    std::vector<Edge> get_edges(int node, int depth) const;
 
    private:
     Graph& graph;

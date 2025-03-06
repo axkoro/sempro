@@ -440,38 +440,6 @@ TEST(GraphEdgeWeightsTest, GetEdgesImmediate) {
     EXPECT_DOUBLE_EQ(immediateEdges[1].weight, 1.0);
 }
 
-// Test edge retrieval with a given BFS depth.
-TEST(GraphEdgeWeightsTest, GetEdgesWithDepth) {
-    std::vector<int> offsets = {0, 2, 4, 6};
-    std::vector<int> edges = {1, 2, 0, 2, 0, 1};
-    DummyGraph dummy(offsets, edges);
-    GraphEdgeWeights edge_weights(dummy);
-
-    // For node 0 with depth = 1, should return immediate edges.
-    auto depth1Edges = edge_weights.get_edges(0, 1);
-    EXPECT_EQ(depth1Edges.size(), 2u);
-
-    // For node 0 with depth = 2:
-    // Depth 1: from node 0: edges (0->1) and (0->2).
-    // Depth 2: from node 1: (1->0) and (1->2) and from node 2: (2->0) and (2->1).
-    // Total edges: 2 + 2 + 2 = 6.
-    auto depth2Edges = edge_weights.get_edges(0, 2);
-    EXPECT_EQ(depth2Edges.size(), 6u);
-
-    // Verify that the collected targets appear as expected:
-    // Expected targets:
-    //  From node 0: {1, 2}
-    //  From node 1: {0, 2}
-    //  From node 2: {0, 1}
-    std::unordered_multiset<int> targets;
-    for (const auto& edge : depth2Edges) {
-        targets.insert(edge.target);
-    }
-    EXPECT_EQ(targets.count(0), 2);
-    EXPECT_EQ(targets.count(1), 2);
-    EXPECT_EQ(targets.count(2), 2);
-}
-
 // Test that an invalid node parameter throws an exception.
 TEST(GraphEdgeWeightsTest, GetEdgesInvalidNode) {
     std::vector<int> offsets = {0, 2, 4, 6};
@@ -481,8 +449,6 @@ TEST(GraphEdgeWeightsTest, GetEdgesInvalidNode) {
 
     EXPECT_THROW(edge_weights.get_edges(-1), std::logic_error);
     EXPECT_THROW(edge_weights.get_edges(100), std::logic_error);
-    EXPECT_THROW(edge_weights.get_edges(-1, 2), std::logic_error);
-    EXPECT_THROW(edge_weights.get_edges(100, 2), std::logic_error);
 }
 
 TEST(GraphEdgeWeightsTest, IteratorFunctionality) {

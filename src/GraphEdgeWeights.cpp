@@ -17,46 +17,18 @@ WeightedEdgeIterator GraphEdgeWeights::end() {
 std::vector<GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node) const {
     if (!(graph.is_valid_node(node))) throw std::logic_error("Node does not exist");
 
-    std::vector<Edge> neighbors(graph.offsets[node + 1] - graph.offsets[node]);
-    size_t num_neighbors = neighbors.size();
+    size_t num_neighbors = graph.offsets[node + 1] - graph.offsets[node];
+    std::vector<Edge> neighbors;
+    neighbors.reserve(num_neighbors);
+
     size_t offset = graph.offsets[node];
     for (size_t i = 0; i < num_neighbors; i++) {
-        neighbors[i].target = graph.edges[offset + i];
-        neighbors[i].weight = edge_weights[offset + i];
+        int target = graph.edges[offset + i];
+        double weight = edge_weights[offset + i];
+        neighbors.emplace_back(target, weight);
     }
 
     return neighbors;
-}
-
-std::vector<typename GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node,
-                                                                         int depth) const {
-    if (!graph.is_valid_node(node)) throw std::logic_error("Node does not exist");
-
-    std::unordered_set<int> visited;
-    std::queue<int> frontier;
-    frontier.push(node);
-    visited.insert(node);
-
-    std::vector<Edge> result;
-
-    for (int d = 0; d < depth; ++d) {
-        int frontierSize = frontier.size();
-        for (int i = 0; i < frontierSize; ++i) {
-            int curr = frontier.front();
-            frontier.pop();
-
-            std::vector<Edge> currEdges = get_edges(curr);
-            for (const auto& edge : currEdges) {
-                if (!visited.count(edge.target)) {
-                    visited.insert(edge.target);
-                    frontier.push(edge.target);
-                }
-                result.push_back(edge);
-            }
-        }
-    }
-
-    return result;
 }
 
 // --- WeightedEdgeIterator Implementation ---
