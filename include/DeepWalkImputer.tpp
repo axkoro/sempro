@@ -37,7 +37,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     int num_features = this->graph.get_num_features();
 
     for (int node = 0; node < num_nodes; ++node) {
-        auto missing_feature_indices = this->graph.get_missing_indices(node);
+        auto missing_feature_indices = this->graph.get_missing_features(node);
         if (missing_feature_indices.empty()) continue;
 
         std::vector<std::pair<int, double>> similarity_ranking =
