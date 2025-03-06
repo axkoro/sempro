@@ -37,29 +37,29 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     int num_features = this->graph.get_num_features();
 
     for (int node = 0; node < num_nodes; ++node) {
-        auto missing_feature_indices = this->graph.get_missing_features(node);
+        auto missing_feature_indices = this->graph.get_missing_indices(node);
         if (missing_feature_indices.empty()) continue;
 
         std::vector<std::pair<int, double>> similarity_ranking =
             get_similarity_ranking(node, embeddings);
 
-        for (auto&& feature : missing_feature_indices) {
+        for (int feature_idx : missing_feature_indices) {
             double feature_sum = 0.0;  // for average calculation
             int count = 0;
             for (const auto& [similar_node, similarity] : similarity_ranking) {
-                if (this->graph.is_missing(similar_node, feature)) continue;
+                if (this->graph.is_missing(similar_node, feature_idx)) continue;
 
-                feature_sum += this->graph.get_feature(similar_node, feature);
+                feature_sum += this->graph.get_feature(similar_node, feature_idx);
                 count++;
                 if (count == config.top_similar) break;  // Use the top n similar nodes
             }
             if (count > 0) {
                 T imputed_val = round_value<T>(feature_sum / static_cast<double>(count));
-                this->graph.set_feature(node, feature, imputed_val);
+                this->graph.set_feature(node, feature_idx, imputed_val);
             } else {
-                this->graph.set_feature(node, feature, 1.0);
+                this->graph.set_feature(node, feature_idx, 1.0);
             }
-            this->graph.set_missing(node, feature, false);
+            this->graph.set_missing(node, feature_idx, false);
         }
     }
 }

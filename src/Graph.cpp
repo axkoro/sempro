@@ -38,7 +38,7 @@ std::vector<int> Graph::get_k_hop_neighbors(int node, int depth) const {
         for (int i = 0; i < frontierSize; ++i) {
             int curr = frontier.front();
             frontier.pop();
-            for (auto&& nbr : get_neighbors(curr)) {
+            for (int nbr : get_neighbors(curr)) {
                 if (!visited.count(nbr)) {
                     visited.insert(nbr);
                     frontier.push(nbr);
