@@ -14,7 +14,7 @@ TEST(EdgeWeightCalculatorTest, generate_edge_weights) {
     // - MFS = overlap / num_features
     // - no tolerance for overlap in feature similarity calculation
     // - see Wiki for how I manually calculated the the correct weights
-    double fusion_coefficient = 0.6;
+    double fusion_coefficient = 0.4;
 
     std::string edges_path = "../data/test/deepwalk/test_edges.txt";
     std::string features_path = "../data/test/deepwalk/test_features.txt";

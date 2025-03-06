@@ -11,12 +11,17 @@
 
 template <typename T>
 EdgeWeightCalculator<T>::EdgeWeightCalculator(AttributedGraph<T>& graph, double fusion_coefficient)
-    : graph(graph), fusion_coefficient(fusion_coefficient) {}
+    : graph(graph), fusion_coefficient(fusion_coefficient) {
+    if (fusion_coefficient < 0.0 || fusion_coefficient > 1.0)
+        throw std::runtime_error(
+            "Invalid parameter: Fusion coefficient must be between 0.0 and 1.0");
+}
 
 template <typename T>
 GraphEdgeWeights EdgeWeightCalculator<T>::generate_edge_weights() {
     GraphEdgeWeights edge_weights(graph);
-    std::vector<std::unordered_set<int>> covers = compute_covers();
+    std::vector<std::unordered_set<int>> covers;
+    if (fusion_coefficient != 1.0) covers = compute_covers();
 
     for (auto it = edge_weights.begin(); it != edge_weights.end(); ++it) {
         auto [source, target] = it.get_edge();
@@ -28,9 +33,12 @@ GraphEdgeWeights EdgeWeightCalculator<T>::generate_edge_weights() {
 template <typename T>
 double EdgeWeightCalculator<T>::compute_weight(int u, int v,
                                                std::vector<std::unordered_set<int>>& covers) {
+    if (fusion_coefficient == 1.0) return compute_feature_similarity(u, v);
+    if (fusion_coefficient == 0.0) return compute_structural_similarity(u, v, covers);
+
     double struct_sim = compute_structural_similarity(u, v, covers);
     double feature_sim = compute_feature_similarity(u, v);
-    double weight = struct_sim * fusion_coefficient + feature_sim * (1 - fusion_coefficient);
+    double weight = feature_sim * fusion_coefficient + struct_sim * (1 - fusion_coefficient);
 
     return weight;
 }
@@ -91,7 +99,7 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator<T>::compute_covers(int
     int num_nodes = graph.get_num_nodes();
     std::vector<std::unordered_set<int>> covers(num_nodes);
 
-#pragma omp parallel for
+#pragma omp parallel for  // FIXME: covers (unordered_set) is not thread-safe!
     for (int node = 0; node < num_nodes; ++node) {
         auto neighbors = graph.get_k_hop_neighbors(node, depth);
         for (int neighbor : neighbors) {
