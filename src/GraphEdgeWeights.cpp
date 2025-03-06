@@ -35,28 +35,112 @@ std::vector<GraphEdgeWeights::Edge> GraphEdgeWeights::get_edges(int node) const 
 
 WeightedEdgeIterator::WeightedEdgeIterator(GraphEdgeWeights* wg, size_t idx)
     : weighted_graph(wg), index(idx), current_node(0) {
-    // Advance current_node until we find the node corresponding to index.
     while (current_node + 1 < weighted_graph->graph.offsets.size() &&
            index >= weighted_graph->graph.offsets[current_node + 1]) {
         ++current_node;
     }
 }
 
-WeightedEdgeIterator& WeightedEdgeIterator::operator++() {
-    ++index;
-    if (current_node + 1 < weighted_graph->graph.offsets.size() &&
-        index >= weighted_graph->graph.offsets[current_node + 1]) {
+void WeightedEdgeIterator::update_current_node() {
+    while (current_node + 1 < weighted_graph->graph.offsets.size() &&
+           index >= weighted_graph->graph.offsets[current_node + 1]) {
         ++current_node;
     }
+    while (current_node > 0 && index < weighted_graph->graph.offsets[current_node]) {
+        --current_node;
+    }
+}
+
+WeightedEdgeIterator& WeightedEdgeIterator::operator++() {
+    ++index;
+    update_current_node();
     return *this;
+}
+
+WeightedEdgeIterator WeightedEdgeIterator::operator++(int) {
+    WeightedEdgeIterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+WeightedEdgeIterator& WeightedEdgeIterator::operator--() {
+    --index;
+    update_current_node();
+    return *this;
+}
+
+WeightedEdgeIterator WeightedEdgeIterator::operator--(int) {
+    WeightedEdgeIterator tmp = *this;
+    --(*this);
+    return tmp;
+}
+
+WeightedEdgeIterator& WeightedEdgeIterator::operator+=(difference_type n) {
+    index += n;
+    update_current_node();
+    return *this;
+}
+
+WeightedEdgeIterator& WeightedEdgeIterator::operator-=(difference_type n) {
+    index -= n;
+    update_current_node();
+    return *this;
+}
+
+WeightedEdgeIterator WeightedEdgeIterator::operator+(difference_type n) const {
+    WeightedEdgeIterator tmp = *this;
+    tmp += n;
+    return tmp;
+}
+
+WeightedEdgeIterator WeightedEdgeIterator::operator-(difference_type n) const {
+    WeightedEdgeIterator tmp = *this;
+    tmp -= n;
+    return tmp;
+}
+
+WeightedEdgeIterator::difference_type WeightedEdgeIterator::operator-(
+    const WeightedEdgeIterator& other) const {
+    return static_cast<difference_type>(index) - static_cast<difference_type>(other.index);
+}
+
+WeightedEdgeIterator::reference WeightedEdgeIterator::operator*() {
+    return weighted_graph->edge_weights[index];
+}
+
+WeightedEdgeIterator::pointer WeightedEdgeIterator::operator->() { return &(**this); }
+
+WeightedEdgeIterator::reference WeightedEdgeIterator::operator[](difference_type n) {
+    return *(*this + n);
+}
+
+bool WeightedEdgeIterator::operator==(const WeightedEdgeIterator& other) const {
+    return index == other.index;
 }
 
 bool WeightedEdgeIterator::operator!=(const WeightedEdgeIterator& other) const {
     return index != other.index;
 }
 
-double& WeightedEdgeIterator::operator*() { return weighted_graph->edge_weights[index]; }
+bool WeightedEdgeIterator::operator<(const WeightedEdgeIterator& other) const {
+    return index < other.index;
+}
+
+bool WeightedEdgeIterator::operator<=(const WeightedEdgeIterator& other) const {
+    return index <= other.index;
+}
+
+bool WeightedEdgeIterator::operator>(const WeightedEdgeIterator& other) const {
+    return index > other.index;
+}
+
+bool WeightedEdgeIterator::operator>=(const WeightedEdgeIterator& other) const {
+    return index >= other.index;
+}
 
 std::pair<int, int> WeightedEdgeIterator::get_edge() const {
-    return {static_cast<int>(current_node), weighted_graph->graph.edges[index]};
+    int source = static_cast<int>(current_node);
+    size_t offset = weighted_graph->graph.offsets[current_node];
+    int target = weighted_graph->graph.edges[index];
+    return {source, target};
 }

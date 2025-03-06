@@ -55,19 +55,43 @@ class GraphEdgeWeights {
 };
 
 class WeightedEdgeIterator {
+   private:
     friend class GraphEdgeWeights;
-
     GraphEdgeWeights* weighted_graph;
     size_t index;
     size_t current_node;  // current source node
 
+    void update_current_node();
+
    public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = double;
+    using difference_type = std::ptrdiff_t;
+    using pointer = double*;
+    using reference = double&;
+
     WeightedEdgeIterator(GraphEdgeWeights* wg, size_t idx);
 
     WeightedEdgeIterator& operator++();
-    bool operator!=(const WeightedEdgeIterator& other) const;
-    double& operator*();
+    WeightedEdgeIterator operator++(int);
+    WeightedEdgeIterator& operator--();
+    WeightedEdgeIterator operator--(int);
+    WeightedEdgeIterator& operator+=(difference_type n);
+    WeightedEdgeIterator& operator-=(difference_type n);
+    WeightedEdgeIterator operator+(difference_type n) const;
+    WeightedEdgeIterator operator-(difference_type n) const;
+    difference_type operator-(const WeightedEdgeIterator& other) const;
 
-    // Returns the current edge as a (source, target) pair.
+    reference operator*();
+    pointer operator->();
+    reference operator[](difference_type n);
+
+    bool operator==(const WeightedEdgeIterator& other) const;
+    bool operator!=(const WeightedEdgeIterator& other) const;
+    bool operator<(const WeightedEdgeIterator& other) const;
+    bool operator<=(const WeightedEdgeIterator& other) const;
+    bool operator>(const WeightedEdgeIterator& other) const;
+    bool operator>=(const WeightedEdgeIterator& other) const;
+
     std::pair<int, int> get_edge() const;
 };
