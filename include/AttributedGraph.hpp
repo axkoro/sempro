@@ -35,7 +35,7 @@ class AttributedGraph : public Graph {
      * @param node The node index to check for missing features
      * @return Vector containing indices of all missing features for the node
      */
-    std::vector<int> get_missing_features(int node) const;  // TODO: use iterator instead
+    std::vector<int> get_missing_features(int node) const;
 
     // Setters
 

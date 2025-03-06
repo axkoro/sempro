@@ -1,5 +1,7 @@
 #pragma once
 
+#include <random>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -51,17 +53,7 @@ class Graph {
      * @return Vector of neighbor node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbors(int node) const;  // TODO: use iterator instead
-
-    /**
-     * @brief Gets k random neighbors of a node.
-     *
-     * @param node Index of the node.
-     * @param k Number of neighbors to return.
-     * @return Vector of neighbor node indices.
-     * @throws std::logic_error If the node does not exist.
-     */
-    std::vector<int> get_k_nearest_neighbors(int node, int k);
+    std::span<const int> get_neighbors(int node) const;
 
     /**
      * @brief Gets the neighbors of a node up to a certain depth.
@@ -71,7 +63,31 @@ class Graph {
      * @return Vector of neighbor node indices.
      * @throws std::logic_error If the node does not exist.
      */
-    std::vector<int> get_neighbors(int node, int depth) const;  // TODO: ? use iterator instead
+    std::vector<int> get_k_hop_neighbors(int node, int depth) const;
+
+    /**
+     * @brief Gets k random neighbors of a node.
+     *
+     * @param node Index of the node.
+     * @param k Number of neighbors to return.
+     * @return Vector of neighbor node indices.
+     * @throws std::logic_error If the node does not exist.
+     *
+     * @note If possible, use function overloading get_k_nearest_neighbors(int node, int k,
+     * std::mt19937 rng) to avoid instantiating the RNG in every function call.
+     */
+    std::vector<int> get_k_nearest_neighbors(int node, int k);
+
+    /**
+     * @brief Gets k random neighbors of a node.
+     *
+     * @param node Index of the node.
+     * @param k Number of neighbors to return.
+     * @param rng
+     * @return Vector of neighbor node indices.
+     * @throws std::logic_error If the node does not exist.
+     */
+    std::vector<int> get_k_nearest_neighbors(int node, int k, std::mt19937 rng);
 
     /**
      * @brief Gets the degree of a node.

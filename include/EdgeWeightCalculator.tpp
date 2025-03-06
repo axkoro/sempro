@@ -93,8 +93,8 @@ std::vector<std::unordered_set<int>> EdgeWeightCalculator<T>::compute_covers(int
 
 #pragma omp parallel for
     for (int node = 0; node < num_nodes; ++node) {
-        std::vector<int> neighbors = graph.get_neighbors(node, depth);
-        for (const auto& neighbor : neighbors) {
+        auto neighbors = graph.get_k_hop_neighbors(node, depth);
+        for (int neighbor : neighbors) {
             covers[node].insert(neighbor);
         }
         covers[node].erase(node);

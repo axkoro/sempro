@@ -328,18 +328,22 @@ TEST(GraphTest, print_double_features) {
     EXPECT_EQ(output.str(), expected_print);
 }
 
-TEST(GraphTest, get_neighbors) {
+TEST(GraphTest, get_k_hop_neighbors) {
     std::string edges_path = "../data/test/graph/edges_example.txt";
     std::string features_path = "../data/test/graph/features_example.txt";
     AttributedGraph<double> graph(edges_path, features_path);
 
-    std::vector<int> neighbors = graph.get_neighbors(0);
+    auto neighbors = graph.get_neighbors(0);
     std::vector<int> expected_neighbors = {1, 4};
 
-    EXPECT_EQ(neighbors, expected_neighbors);
+    int i = 0;
+    for (int neighbor : neighbors) {
+        EXPECT_EQ(neighbor, expected_neighbors[i]);
+        ++i;
+    }
 
     // Test for a specific depth
-    std::vector<int> depth_neighbors = graph.get_neighbors(0, 2);
+    auto depth_neighbors = graph.get_k_hop_neighbors(0, 2);
     std::vector<int> expected_depth_neighbors = {3, 2, 4, 1, 0};
 
     EXPECT_EQ(depth_neighbors, expected_depth_neighbors);
