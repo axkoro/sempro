@@ -24,11 +24,11 @@ class EdgeWeightCalculator {
     GraphEdgeWeights generate_edge_weights();
 
    private:
-    double compute_weight(int u, int v, std::vector<std::unordered_set<int>>& covers);
+    double compute_weight(int u, int v, const std::vector<std::unordered_set<int>>& covers);
     double compute_feature_similarity(int u, int v);
     bool have_similar_feature(int node1, int node2, int feature_idx);
     double compute_structural_similarity(int u, int v,
-                                         std::vector<std::unordered_set<int>>& covers);
+                                         const std::vector<std::unordered_set<int>>& covers);
     std::vector<std::unordered_set<int>> compute_covers(int depth = 2);
 };
 

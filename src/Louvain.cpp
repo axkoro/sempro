@@ -184,7 +184,7 @@ void Louvain::aggregate_communities() {
 
     DynamicGraph new_graph(next_community_id);
 
-    for (auto& pair : community_connections) {
+    for (const auto& pair : community_connections) {
         uint64_t key = pair.first;
         int weight = pair.second;
 

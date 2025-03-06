@@ -47,6 +47,7 @@ PYBIND11_MODULE(cpp_imputation_module, m) {
 
     py::class_<DeepWalkConfig>(m, "DeepWalkConfig")
         .def(py::init<>())
+        .def_readwrite("no_edge_weights", &DeepWalkConfig::no_edge_weights)
         .def_readwrite("fusion_coefficient", &DeepWalkConfig::fusion_coefficient)
         .def_readwrite("walk_length", &DeepWalkConfig::walk_length)
         .def_readwrite("num_walks", &DeepWalkConfig::num_walks)
@@ -56,5 +57,6 @@ PYBIND11_MODULE(cpp_imputation_module, m) {
         .def_readwrite("smoothing_exponent", &DeepWalkConfig::smoothing_exponent)
         .def_readwrite("num_epochs", &DeepWalkConfig::num_epochs)
         .def_readwrite("learning_rate", &DeepWalkConfig::learning_rate)
+        .def_readwrite("top_similar", &DeepWalkConfig::top_similar)
         .def("validate", &DeepWalkConfig::validate, "Validate configuration parameters");
 }

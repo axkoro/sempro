@@ -2,6 +2,7 @@
 
 // TODO: add documentation for how to use default config (and only change specific paramters)
 struct DeepWalkConfig {
+    bool no_edge_weights = false;
     double fusion_coefficient = 0.6;
 
     int walk_length = 80;
@@ -18,15 +19,22 @@ struct DeepWalkConfig {
     int top_similar = 10;
 
     bool validate() {
+        if (fusion_coefficient < 0 || fusion_coefficient > 1) return false;
+
+        if (num_walks <= 0) return false;
+        if (walk_length < (2 * context_window + 1))
+            return false;  // the full context window would exceed the walk
+
         if (embedding_size <= 0) return false;
         if (context_window <= 0) return false;
         if (num_negative_samples < 0) return false;
         if (smoothing_exponent <= 0) return false;
+
         if (num_epochs <= 0) return false;
         if (learning_rate <= 0) return false;
+
         if (top_similar <= 0) return false;
-        if (walk_length < (2 * context_window + 1))
-            return false;  // the full context window would exceed the walk
+
         return true;
     }
 };

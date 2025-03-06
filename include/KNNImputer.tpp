@@ -16,45 +16,49 @@ void KNNImputer<T>::run() {
     std::unordered_map<int, T> global_averages;
     std::mutex global_averages_mutex;
 
-#pragma omp parallel for schedule(dynamic)
-    for (int node = 0; node < num_nodes; ++node) {
-        std::vector<int> neighbors;
+#pragma omp parallel
+    {
+        std::mt19937 rng(std::random_device{}());  // for get_k_nearest_neighbors
+#pragma omp for schedule(dynamic)
+        for (int node = 0; node < num_nodes; ++node) {
+            std::vector<int> neighbors;
 
-        if (use_k_hop) {
-            neighbors = this->graph.get_neighbors(node, k);
-        } else {
-            neighbors = this->graph.get_k_nearest_neighbors(node, k);
-        }
-        auto missing_features = this->graph.get_missing_features(node);
-
-        for (int feature : missing_features) {
-            double sum = 0.0;
-            int count = 0;
-
-            for (int neighbor : neighbors) {
-                if (!this->graph.is_missing(neighbor, feature)) {
-                    T feature_val = this->graph.get_feature(neighbor, feature);
-                    sum += static_cast<double>(feature_val);
-                    ++count;
-                }
+            if (use_k_hop) {
+                neighbors = this->graph.get_k_hop_neighbors(node, k);
+            } else {
+                neighbors = this->graph.get_k_nearest_neighbors(node, k, rng);
             }
+            auto missing_features = this->graph.get_missing_features(node);
 
-            if (count > 0) {
-                T rounded_average = round_value<T>(sum / count);
-                this->graph.set_feature(node, feature, rounded_average);
-            } else {  // If no neighbor has the feature, use a global average.
-                std::lock_guard<std::mutex> lock(global_averages_mutex);
-                auto it = global_averages.find(feature);
-                if (it != global_averages.end()) {
-                    this->graph.set_feature(node, feature, it->second);
-                } else {
-                    double global_avg = Imputer<T>::compute_global_average(feature);
-                    T imputed = round_value<T>(global_avg);
-                    this->graph.set_feature(node, feature, imputed);
-                    global_averages[feature] = imputed;
+            for (int feature : missing_features) {
+                double sum = 0.0;
+                int count = 0;
+
+                for (int neighbor : neighbors) {
+                    if (!this->graph.is_missing(neighbor, feature)) {
+                        T feature_val = this->graph.get_feature(neighbor, feature);
+                        sum += static_cast<double>(feature_val);
+                        ++count;
+                    }
                 }
+
+                if (count > 0) {
+                    T rounded_average = round_value<T>(sum / count);
+                    this->graph.set_feature(node, feature, rounded_average);
+                } else {  // If no neighbor has the feature, use a global average.
+                    std::lock_guard<std::mutex> lock(global_averages_mutex);
+                    auto it = global_averages.find(feature);
+                    if (it != global_averages.end()) {
+                        this->graph.set_feature(node, feature, it->second);
+                    } else {
+                        double global_avg = Imputer<T>::compute_global_average(feature);
+                        T imputed = round_value<T>(global_avg);
+                        this->graph.set_feature(node, feature, imputed);
+                        global_averages[feature] = imputed;
+                    }
+                }
+                this->graph.set_missing(node, feature, false);
             }
-            this->graph.set_missing(node, feature, false);
         }
     }
 }

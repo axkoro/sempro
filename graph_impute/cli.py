@@ -99,6 +99,12 @@ def parse_args() -> argparse.Namespace:
 
     deepwalk_group = parser.add_argument_group("DeepWalk Imputer Options")
     deepwalk_group.add_argument(
+        "--no-edge-weights",
+        action="store_true",
+        default=None,  # because otherwise 'False' is default which makes checking if this argument was passed impossible (for warning messages)
+        help="Whether to perform the edge weight preprocessing step.",
+    )
+    deepwalk_group.add_argument(
         "--fusion-coefficient",
         type=float,
         # default=0.6,
@@ -151,6 +157,11 @@ def parse_args() -> argparse.Namespace:
         type=float,
         # default=0.025,
         help="Learning rate for the optimizer.",
+    )
+    deepwalk_group.add_argument(
+        "--top-similar",
+        type=int,
+        help="Number of most similar nodes (according to DeepWalk embeddings) to be used for imputation.",
     )
 
     return parser.parse_args()

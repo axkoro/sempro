@@ -15,13 +15,14 @@ DeepWalkImputer<T>::DeepWalkImputer(AttributedGraph<T>& g, const DeepWalkConfig&
 
 template <typename T>
 void DeepWalkImputer<T>::run() {
-    EdgeWeightCalculator<T> ew_calc(this->graph, config.fusion_coefficient);
-    GraphEdgeWeights edge_weights = ew_calc.generate_edge_weights();
-    // GraphEdgeWeights edge_weights(this->graph); // sets every edge weight to 1
+    GraphEdgeWeights edge_weights =
+        config.no_edge_weights ? GraphEdgeWeights(this->graph)  // sets all edge weights to 1.0
+                               : EdgeWeightCalculator<T>(this->graph, config.fusion_coefficient)
+                                     .generate_edge_weights();
 
     RandomWalkGenerator rw_gen(this->graph, edge_weights, config.walk_length, config.num_walks,
                                seed);
-    std::vector<std::vector<int>> walks = rw_gen.generate_walks();
+    const std::vector<std::vector<int>> walks = rw_gen.generate_walks();
 
     SkipGramConfig cfg(config);
     SkipGram skip_gram(this->graph.get_num_nodes(), cfg, seed);
@@ -43,23 +44,23 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
         std::vector<std::pair<int, double>> similarity_ranking =
             get_similarity_ranking(node, embeddings);
 
-        for (auto&& feature : missing_feature_indices) {
+        for (int feature_idx : missing_feature_indices) {
             double feature_sum = 0.0;  // for average calculation
             int count = 0;
             for (const auto& [similar_node, similarity] : similarity_ranking) {
-                if (this->graph.is_missing(similar_node, feature)) continue;
+                if (this->graph.is_missing(similar_node, feature_idx)) continue;
 
-                feature_sum += this->graph.get_feature(similar_node, feature);
+                feature_sum += this->graph.get_feature(similar_node, feature_idx);
                 count++;
                 if (count == config.top_similar) break;  // Use the top n similar nodes
             }
             if (count > 0) {
                 T imputed_val = round_value<T>(feature_sum / static_cast<double>(count));
-                this->graph.set_feature(node, feature, imputed_val);
+                this->graph.set_feature(node, feature_idx, imputed_val);
             } else {
-                this->graph.set_feature(node, feature, 1.0);
+                this->graph.set_feature(node, feature_idx, 1.0);
             }
-            this->graph.set_missing(node, feature, false);
+            this->graph.set_missing(node, feature_idx, false);
         }
     }
 }

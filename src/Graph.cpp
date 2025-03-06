@@ -20,21 +20,43 @@ int Graph::get_num_nodes() const { return num_nodes; }
 
 int Graph::get_num_edges() const { return edges.size() / 2; }
 
-std::vector<int> Graph::get_neighbors(int node) const {
+std::span<const int> Graph::get_neighbors(int node) const {
     if (!is_valid_node(node)) throw GraphException("Node does not exist");
+    return std::span<const int>(edges.begin() + offsets[node], offsets[node + 1] - offsets[node]);
+}
 
-    std::vector<int> neighbors(offsets[node + 1] - offsets[node]);
-    std::copy(edges.begin() + offsets[node], edges.begin() + offsets[node + 1], neighbors.begin());
+std::vector<int> Graph::get_k_hop_neighbors(int node, int depth) const {
+    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
+
+    std::unordered_set<int> visited;
+    std::queue<int> frontier;
+    frontier.push(node);
+    visited.insert(node);
+
+    for (int d = 0; d < depth; ++d) {
+        int frontierSize = frontier.size();
+        for (int i = 0; i < frontierSize; ++i) {
+            int curr = frontier.front();
+            frontier.pop();
+            for (int nbr : get_neighbors(curr)) {
+                if (!visited.count(nbr)) {
+                    visited.insert(nbr);
+                    frontier.push(nbr);
+                }
+            }
+        }
+    }
+    std::vector<int> neighbors(visited.begin(), visited.end());
 
     return neighbors;
 }
 
 std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
-    ;
-    if (!is_valid_node(node)) throw GraphException("Node does not exist");
+    return this->get_k_nearest_neighbors(node, k, std::mt19937(std::random_device{}()));
+}
 
-    std::random_device rd;  // for shuffling
-    std::mt19937 g(rd());
+std::vector<int> Graph::get_k_nearest_neighbors(int node, int k, std::mt19937 rng) {
+    if (!is_valid_node(node)) throw GraphException("Node does not exist");
 
     std::unordered_set<int> visited;
     std::vector<int> selected_neighbors;
@@ -48,10 +70,11 @@ std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
         int current = to_explore.front();
         to_explore.pop();
 
-        std::vector<int> neighbors = get_neighbors(current);
-        std::shuffle(neighbors.begin(), neighbors.end(), g);
+        auto neighbors = get_neighbors(current);
+        std::vector<int> neighbors_copy(neighbors.begin(), neighbors.end());
+        std::shuffle(neighbors_copy.begin(), neighbors_copy.end(), rng);
 
-        for (int neighbor : neighbors) {
+        for (int neighbor : neighbors_copy) {
             if (visited.find(neighbor) == visited.end()) {
                 visited.insert(neighbor);
                 selected_neighbors.push_back(neighbor);
@@ -65,32 +88,6 @@ std::vector<int> Graph::get_k_nearest_neighbors(int node, int k) {
     }
 
     return selected_neighbors;
-}
-
-std::vector<int> Graph::get_neighbors(int node, int depth) const {
-    if (!(is_valid_node(node))) throw GraphException("Node does not exist");
-
-    std::unordered_set<int> visited;
-    std::queue<int> frontier;
-    frontier.push(node);
-    visited.insert(node);
-
-    for (int d = 0; d < depth; ++d) {
-        int frontierSize = frontier.size();
-        for (int i = 0; i < frontierSize; ++i) {
-            int curr = frontier.front();
-            frontier.pop();
-            for (auto&& nbr : get_neighbors(curr)) {
-                if (!visited.count(nbr)) {
-                    visited.insert(nbr);
-                    frontier.push(nbr);
-                }
-            }
-        }
-    }
-    std::vector<int> neighbors(visited.begin(), visited.end());
-
-    return neighbors;
 }
 
 int Graph::get_degree(int node) const {
