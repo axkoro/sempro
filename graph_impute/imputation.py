@@ -147,6 +147,7 @@ class DeepWalkImputer(Imputer):
     def __init__(
         self,
         graph: Graph,
+        no_edge_weights: bool = False,
         fusion_coefficient: float = 0.6,
         walk_length: int = 80,
         num_walks: int = 10,
@@ -156,9 +157,11 @@ class DeepWalkImputer(Imputer):
         smoothing_exponent: float = 0.75,
         num_epochs: int = 1,
         learning_rate: float = 0.025,
+        top_similar: int = 10,
     ):
         super().__init__(graph)
         self.config = cpp_create_deepwalk_config(
+            no_edge_weights,
             fusion_coefficient,
             walk_length,
             num_walks,
@@ -168,6 +171,7 @@ class DeepWalkImputer(Imputer):
             smoothing_exponent,
             num_epochs,
             learning_rate,
+            top_similar,
         )
         self.cpp_imputer = cpp_create_deepwalk_imputer(graph.cpp_graph, self.config)
 

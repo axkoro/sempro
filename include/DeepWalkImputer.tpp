@@ -15,13 +15,14 @@ DeepWalkImputer<T>::DeepWalkImputer(AttributedGraph<T>& g, const DeepWalkConfig&
 
 template <typename T>
 void DeepWalkImputer<T>::run() {
-    EdgeWeightCalculator<T> ew_calc(this->graph, config.fusion_coefficient);
-    GraphEdgeWeights edge_weights = ew_calc.generate_edge_weights();
-    // GraphEdgeWeights edge_weights(this->graph); // sets every edge weight to 1
+    GraphEdgeWeights edge_weights =
+        config.no_edge_weights ? GraphEdgeWeights(this->graph)  // sets all edge weights to 1.0
+                               : EdgeWeightCalculator<T>(this->graph, config.fusion_coefficient)
+                                     .generate_edge_weights();
 
     RandomWalkGenerator rw_gen(this->graph, edge_weights, config.walk_length, config.num_walks,
                                seed);
-    std::vector<std::vector<int>> walks = rw_gen.generate_walks();
+    const std::vector<std::vector<int>> walks = rw_gen.generate_walks();
 
     SkipGramConfig cfg(config);
     SkipGram skip_gram(this->graph.get_num_nodes(), cfg, seed);

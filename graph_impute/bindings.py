@@ -126,6 +126,7 @@ def cpp_create_deepwalk_imputer(
 
 
 def cpp_create_deepwalk_config(
+    no_edge_weights: bool,
     fusion_coefficient: float,
     walk_length: int,
     num_walks: int,
@@ -135,12 +136,15 @@ def cpp_create_deepwalk_config(
     smoothing_exponent: float,
     num_epochs: int,
     learning_rate: float,
+    top_similar: int,
 ) -> im.DeepWalkConfig:
     """
     Create and configure a DeepWalkConfig instance.
 
     Parameters
     ----------
+    no_edge_weights : bool
+        Whether to perform the edge weight preprocessing step.
     fusion_coefficient : float
         Fusion coefficient.
     walk_length : int
@@ -159,6 +163,8 @@ def cpp_create_deepwalk_config(
         Number of training epochs.
     learning_rate : float
         Learning rate.
+    top_similar : int
+        Number of most similar nodes (according to DeepWalk embeddings) to be used for imputation.
 
     Returns
     -------
@@ -172,6 +178,7 @@ def cpp_create_deepwalk_config(
     """
     config = im.DeepWalkConfig()
 
+    config.no_edge_weights = no_edge_weights
     config.fusion_coefficient = fusion_coefficient
     config.walk_length = walk_length
     config.num_walks = num_walks
@@ -181,6 +188,7 @@ def cpp_create_deepwalk_config(
     config.smoothing_exponent = smoothing_exponent
     config.num_epochs = num_epochs
     config.learning_rate = learning_rate
+    config.top_similar = top_similar
 
     config.validate()
 
