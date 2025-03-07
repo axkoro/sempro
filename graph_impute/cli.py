@@ -1,4 +1,5 @@
 import argparse
+import importlib
 import time
 from copy import deepcopy
 from textwrap import dedent
@@ -56,6 +57,12 @@ def parse_args() -> argparse.Namespace:
         "--reference", type=str, help="Reference data file path for evaluation."
     )
     eval_group.add_argument("--time", action="store_true", help="Time major processing steps.")
+    eval_group.add_argument(
+        "--train",
+        action="store_true",
+        default=None,
+        help="Train a neural network using the imputed data to evaluate the quality in downstream tasks.",
+    )
 
     knn_group = parser.add_argument_group("KNN Imputer Options")
     knn_group.add_argument(
@@ -188,6 +195,38 @@ def validate_command(args: argparse.Namespace) -> None:
                 "Warning: When --dataset is provided, file paths for --edges and --features will be overridden by the dataset configuration."
             )
 
+    if args.train:
+        if not is_extra_installed("train_evaluate"):
+            raise ImportError("Invalid flag: --train. Install extra 'train_evaluate' to use it.")
+
+        valid_datasets = ["amazon", "cora", "twitch", "github", "genius"]
+        if not args.dataset or args.dataset not in valid_datasets:
+            raise NotImplementedError(
+                f"--train currently only works with the following datasets: {', '.join(valid_datasets)}."
+            )
+
+    # if args.plot:
+    #     if not is_extra_installed("plot"):
+    #         raise ImportError("Invalid flag: --plot. Install extra 'plot' to use it.")
+
+
+def is_extra_installed(extra: str):
+    """Check if all dependencies for a given extra are installed."""
+
+    # Should match extras_require in setup.py!
+    EXTRA_DEPENDENCIES = {
+        "train_evaluate": ["torch", "torch_geometric", "tqdm"],
+        "plot": ["matplotlib"],
+        "test": ["pytest", "coverage"],
+    }
+
+    if extra not in EXTRA_DEPENDENCIES:
+        valid_extras = ", ".join(EXTRA_DEPENDENCIES.keys())
+        raise ValueError(f"Invalid extra '{extra}. Available options: {valid_extras}.")
+
+    dependencies = EXTRA_DEPENDENCIES[extra]
+    return all(importlib.util.find_spec(dep) is not None for dep in dependencies)
+
 
 def load_dataset_config(args: argparse.Namespace) -> tuple[str, str, str, str]:
     if args.dataset:
@@ -237,10 +276,12 @@ def extract_parameters(args: argparse.Namespace) -> dict[str, Any]:
         "evaluate",
         "reference",
         "time",
+        "plot",
+        "train",
     ]
     parameters = deepcopy(args.__dict__)
     for parameter in non_parameters:
-        parameters.pop(parameter)
+        parameters.pop(parameter, None)
     return parameters
 
 
@@ -291,13 +332,16 @@ def main():
     if args.evaluate:
         evaluate_time_start = time.time()
 
-        overlap_total, overlap_missing, max_error, avg_error, r2_score = (
-            evaluate_imputed_features_file(
-                imputed_features_path=args.output,
-                reference_path=reference_path,
-                input_features_path=features_path,
-                feature_type=feature_type,
-            )
+        if args.train is None:
+            args.train = False
+
+        results = evaluate_imputed_features_file(
+            imputed_features_path=args.output,
+            reference_path=reference_path,
+            input_features_path=features_path,
+            feature_type=feature_type,
+            train_neural=args.train,
+            dataset_name=args.dataset,
         )
 
         evaluate_time_end = time.time()
@@ -305,15 +349,29 @@ def main():
             evaluate_time = evaluate_time_end - evaluate_time_start
             print(f"Evaluate time: {evaluate_time:{max_width}.2f} s\n")
 
-        eval_values = [overlap_total * 100, overlap_missing * 100, max_error, avg_error, r2_score]
+        eval_values = [
+            results["overlap_total"] * 100,
+            results["overlap_missing"] * 100,
+            results["max_error"],
+            results["avg_error"],
+            results["r2_score"],
+        ]
         formatted_eval = [f"{val:.2f}" for val in eval_values]
         eval_max_width = max(len(val_str) for val_str in formatted_eval)
 
-        print(f"overlap (total):   {overlap_total * 100:{eval_max_width}.2f} %")
-        print(f"overlap (missing): {overlap_missing * 100:{eval_max_width}.2f} %")
-        print(f"max error (abs):   {max_error:{eval_max_width}.2f}")
-        print(f"avg error (abs):   {avg_error:{eval_max_width}.2f}")
-        print(f"R2 score:          {r2_score:{eval_max_width}.2f}")
+        print(f"overlap (total):   {results['overlap_total'] * 100:{eval_max_width}.2f} %")
+        print(f"overlap (missing): {results['overlap_missing'] * 100:{eval_max_width}.2f} %")
+        print(f"max error (abs):   {results['max_error']:{eval_max_width}.2f}")
+        print(f"avg error (abs):   {results['avg_error']:{eval_max_width}.2f}")
+        print(f"R2 score:          {results['r2_score']:{eval_max_width}.2f}")
+
+        if args.train:
+            print(
+                f"model accuracy (original): {results['model_accuracy_original'] * 100:{eval_max_width}.2f} %"
+            )
+            print(
+                f"model accuracy (imputed): {results['model_accuracy_imputed'] * 100:{eval_max_width}.2f} %"
+            )
 
 
 if __name__ == "__main__":
