@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import List, Type, Union
+from typing import List, Optional, Type, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -10,8 +10,12 @@ from .graph import Graph
 
 
 def evaluate_imputed_graph(
-    graph: Graph, input_features_path: str, reference_path: str
-) -> tuple[float, float, float, float, float]:
+    graph: Graph,
+    input_features_path: str,
+    reference_path: str,
+    train_neural: bool = False,
+    dataset_name: Optional[str] = None,
+) -> dict:
     """
     Evaluate imputed graph features against a reference.
 
@@ -25,11 +29,13 @@ def evaluate_imputed_graph(
     temp_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
     graph.save(temp_file.name)
 
-    overlap_total, overlap_missing, max_error, avg_error, r2_score = evaluate_imputed_features_file(
+    results = evaluate_imputed_features_file(
         imputed_features_path=temp_file.name,
         input_features_path=input_features_path,
         reference_path=reference_path,
         feature_type=graph.feature_type,
+        train_neural=train_neural,
+        dataset_name=dataset_name,
     )
 
     temp_file.close()
@@ -39,7 +45,7 @@ def evaluate_imputed_graph(
         print("Failed to delete temp files for evaluation")
         pass
 
-    return overlap_total, overlap_missing, max_error, avg_error, r2_score
+    return results
 
 
 def evaluate_imputed_features_file(
@@ -47,7 +53,9 @@ def evaluate_imputed_features_file(
     reference_path: str,
     input_features_path: str,
     feature_type: Union[Type[float], Type[int], Type[bool]] = float,
-) -> tuple[float, float, float, float, float]:
+    train_neural: bool = False,
+    dataset_name: Optional[str] = None,
+) -> dict:
     """
     Evaluate the quality of imputed features against a reference.
 
@@ -103,9 +111,25 @@ def evaluate_imputed_features_file(
 
     r2_score = measure_r2_score(ref_features, imputed_features, missing_map)
 
-    # TODO: train neural network
+    results = {
+        "overlap_total": overlap_total,
+        "overlap_missing": overlap_missing,
+        "max_error": max_error,
+        "avg_error": avg_error,
+        "r2_score": r2_score,
+    }
 
-    return overlap_total, overlap_missing, max_error, avg_error, r2_score
+    if train_neural:
+        from .evaluation_train import train_and_evaluate_gnn_with_imputation
+
+        model_accuracy_original, model_accuracy_imputed = train_and_evaluate_gnn_with_imputation(
+            dataset_name, imputed_features
+        )
+
+        results["model_accuracy_original"] = model_accuracy_original
+        results["model_accuracy_imputed"] = model_accuracy_imputed
+
+    return results
 
 
 def read_features(

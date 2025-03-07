@@ -232,7 +232,12 @@ TEST(DeepWalkImputerTest, no_missing_features) {
     std::string features_file = "../data/test/deepwalk/test_missing_features.txt";
 
     AttributedGraph<double> graph(edges_file, features_file);
-    DeepWalkImputer<double> imputer(graph);
+
+    DeepWalkConfig config;
+    config.embedding_size = 8;
+    config.num_negative_samples = 2;
+
+    DeepWalkImputer<double> imputer(graph, config);
     imputer.run();
 
     for (int node = 0; node < graph.get_num_nodes(); ++node) {

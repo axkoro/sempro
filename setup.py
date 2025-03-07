@@ -118,11 +118,6 @@ class CMakeBuild(build_ext):
         subprocess.run(["cmake", "--build", ".", *build_args], cwd=build_temp, check=True)
 
 
-# def load_submodule_requirements():
-#     with open("extlibs/evaluation/requirements_full.txt") as f:
-#         return f.read().splitlines()
-
-
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
@@ -140,8 +135,9 @@ setup(
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={
-        "test": ["pytest>=6.0", "coverage>=7.6"],
-        "plot": ["matplotlib>=3.10"],
+        "train_evaluate": ["torch", "torch_geometric", "tqdm"],
+        "plot": ["matplotlib"],
+        "test": ["pytest", "coverage"],
     },
     packages=["graph_impute"],
     python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
