@@ -130,7 +130,7 @@ double SkipGram::sigmoid(double val) {
     return 1 / (1 + exp(-val));
 }
 
-double SkipGram::dot_product(std::span<const double> a, std::span<const double> b) {
+double SkipGram::dot_product(const std::span<const double>& a, const std::span<const double>& b) {
     if (a.size() != b.size()) throw std::runtime_error("Vectors must be of equal length.");
     return std::inner_product(a.begin(), a.end(), b.begin(), 0.0);
 }

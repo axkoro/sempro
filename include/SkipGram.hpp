@@ -133,5 +133,5 @@ class SkipGram {
                                                    int num_epochs);
 
    public:
-    static double dot_product(std::span<const double> a, std::span<const double> b);
+    static double dot_product(const std::span<const double>& a, const std::span<const double>& b);
 };
