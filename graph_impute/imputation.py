@@ -1,7 +1,7 @@
 import inspect
 from abc import ABC, abstractmethod
 
-from .bindings import (
+from ._bindings import (
     cpp_create_community_imputer,
     cpp_create_deepwalk_config,
     cpp_create_deepwalk_imputer,
@@ -38,6 +38,15 @@ class Imputer(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_config() -> dict:
+        """
+        Returns
+        -------
+        Configuration of the Imputer as a dict (paramter_name: str -> parameter_value: Any)
+        """
+        pass
+
 
 class KNNImputer(Imputer):
     """
@@ -53,22 +62,20 @@ class KNNImputer(Imputer):
 
     def __init__(self, graph: Graph, k: int = 100, use_k_hop: bool = False):
         super().__init__(graph)
+        self.k = k
+        self.use_k_hop = use_k_hop
         self.cpp_imputer = cpp_create_knn_imputer(graph.cpp_graph, k, use_k_hop)
 
     def impute(self) -> None:
         self.cpp_imputer.run()
 
+    def get_config(self) -> dict:
+        return {"k": self.k, "use_k_hop": self.use_k_hop}
+
 
 class CommunityImputer(Imputer):
     """
     Imputer using community detection.
-
-    Parameters
-    ----------
-    graph : Graph
-        The graph to be imputed.
-    community_algorithm : str, optional
-        The algorithm used for community detection (default is "louvain").
     """
 
     def __init__(
@@ -81,6 +88,11 @@ class CommunityImputer(Imputer):
     ):
         super().__init__(graph)
         self.communities_ready = False
+        # Store configuration parameters
+        self.community_algorithm = community_algorithm
+        self.max_levels = max_levels
+        self.max_iterations = max_iterations
+        self.tolerance = tolerance
 
         if community_algorithm == "louvain":
             config = cpp_create_louvain_config(max_levels, max_iterations, tolerance)
@@ -93,55 +105,27 @@ class CommunityImputer(Imputer):
             )
 
     def detect_communities(self):
-        """
-        Detect communities in the graph using the specified community_algorithm (passed during construction).
-        Then instantiate the actual C++ imputer class.
-        """
         communities = self.community_detector.execute()
         self.cpp_imputer = cpp_create_community_imputer(self.graph.cpp_graph, communities)
         self.communities_ready = True
 
     def impute(self) -> None:
-        """
-        Impute missing features using community detection.
-        If communities have not been previously detected by runnning detect_communities(),
-        this step will be performed before running the actual imputation strategy.
-
-        Returns
-        -------
-        None
-        """
         if not self.communities_ready:
             self.detect_communities()
         self.cpp_imputer.run()
+
+    def get_config(self) -> dict:
+        return {
+            "community_algorithm": self.community_algorithm,
+            "max_levels": self.max_levels,
+            "max_iterations": self.max_iterations,
+            "tolerance": self.tolerance,
+        }
 
 
 class DeepWalkImputer(Imputer):
     """
     Imputer using DeepWalk embeddings.
-
-    Parameters
-    ----------
-    graph : Graph
-        The graph to be imputed.
-    fusion_coefficient : float, optional
-        Fusion coefficient (default is 0.6).
-    walk_length : int, optional
-        Length of each random walk (default is 40).
-    num_walks : int, optional
-        Number of walks per node (default is 10).
-    embedding_size : int, optional
-        Size of the embedding (default is 128).
-    context_window : int, optional
-        Size of the context window (default is 10).
-    num_negative_samples : int, optional
-        Number of negative samples (default is 10).
-    smoothing_exponent : float, optional
-        Smoothing exponent (default is 0.75).
-    num_epochs : int, optional
-        Number of training epochs (default is 5).
-    learning_rate : float, optional
-        Learning rate for training (default is 0.025).
     """
 
     def __init__(
@@ -160,6 +144,19 @@ class DeepWalkImputer(Imputer):
         top_similar: int = 10,
     ):
         super().__init__(graph)
+        # Store configuration parameters
+        self.no_edge_weights = no_edge_weights
+        self.fusion_coefficient = fusion_coefficient
+        self.walk_length = walk_length
+        self.num_walks = num_walks
+        self.embedding_size = embedding_size
+        self.context_window = context_window
+        self.num_negative_samples = num_negative_samples
+        self.smoothing_exponent = smoothing_exponent
+        self.num_epochs = num_epochs
+        self.learning_rate = learning_rate
+        self.top_similar = top_similar
+
         self.config = cpp_create_deepwalk_config(
             no_edge_weights,
             fusion_coefficient,
@@ -177,6 +174,21 @@ class DeepWalkImputer(Imputer):
 
     def impute(self) -> None:
         self.cpp_imputer.run()
+
+    def get_config(self) -> dict:
+        return {
+            "no_edge_weights": self.no_edge_weights,
+            "fusion_coefficient": self.fusion_coefficient,
+            "walk_length": self.walk_length,
+            "num_walks": self.num_walks,
+            "embedding_size": self.embedding_size,
+            "context_window": self.context_window,
+            "num_negative_samples": self.num_negative_samples,
+            "smoothing_exponent": self.smoothing_exponent,
+            "num_epochs": self.num_epochs,
+            "learning_rate": self.learning_rate,
+            "top_similar": self.top_similar,
+        }
 
 
 def create_imputer(strategy: str, graph: Graph, **kwargs) -> Imputer:

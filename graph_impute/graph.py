@@ -1,7 +1,7 @@
 from typing import Type, Union
 
 from . import cpp_graph_module as g
-from .bindings import load_cpp_graph
+from ._bindings import load_cpp_graph
 
 
 class Graph:

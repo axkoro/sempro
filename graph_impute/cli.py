@@ -205,10 +205,6 @@ def validate_command(args: argparse.Namespace) -> None:
                 f"--train currently only works with the following datasets: {', '.join(valid_datasets)}."
             )
 
-    # if args.plot:
-    #     if not is_extra_installed("plot"):
-    #         raise ImportError("Invalid flag: --plot. Install extra 'plot' to use it.")
-
 
 def is_extra_installed(extra: str):
     """Check if all dependencies for a given extra are installed."""
@@ -228,23 +224,36 @@ def is_extra_installed(extra: str):
     return all(importlib.util.find_spec(dep) is not None for dep in dependencies)
 
 
-def load_dataset_config(args: argparse.Namespace) -> tuple[str, str, str, str]:
+def load_dataset_config(config_path: str, dataset: str, evaluate: bool):
+    with open(config_path) as file:
+        data = yaml.safe_load(file)
+    try:
+        feature_type_str = data[dataset]["feature_type"]
+        edges_path = data[dataset]["edges"]
+        features_path = data[dataset]["features"]
+        if evaluate:
+            reference_path = data[dataset]["reference"]
+        else:
+            reference_path = ""
+    except KeyError as err:
+        raise LookupError(
+            f"Could not find all relevant data for data set '{dataset}' in '{config_path}' (see documentation for information about the config)"
+        ) from err
+
+    type_map = {
+        "bool": bool,
+        "int": int,
+        "float": float,
+    }
+    feature_type = type_map[feature_type_str]
+    return edges_path, features_path, reference_path, feature_type
+
+
+def load_dataset_paths(args: argparse.Namespace) -> tuple[str, str, str, str]:
     if args.dataset:
-        config_path = args.config  # will always be set due to default value
-        with open(config_path) as file:
-            data = yaml.safe_load(file)
-        try:
-            feature_type_str = data[args.dataset]["feature_type"]
-            edges_path = data[args.dataset]["edges"]
-            features_path = data[args.dataset]["features"]
-            if args.evaluate:
-                reference_path = data[args.dataset]["reference"]
-            else:
-                reference_path = ""
-        except KeyError as err:
-            raise LookupError(
-                f"Could not find all relevant data for data set '{args.dataset}' in '{config_path}' (see documentation for information about the config)"
-            ) from err
+        edges_path, features_path, reference_path, feature_type = load_dataset_config(
+            args.config, args.dataset, args.evaluate
+        )  # will always be set due to default
     else:
         edges_path = args.edges
         features_path = args.features
@@ -253,13 +262,12 @@ def load_dataset_config(args: argparse.Namespace) -> tuple[str, str, str, str]:
             reference_path = args.reference
         else:
             reference_path = ""
-
-    type_map = {
-        "bool": bool,
-        "int": int,
-        "float": float,
-    }
-    feature_type = type_map[feature_type_str]
+        type_map = {
+            "bool": bool,
+            "int": int,
+            "float": float,
+        }
+        feature_type = type_map[feature_type_str]
 
     return edges_path, features_path, reference_path, feature_type
 
@@ -288,7 +296,7 @@ def extract_parameters(args: argparse.Namespace) -> dict[str, Any]:
 def main():
     args = parse_args()
     validate_command(args)
-    edges_path, features_path, reference_path, feature_type = load_dataset_config(args)
+    edges_path, features_path, reference_path, feature_type = load_dataset_paths(args)
 
     load_time_start = time.time()
     graph = Graph.load(edges_path, features_path, feature_type=feature_type)

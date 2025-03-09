@@ -8,6 +8,8 @@ download/
 # Results and plots
 /*.txt
 /*.png
+/*.pdf
+results.db
 
 # MacOS
 .DS_Store
