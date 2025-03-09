@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // TODO: add documentation for how to use default config (and only change specific paramters)
 struct DeepWalkConfig {
     bool no_edge_weights = false;
