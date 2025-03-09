@@ -20,7 +20,9 @@ class DeepWalkImputer : public Imputer<T> {
 
     void impute_features(const Matrix& embeddings);
     std::vector<std::pair<int, double>> get_similarity_ranking(int node, const Matrix& embeddings);
-    static double calculate_similarity(std::span<const double> vec1, std::span<const double> vec2);
+    static double vector_length(const std::span<const double>& vec);
+    static double cosine_similarity(const std::span<const double>& vec1,
+                                    const std::span<const double>& vec2);
 };
 
 #include "DeepWalkImputer.tpp"

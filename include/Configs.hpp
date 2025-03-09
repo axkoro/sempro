@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // TODO: add documentation for how to use default config (and only change specific paramters)
 struct DeepWalkConfig {
     bool no_edge_weights = false;
@@ -17,6 +19,7 @@ struct DeepWalkConfig {
     double learning_rate = 0.025;
 
     int top_similar = 10;
+    std::string similarity_metric = "cosine";  // valid arguments: "cosine", "dot_product"
 
     bool validate() {
         if (fusion_coefficient < 0 || fusion_coefficient > 1) return false;
@@ -34,6 +37,7 @@ struct DeepWalkConfig {
         if (learning_rate <= 0) return false;
 
         if (top_similar <= 0) return false;
+        if (similarity_metric != "cosine" && similarity_metric != "dot_product") return false;
 
         return true;
     }

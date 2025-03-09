@@ -142,6 +142,7 @@ class DeepWalkImputer(Imputer):
         num_epochs: int = 1,
         learning_rate: float = 0.025,
         top_similar: int = 10,
+        similarity_metric: str = "cosine",
     ):
         super().__init__(graph)
         # Store configuration parameters
@@ -156,6 +157,7 @@ class DeepWalkImputer(Imputer):
         self.num_epochs = num_epochs
         self.learning_rate = learning_rate
         self.top_similar = top_similar
+        self.similarity_metric = similarity_metric
 
         self.config = cpp_create_deepwalk_config(
             no_edge_weights,
@@ -169,6 +171,7 @@ class DeepWalkImputer(Imputer):
             num_epochs,
             learning_rate,
             top_similar,
+            similarity_metric,
         )
         self.cpp_imputer = cpp_create_deepwalk_imputer(graph.cpp_graph, self.config)
 
@@ -188,6 +191,7 @@ class DeepWalkImputer(Imputer):
             "num_epochs": self.num_epochs,
             "learning_rate": self.learning_rate,
             "top_similar": self.top_similar,
+            "similarity_metric": self.similarity_metric,
         }
 
 

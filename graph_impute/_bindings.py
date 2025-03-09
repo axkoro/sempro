@@ -137,6 +137,7 @@ def cpp_create_deepwalk_config(
     num_epochs: int,
     learning_rate: float,
     top_similar: int,
+    similarity_metric: str,
 ) -> im.DeepWalkConfig:
     """
     Create and configure a DeepWalkConfig instance.
@@ -189,6 +190,7 @@ def cpp_create_deepwalk_config(
     config.num_epochs = num_epochs
     config.learning_rate = learning_rate
     config.top_similar = top_similar
+    config.similarity_metric = similarity_metric
 
     config.validate()
 

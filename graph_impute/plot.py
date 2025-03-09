@@ -3,7 +3,7 @@ import sqlite3
 import time
 from copy import deepcopy
 from datetime import datetime
-from typing import NamedTuple, Tuple, Dict, Any, List
+from typing import Any, Dict, List, NamedTuple, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -63,6 +63,7 @@ class _Database:
                 num_epochs INTEGER,
                 learning_rate REAL,
                 top_similar INTEGER,
+                similarity_metric TEXT,
                 overlap_total REAL,
                 overlap_missing REAL,
                 max_error REAL,

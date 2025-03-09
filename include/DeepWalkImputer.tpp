@@ -37,6 +37,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     int num_nodes = this->graph.get_num_nodes();
     int num_features = this->graph.get_num_features();
 
+#pragma omp parallel for
     for (int node = 0; node < num_nodes; ++node) {
         auto missing_feature_indices = this->graph.get_missing_features(node);
         if (missing_feature_indices.empty()) continue;
@@ -78,12 +79,21 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
     std::vector<std::pair<int, double>> similarity_ranking;
     similarity_ranking.reserve(num_nodes - 1);
 
+    double (*similarity_func)(const std::span<const double>& vec1,
+                              const std::span<const double>& vec2);
+    if (config.similarity_metric == "cosine") {
+        similarity_func = cosine_similarity;
+    } else if (config.similarity_metric == "dot_product") {
+        similarity_func = SkipGram::dot_product;
+    } else {
+        throw std::runtime_error("Invalid similarity metric: " + config.similarity_metric);
+    }
+
     for (int other_node = 0; other_node < num_nodes; ++other_node) {
         if (node == other_node) continue;
-
-        double similarity =
-            calculate_similarity(embeddings.get_row(node), embeddings.get_row(other_node));
-
+        auto embedding1 = embeddings.get_row(node);
+        auto embedding2 = embeddings.get_row(other_node);
+        double similarity = similarity_func(embedding1, embedding2);
         similarity_ranking.emplace_back(other_node, similarity);
     }
 
@@ -96,7 +106,18 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
 }
 
 template <typename T>
-double DeepWalkImputer<T>::calculate_similarity(std::span<const double> vec1,
-                                                std::span<const double> vec2) {
-    return SkipGram::dot_product(vec1, vec2);
+double DeepWalkImputer<T>::vector_length(const std::span<const double>& vec) {
+    double sum = 0.0;
+    for (size_t i = 0; i < vec.size(); i++) {
+        sum += vec[i] * vec[i];
+    }
+    return std::sqrt(sum);
+}
+
+template <typename T>
+double DeepWalkImputer<T>::cosine_similarity(const std::span<const double>& vec1,
+                                             const std::span<const double>& vec2) {
+    double cosine_similarity =
+        SkipGram::dot_product(vec1, vec2) / (vector_length(vec1) * vector_length(vec2));
+    return cosine_similarity;
 }

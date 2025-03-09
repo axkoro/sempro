@@ -58,5 +58,6 @@ PYBIND11_MODULE(cpp_imputation_module, m) {
         .def_readwrite("num_epochs", &DeepWalkConfig::num_epochs)
         .def_readwrite("learning_rate", &DeepWalkConfig::learning_rate)
         .def_readwrite("top_similar", &DeepWalkConfig::top_similar)
+        .def_readwrite("similarity_metric", &DeepWalkConfig::similarity_metric)
         .def("validate", &DeepWalkConfig::validate, "Validate configuration parameters");
 }
