@@ -87,7 +87,6 @@ std::vector<std::pair<int, double>> DeepWalkImputer<T>::get_similarity_ranking(
     } else {
         throw std::runtime_error("Invalid similarity metric: " + config.similarity_metric);
     }
-    std::cout << config.similarity_metric << std::endl;
 
     for (int other_node = 0; other_node < num_nodes; ++other_node) {
         if (node == other_node) continue;
