@@ -86,8 +86,8 @@ def evaluate_imputed_features_file(
         If the dimensions of the imputed and reference features do not match, or if there are
         no missing features in `input_features_path` to evaluate.
     """
-    imputed_features = read_features(imputed_features_path, feature_type)
-    ref_features = read_features(reference_path, feature_type)
+    imputed_features = _read_features(imputed_features_path, feature_type)
+    ref_features = _read_features(reference_path, feature_type)
 
     if np.shape(imputed_features) != np.shape(ref_features):
         raise ValueError(
@@ -96,10 +96,10 @@ def evaluate_imputed_features_file(
         )
     total_num_features = imputed_features.shape[0] * imputed_features.shape[1]
 
-    num_overlapping = compute_overlap(imputed_features, ref_features)
+    num_overlapping = _compute_overlap(imputed_features, ref_features)
     overlap_total = num_overlapping / total_num_features
 
-    num_missing, missing_map = count_missing_features(input_features_path)
+    num_missing, missing_map = _count_missing_features(input_features_path)
     if num_missing > 0:
         overlap_missing = (num_overlapping - total_num_features + num_missing) / num_missing
     else:
@@ -107,9 +107,9 @@ def evaluate_imputed_features_file(
             f"There are no missing features in '{input_features_path}', so nothing to evaluate."
         )
 
-    max_error, avg_error = measure_avg_and_max_distance(imputed_features, ref_features)
+    max_error, avg_error = _measure_avg_and_max_distance(imputed_features, ref_features)
 
-    r2_score = measure_r2_score(ref_features, imputed_features, missing_map)
+    r2_score = _measure_r2_score(ref_features, imputed_features, missing_map)
 
     results = {
         "overlap_total": overlap_total,
@@ -120,7 +120,7 @@ def evaluate_imputed_features_file(
     }
 
     if train_neural:
-        from .evaluation_train import train_and_evaluate_gnn_with_imputation
+        from ._evaluation_train import train_and_evaluate_gnn_with_imputation
 
         model_accuracy_original, model_accuracy_imputed = train_and_evaluate_gnn_with_imputation(
             dataset_name, imputed_features
@@ -132,7 +132,7 @@ def evaluate_imputed_features_file(
     return results
 
 
-def read_features(
+def _read_features(
     features_path: str, feature_type: Union[Type[float], Type[int], Type[bool]] = float
 ) -> npt.NDArray:
     with open(features_path, "rb") as f:
@@ -150,14 +150,14 @@ def read_features(
     return features
 
 
-def compute_overlap(
+def _compute_overlap(
     features_x: npt.NDArray, features_y: npt.NDArray, tolerance: float = 1e-5
 ) -> int:
     ground_truth = np.isclose(features_x, features_y)
     return ground_truth.sum()
 
 
-def count_missing_features(features_path: str) -> tuple[int, npt.NDArray]:
+def _count_missing_features(features_path: str) -> tuple[int, npt.NDArray]:
     num_missing_features = 0
     missing_feature_indices = []
     with open(features_path, encoding="UTF-8") as f:
@@ -176,7 +176,7 @@ def count_missing_features(features_path: str) -> tuple[int, npt.NDArray]:
     return num_missing_features, missing_feature_indices
 
 
-def measure_avg_and_max_distance(
+def _measure_avg_and_max_distance(
     features_x: npt.NDArray, features_y: npt.NDArray
 ) -> tuple[float, float]:
     if features_x.dtype == np.bool_:
@@ -186,7 +186,7 @@ def measure_avg_and_max_distance(
     return np.max(diff), np.mean(diff)
 
 
-def measure_r2_score(
+def _measure_r2_score(
     ref_features: npt.NDArray,
     pred_features: npt.NDArray,
     missing_map: List[tuple[int, int]],
