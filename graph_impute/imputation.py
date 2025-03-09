@@ -191,6 +191,7 @@ class DeepWalkImputer(Imputer):
             "num_epochs": self.num_epochs,
             "learning_rate": self.learning_rate,
             "top_similar": self.top_similar,
+            "similarity_metric": self.similarity_metric,
         }
 
 
