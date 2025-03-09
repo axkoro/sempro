@@ -37,6 +37,7 @@ void DeepWalkImputer<T>::impute_features(const Matrix& embeddings) {
     int num_nodes = this->graph.get_num_nodes();
     int num_features = this->graph.get_num_features();
 
+#pragma omp parallel for
     for (int node = 0; node < num_nodes; ++node) {
         auto missing_feature_indices = this->graph.get_missing_features(node);
         if (missing_feature_indices.empty()) continue;
