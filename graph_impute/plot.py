@@ -301,16 +301,208 @@ def plot_parameter(
     return _create_plots(parameter_name, parameter_values, metrics, datasets, results)
 
 
+def plot_best_results(
+    strategies: List[str],
+    datasets: List[str],
+    metrics: List[str],
+    db_file: str = "results.db",
+) -> List[plt.Figure]:
+    """
+    Creates bar plots for the best results (per metric) stored in the database.
+    For each metric (e.g. overlap_missing, avg_error, r2_score):
+      - x-ticks represent datasets.
+      - At each dataset tick, one bar per strategy (knn, community, deepwalk) is plotted,
+        corresponding to the best result found in the database.
+      - Each bar is annotated with its execution time.
+
+    Note: For overlap_missing and avg_error lower values are better (ascending order),
+    whereas for r2_score higher values are preferred (descending order).
+    """
+    import numpy as np
+
+    # Define ordering direction for each metric: ASC means lower is better, DESC means higher is better.
+    metric_order = {
+        "overlap_missing": "ASC",
+        "avg_error": "ASC",
+        "r2_score": "DESC",
+    }
+
+    # Dictionary to hold best results:
+    # Structure: best_results[metric][dataset][strategy] = (metric_value, execution_time)
+    best_results: Dict[str, Dict[str, Dict[str, Tuple[Optional[float], Optional[float]]]]] = {
+        metric: {} for metric in metrics
+    }
+
+    # Loop over metrics, datasets, and strategies to query the best result.
+    for metric in metrics:
+        for dataset in datasets:
+            if dataset not in best_results[metric]:
+                best_results[metric][dataset] = {}
+            for strategy in strategies:
+                query = (
+                    f"SELECT {metric}, execution_time FROM results "
+                    f"WHERE dataset=? AND strategy=? "
+                    f"ORDER BY {metric} {metric_order[metric]} LIMIT 1"
+                )
+                with _Database(db_file) as cursor:
+                    cursor.execute(query, (dataset, strategy))
+                    row = cursor.fetchone()
+                if row is None:
+                    best_results[metric][dataset][strategy] = (None, None)
+                else:
+                    best_results[metric][dataset][strategy] = (
+                        row  # row: (metric_value, execution_time)
+                    )
+
+    # Create bar plots for each metric.
+    figures: List[plt.Figure] = []
+    for metric in metrics:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        x = np.arange(len(datasets))
+        n_strat = len(strategies)
+        bar_width = 0.8 / n_strat  # distribute bars within each dataset tick
+        # Compute offsets to center the grouped bars at each dataset tick.
+        offsets = np.linspace(-0.4 + bar_width / 2, 0.4 - bar_width / 2, n_strat)
+
+        for i, strategy in enumerate(strategies):
+            values = []
+            exec_times = []
+            for dataset in datasets:
+                value, exec_time = best_results[metric][dataset].get(strategy, (None, None))
+                # If no result is found, plot zero and annotate as "N/A"
+                if value is None:
+                    values.append(0)
+                    exec_times.append(None)
+                else:
+                    values.append(value)
+                    exec_times.append(exec_time)
+            positions = x + offsets[i]
+            bars = ax.bar(positions, values, width=bar_width, label=strategy)
+            # Annotate each bar with its execution time.
+            for bar, t in zip(bars, exec_times):
+                height = bar.get_height()
+                label = "N/A" if t is None else f"{t:.2f}s"
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    height,
+                    label,
+                    ha="center",
+                    va="bottom",
+                    fontsize=8,
+                )
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(datasets)
+        ax.set_xlabel("Dataset")
+        ax.set_ylabel(metric)
+        ax.set_title(f"Best {metric} across strategies")
+        ax.legend()
+        fig.tight_layout()
+        figures.append(fig)
+    return figures
+
+
 def main() -> None:
-    figures = plot_parameter(
-        strategy="community",
-        parameter_name="max_levels",
-        parameter_values=[1, 3, 10],
-        fixed_parameters={},
-        datasets=["amazon", "twitch"],
-        metrics=["overlap_missing", "avg_error", "r2_score"],
+    param_name = "fusion_coefficient"
+    param_values = [0.01, 0.2, 0.4, 0.5, 0.6, 0.8, 0.99]
+    figures = []
+    figures.extend(
+        plot_parameter(
+            strategy="deepwalk",
+            parameter_name=param_name,
+            parameter_values=param_values,
+            fixed_parameters={
+                "no_edge_weights": False,
+                "walk_length": 80,
+                "num_walks": 15,
+                "embedding_size": 16,
+                "context_window": 10,
+                "num_negative_samples": 20,
+                "similarity_metric": "cosine",
+                "top_similar": 25,
+            },
+            datasets=["twitch"],
+            metrics=["overlap_missing", "avg_error", "r2_score", "execution_time"],
+        )
     )
-    save_plots_to_pdf(figures, "community_max_levels.pdf")
+    figures.extend(
+        plot_parameter(
+            strategy="deepwalk",
+            parameter_name=param_name,
+            parameter_values=param_values,
+            fixed_parameters={
+                "no_edge_weights": True,
+                "walk_length": 21,
+                "num_walks": 10,
+                "embedding_size": 64,
+                "context_window": 2,
+                "num_negative_samples": 15,
+                "similarity_metric": "dot_product",
+                "top_similar": 10,
+            },
+            datasets=["cora"],
+            metrics=["overlap_missing", "avg_error", "r2_score", "execution_time"],
+        )
+    )
+    figures.extend(
+        plot_parameter(
+            strategy="deepwalk",
+            parameter_name=param_name,
+            parameter_values=param_values,
+            fixed_parameters={
+                "no_edge_weights": False,
+                "walk_length": 80,
+                "num_walks": 20,
+                "embedding_size": 16,
+                "context_window": 15,
+                "num_negative_samples": 15,
+                "similarity_metric": "cosine",
+                "top_similar": 100,
+            },
+            datasets=["amazon"],
+            metrics=["overlap_missing", "avg_error", "r2_score", "execution_time"],
+        )
+    )
+    figures.extend(
+        plot_parameter(
+            strategy="deepwalk",
+            parameter_name=param_name,
+            parameter_values=param_values,
+            fixed_parameters={
+                "no_edge_weights": False,
+                "fusion_coefficient": 0.6,
+                "walk_length": 40,
+                "num_walks": 10,
+                "embedding_size": 64,
+                "context_window": 10,
+                "num_negative_samples": 10,
+                "similarity_metric": "cosine",
+                "top_similar": 100,
+            },
+            datasets=["github"],
+            metrics=["overlap_missing", "avg_error", "r2_score", "execution_time"],
+        )
+    )
+    # figures.extend(
+    #     plot_parameter(
+    #         strategy="deepwalk",
+    #         parameter_name=param_name,
+    #         parameter_values=[0, 0.5, 0.6, 0.99],
+    #         fixed_parameters={
+    #             "no_edge_weights": True,
+    #             "embedding_size": 64,
+    #             "walk_length": 40,
+    #             "num_walks": 5,
+    #             "context_window": 10,
+    #             "num_negative_samples": 5,
+    #             "similarity_metric": "dot_product",
+    #             "top_similar": 25,
+    #         },
+    #         datasets=["genius"],
+    #         metrics=["overlap_missing", "avg_error", "r2_score", "execution_time"],
+    #     )
+    # )
+    save_plots_to_pdf(figures, "deepwalk_fusion_coefficient.pdf")
 
 
 if __name__ == "__main__":
