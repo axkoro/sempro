@@ -140,7 +140,7 @@ setup(
         "test": ["pytest", "coverage"],
     },
     packages=["graph_impute"],
-    python_requires=">=3.8, <3.13",  # < 3.13 due to current incompatablity with torch
+    python_requires=">=3.8",
     install_requires=["pyyaml", "scikit-learn"],
     entry_points={
         "console_scripts": [
