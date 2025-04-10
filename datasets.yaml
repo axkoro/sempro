@@ -9,12 +9,6 @@ amazon_fraud:
   edges: ./data/input/amazon_fraud_edges.txt
   features: ./data/input/amazon_fraud_features.txt
 
-cora:
-  feature_type: bool
-  edges: ./data/input/corafull_edges.txt
-  features: ./data/input/corafull_features.txt
-  reference: ./data/reference/corafull_features.txt
-
 genius:
   feature_type: int
   edges: ./data/input/genius_edges.txt
