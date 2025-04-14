@@ -5,21 +5,20 @@ This project contains implementations for various imputation strategies to recon
 ## Overview
 
 Three imputation strategies are implemented:
-- **Baseline Strategy (kNN)**: Uses the graph's topology by looking at the neighbouring nodes to impute missing values.
-- **Topology-Based Strategy (Community Average)**: Detects communities using the [Louvain method](https://en.wikipedia.org/wiki/Louvain_method) and imputes missing values with the average computed within each community.
-- **Learning-Based Strategy (Attributed DeepWalk)**: Extends the [DeepWalk](https://arxiv.org/abs/1403.6652) algorithm by incorporating node features into the random walk process. The resulting embeddings capture both topology and feature information and are used for imputation. For more details, see [our Wiki](https://github.com/axkoro/sempro/wiki/Attributed-DeepWalk).
+- **Baseline Strategy - kNN**: Impute the missing feature of a given node using the average of this feature among neighbouring nodes.
+- **Topology-Based Strategy - Community Average**: Detects communities using the [Louvain method](https://en.wikipedia.org/wiki/Louvain_method) and imputes missing values with the average computed within each community.
+- **Learning-Based Strategy - Attributed DeepWalk**: Extends the [DeepWalk](https://arxiv.org/abs/1403.6652) algorithm by incorporating node features into the random walk process. The resulting embeddings capture both topology and feature information and are used for imputation. For more details, see [our Wiki](https://github.com/axkoro/sempro/wiki/Attributed-DeepWalk).
 
 ## Setup
 
 ### 1. Dependencies
 - Python (3.x) and pip.
-- (Optional) Conda environment if preferred.
 
 ### 2. Installation
 
 ```bash
-git clone https://github.com/axkoro/sempro.git
-cd sempro
+git clone https://github.com/axkoro/graph-impute.git
+cd graph-impute
 git submodule init
 git submodule update
 pip install .
